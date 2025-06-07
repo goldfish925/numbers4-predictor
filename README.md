@@ -1,6 +1,36 @@
-
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ナンバーズ4予測するにゃ！</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #fffaf0;
+      color: #333;
+      padding: 20px;
+    }
+    h1 {
+      color: #d2691e;
+    }
+    button {
+      background-color: #f4a460;
+      border: none;
+      padding: 10px 20px;
       font-size: 18px;
-      border-radius:  padding: 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: white;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
       text-align: center;
     }
     #prediction {
@@ -66,3 +96,13 @@
         .map(pair => pair[0].toString());
 
       // ランダムに4つ選んで予測数字にする
+      let prediction = '';
+      for (let i = 0; i < 4; i++) {
+        prediction += topDigits[Math.floor(Math.random() * topDigits.length)];
+      }
+
+      document.getElementById('prediction').innerText = `にゃんこの予測は… ${prediction} にゃ！`;
+    }
+  </script>
+</body>
+</html>
