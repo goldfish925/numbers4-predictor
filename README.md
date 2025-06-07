@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -83,19 +84,16 @@
         return;
       }
 
-      // 各桁ごとに出現頻度をカウント
       let digitFreq = Array(10).fill(0);
       numbers.forEach(num => {
         num.split('').forEach(d => digitFreq[parseInt(d)]++);
       });
 
-      // 出現回数上位の数字から予測
       const topDigits = [...digitFreq.entries()]
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5)
         .map(pair => pair[0].toString());
 
-      // ランダムに4つ選んで予測数字にする
       let prediction = '';
       for (let i = 0; i < 4; i++) {
         prediction += topDigits[Math.floor(Math.random() * topDigits.length)];
