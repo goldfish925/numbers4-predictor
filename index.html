@@ -2,56 +2,75 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>numbers4-predictor</title>
+  <title>にゃんこのナンバーズ4予測</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: 'Arial', sans-serif;
       background-color: #fffaf0;
       padding: 20px;
+      margin: 0;
     }
     h1 {
       color: #ff6f61;
+      text-align: center;
     }
     button {
       background-color: #f48c06;
       color: white;
       border: none;
-      padding: 10px 20px;
+      padding: 12px 20px;
       font-size: 1rem;
       border-radius: 6px;
       cursor: pointer;
-      margin-top: 10px;
+      display: block;
+      margin: 10px auto;
     }
     table {
       border-collapse: collapse;
-      margin-top: 20px;
-      width: 100%;
+      margin: 20px auto;
+      width: 95%;
+      max-width: 600px;
     }
     th, td {
       border: 1px solid #ccc;
       padding: 8px;
+      text-align: center;
     }
     th {
       background-color: #ffe4b5;
     }
     .prediction {
-      margin-top: 30px;
-      font-size: 1.8rem;
+      margin: 30px auto;
+      font-size: 1.5rem;
       color: #ff4500;
       font-weight: bold;
       background-color: #fff0f5;
-      padding: 15px;
-      border-radius: 10px;
+      padding: 20px;
+      border-radius: 12px;
       border: 2px dashed #f08080;
+      text-align: center;
+      max-width: 600px;
+    }
+    .cat-img {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .cat-img img {
+      max-width: 200px;
+      width: 50%;
     }
   </style>
 </head>
 <body>
-  <h1>ナンバーズ4予測にゃんこ🐾</h1>
-  <input type="file" id="csvFile" accept=".csv">
+  <h1>にゃんこのナンバーズ4予測🐾</h1>
+  <input type="file" id="csvFile" accept=".csv" style="display:block; margin: 10px auto;">
   <button onclick="handleFile()">予測してみる</button>
   <div id="output"></div>
   <div id="prediction" class="prediction" style="display: none;"></div>
+  <div class="cat-img">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Cat_cartoon_02.svg/512px-Cat_cartoon_02.svg.png" alt="にゃんこ">
+  </div>
 
   <script>
     function handleFile() {
@@ -81,7 +100,7 @@
         });
 
         const tbody = table.createTBody();
-        const recentNumbers = [];
+        const digitsByPosition = [[], [], [], []];
 
         for (let i = 1; i < rows.length; i++) {
           const row = tbody.insertRow();
@@ -92,22 +111,26 @@
             row.appendChild(td);
           });
 
-          // 数字列だけ抽出（仮に第3列がナンバーズ4の数字とする）
-          if (cells[2]) {
-            recentNumbers.push(cells[2].trim());
+          const number = cells[2] ? cells[2].trim() : "";
+          if (/^\d{4}$/.test(number)) {
+            for (let j = 0; j < 4; j++) {
+              digitsByPosition[j].push(number[j]);
+            }
           }
         }
 
         output.innerHTML = '';
         output.appendChild(table);
 
-        // 仮予測：最近の数字をもとにランダム1個ピック（後で改良可能）
-        if (recentNumbers.length > 0) {
-          const lastDigit = recentNumbers[recentNumbers.length - 1];
-          const prediction = Array.from({length: 4}, () => Math.floor(Math.random() * 10)).join('');
-          predictionBox.style.display = 'block';
-          predictionBox.innerHTML = `にゃんこの予測番号は… <strong>${prediction}</strong> にゃ！🐱✨`;
+        function mostFrequentDigit(arr) {
+          const count = {};
+          arr.forEach(d => count[d] = (count[d] || 0) + 1);
+          return Object.entries(count).sort((a, b) => b[1] - a[1])[0][0];
         }
+
+        const prediction = digitsByPosition.map(mostFrequentDigit).join('');
+        predictionBox.style.display = 'block';
+        predictionBox.innerHTML = `たくさん出てる数字から予測したにゃ！<br><strong>${prediction}</strong> にゃ！🐱✨`;
       };
 
       reader.readAsText(file, 'UTF-8');
