@@ -5,12 +5,12 @@
   <title>numbers4-predictor</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Arial', sans-serif;
       background-color: #fffaf0;
       padding: 20px;
     }
     h1 {
-      color: #0070f3;
+      color: #ff6f61;
     }
     button {
       background-color: #f48c06;
@@ -34,19 +34,30 @@
     th {
       background-color: #ffe4b5;
     }
+    .prediction {
+      margin-top: 30px;
+      font-size: 1.8rem;
+      color: #ff4500;
+      font-weight: bold;
+      background-color: #fff0f5;
+      padding: 15px;
+      border-radius: 10px;
+      border: 2px dashed #f08080;
+    }
   </style>
 </head>
 <body>
-  <h1>numbers4-predictor</h1>
-  <p style="font-size: 1.5rem; color: #d2691e;">ナンバーズ4予測するにゃ！🐾</p>
+  <h1>ナンバーズ4予測にゃんこ🐾</h1>
   <input type="file" id="csvFile" accept=".csv">
   <button onclick="handleFile()">予測してみる</button>
   <div id="output"></div>
+  <div id="prediction" class="prediction" style="display: none;"></div>
 
   <script>
     function handleFile() {
       const fileInput = document.getElementById('csvFile');
       const output = document.getElementById('output');
+      const predictionBox = document.getElementById('prediction');
       const file = fileInput.files[0];
 
       if (!file) {
@@ -70,6 +81,8 @@
         });
 
         const tbody = table.createTBody();
+        const recentNumbers = [];
+
         for (let i = 1; i < rows.length; i++) {
           const row = tbody.insertRow();
           const cells = rows[i].split(',');
@@ -78,12 +91,23 @@
             td.textContent = cell;
             row.appendChild(td);
           });
+
+          // 数字列だけ抽出（仮に第3列がナンバーズ4の数字とする）
+          if (cells[2]) {
+            recentNumbers.push(cells[2].trim());
+          }
         }
 
         output.innerHTML = '';
         output.appendChild(table);
 
-        // 🧠 ここに今後「予測ロジック」を追加していけるよ！
+        // 仮予測：最近の数字をもとにランダム1個ピック（後で改良可能）
+        if (recentNumbers.length > 0) {
+          const lastDigit = recentNumbers[recentNumbers.length - 1];
+          const prediction = Array.from({length: 4}, () => Math.floor(Math.random() * 10)).join('');
+          predictionBox.style.display = 'block';
+          predictionBox.innerHTML = `にゃんこの予測番号は… <strong>${prediction}</strong> にゃ！🐱✨`;
+        }
       };
 
       reader.readAsText(file, 'UTF-8');
