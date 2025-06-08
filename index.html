@@ -20,14 +20,74 @@
       font-size: 1rem;
       border-radius: 6px;
       cursor: pointer;
+      margin-top: 10px;
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 20px;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+    th {
+      background-color: #ffe4b5;
     }
   </style>
 </head>
 <body>
   <h1>numbers4-predictor</h1>
   <p style="font-size: 1.5rem; color: #d2691e;">ナンバーズ4予測するにゃ！🐾</p>
-  <button onclick="alert('予測はまだこれからにゃ〜！')">予測してみる</button>
-  <p style="margin-top: 20px; color: tomato;">ここに予測が表示されるにゃ</p>
-  <input type="file">
+  <input type="file" id="csvFile" accept=".csv">
+  <button onclick="handleFile()">予測してみる</button>
+  <div id="output"></div>
+
+  <script>
+    function handleFile() {
+      const fileInput = document.getElementById('csvFile');
+      const output = document.getElementById('output');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert('ファイルを選んでにゃ！');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const text = e.target.result;
+        const rows = text.trim().split('\n');
+        const table = document.createElement('table');
+        const header = rows[0].split(',');
+        const thead = table.createTHead();
+        const headerRow = thead.insertRow();
+
+        header.forEach(cell => {
+          const th = document.createElement('th');
+          th.textContent = cell;
+          headerRow.appendChild(th);
+        });
+
+        const tbody = table.createTBody();
+        for (let i = 1; i < rows.length; i++) {
+          const row = tbody.insertRow();
+          const cells = rows[i].split(',');
+          cells.forEach(cell => {
+            const td = document.createElement('td');
+            td.textContent = cell;
+            row.appendChild(td);
+          });
+        }
+
+        output.innerHTML = '';
+        output.appendChild(table);
+
+        // 🧠 ここに今後「予測ロジック」を追加していけるよ！
+      };
+
+      reader.readAsText(file, 'UTF-8');
+    }
+  </script>
 </body>
 </html>
