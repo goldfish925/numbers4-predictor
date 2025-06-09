@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <img src="./neco.png" alt="ネコの画像" style="width: 200px; margin: 20px auto; display: block;">
