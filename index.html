@@ -82,7 +82,24 @@
       const mode = document.querySelector('input[name="mode"]:checked').value;
 
       const reader = new FileReader();
-      reader.onload = function (e) {
+      reader.onload = function (e) {// 曜日別集計用の準備
+const weekdayCount = {
+  "日": 0, "月": 0, "火": 0, "水": 0, "木": 0, "金": 0, "土": 0
+};
+
+// 曜日取得に使うために、全データを処理
+lines.forEach(line => {
+  const cols = line.trim().split(",");
+  const dateStr = cols[0];
+  const num = cols[2];
+  if (dateStr && /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr) && /^\d{4}$/.test(num)) {
+    const date = new Date(dateStr);
+    const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+    const weekday = weekdays[date.getDay()];
+    weekdayCount[weekday]++;
+  }
+});
+
         const text = e.target.result;
         const lines = text.split("\n").filter(line => line.trim());
         const dataLines = mode === "recent" ? lines.slice(-20) : lines;
@@ -126,6 +143,13 @@
         });
 
         details.textContent = detailText;
+        let weekdayText = "\n曜日ごとの出現数にゃ：\n";
+for (const [day, count] of Object.entries(weekdayCount)) {
+  weekdayText += `${day}曜日：${count} 回\n`;
+}
+
+details.textContent += weekdayText;
+
       };
 
       reader.readAsText(file, "UTF-8");
