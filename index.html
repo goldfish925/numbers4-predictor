@@ -123,16 +123,20 @@ reader.onload = function (e) {
   const weekdayCount = { "日": 0, "月": 0, "火": 0, "水": 0, "木": 0, "金": 0, "土": 0 };
   const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
 
-  targetLines.forEach(line => {
-    const cols = line.trim().split(",");
-    const dateStr = cols[0];
-    const num = cols[2];
-    if (dateStr && /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr) && /^\d{4}$/.test(num)) {
-      const date = new Date(dateStr);
-      const weekday = weekdays[date.getDay()];
-      weekdayCount[weekday]++;
-    }
-  });
+ targetLines.forEach(line => {
+  const cols = line.trim().split(",");
+  let dateStr = cols[0];
+  const num = cols[2];
+  if (!dateStr || !num) return;
+
+  dateStr = dateStr.replace(/-/g, "/"); // ← ハイフン→スラッシュ
+  if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr) && /^\d{4}$/.test(num)) {
+    const date = new Date(dateStr);
+    const weekday = weekdays[date.getDay()];
+    weekdayCount[weekday]++;
+  }
+});
+
 
   detailText += "\n曜日ごとの出現数にゃ：\n";
   for (const [day, count] of Object.entries(weekdayCount)) {
@@ -141,8 +145,9 @@ reader.onload = function (e) {
 
   // --- 未出現日数 ---
   const latestLine = targetLines[targetLines.length - 1];
-  const latestDateStr = latestLine.trim().split(",")[0];
-  const latestDate = new Date(latestDateStr);
+  let latestDateStr = targetLines[targetLines.length - 1].trim().split(",")[0];
+latestDateStr = latestDateStr.replace(/-/g, "/");
+const latestDate = new Date(latestDateStr);
 
   const allLines = lines.filter(line => {
     const cols = line.trim().split(",");
