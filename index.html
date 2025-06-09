@@ -93,12 +93,13 @@
   predictions.push(shuffled.slice(0, 4).join(""));
 }
 
-        result.innerHTML = `未来の数字は…<br><strong style="font-size:24px;">${prediction}</strong> だよ`;
+        result.innerHTML = `未来の数字たちにゃ！<br><strong style="font-size:24px;">${predictions.join(" / ")}</strong> ✨`;
 
-        let detailText = "よく出た数字ランキングだよ：\n";
-        sorted.forEach(([digit, freq]) => {
-          detailText += `「${digit}」が ${freq} 回\n`;
-        });
+        let detailText = "よく出た数字ランキングにゃ：\n";
+sorted.forEach(([digit, freq]) => {
+  detailText += `「${digit}」が ${freq} 回\n`;
+});
+details.textContent = detailText;
 
         details.textContent = detailText;
       };
