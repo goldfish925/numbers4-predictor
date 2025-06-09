@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
-<img src="IMG_4255" alt="にゃんこ">
+<img src="cat.png" alt="にゃんこ">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ナンバーズ4予測するにゃ！</title>
