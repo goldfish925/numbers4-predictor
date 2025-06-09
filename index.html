@@ -2,7 +2,6 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <link href="https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap" rel="stylesheet">
   <meta charset="UTF-8">
   <title>NUMBERS4予想</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,10 +14,11 @@
       padding: 20px;
     }
     h1 {
-      color: #d8bfa2
+      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+      color: #c1a57b;
     }
     button {
-      background-color: #d8bfa2;
+      background-color: #fff5bd;
       color: white;
       padding: 10px 20px;
       border: none;
@@ -38,21 +38,22 @@
       color: #555;
       font-size: 14px;
       white-space: pre-line;
+      text-align: left;
+      margin: 20px auto;
+      max-width: 500px;
     }
     img {
       max-width: 150px;
       margin-top: 20px;
     }
-    }
   </style>
-  </head>
+</head>
 <body>
   <h1>NUMBERS4予想</h1>
   <input type="file" id="csvFile" accept=".csv">
-  <!-- 以降のコンテンツ -->
-    <button onclick="predict()">予想してみるよ</button>
+  <button onclick="predict()">予測してみるね</button>
 
-  <div id="result">ここに予想が表示されるよ</div>
+  <div id="result">ここに予測が表示されるよ</div>
   <div id="details"></div>
 
   <img src="neco.png" alt="にゃんこ">
@@ -72,15 +73,16 @@
       const reader = new FileReader();
       reader.onload = function (e) {
         const text = e.target.result;
-        const lines = text.split("\n").slice(-20); // 最新20件
-        console.log("読み込んだ行：", lines);
+        const lines = text.split("\n").slice(-20);
         const numbers = lines
-  .map(line => {
-    const cell = line.trim().split(",")[2] || "";
-    const digits = cell.replace(/[^0-9]/g, "");
-    return digits.length === 4 ? digits : null;
-  })
-  .filter(Boolean);
+          .map(line => {
+            const cell = line.trim().split(",")[2] || "";
+            const digits = cell.replace(/[^0-9]/g, "");
+            return digits.length === 4 ? digits : null;
+          })
+          .filter(Boolean);
+
+        // 全体の出現頻度
         const count = {};
         numbers.forEach(num => {
           for (const digit of num) {
@@ -89,20 +91,36 @@
         });
 
         const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-        const topDigits = sorted.slice(0, 6).map(entry => entry[0]);
         const predictions = [];
         for (let i = 0; i < 3; i++) {
-  const shuffled = [...topDigits].sort(() => Math.random() - 0.5);
-  predictions.push(shuffled.slice(0, 4).join(""));
-}
+          const topDigits = sorted.slice(i, i + 4).map(entry => entry[0]);
+          if (topDigits.length === 4) {
+            predictions.push(topDigits.join(""));
+          }
+        }
 
         result.innerHTML = `未来の数字たちだよ！<br><strong style="font-size:24px;">${predictions.join(" / ")}</strong> ✨`;
 
-        let detailText = "よく出た数字ランキング：\n";
-sorted.forEach(([digit, freq]) => {
-  detailText += `「${digit}」が ${freq} 回\n`;
-});
-details.textContent = detailText;
+        let detailText = "よく出た数字ランキングだよ：\n";
+        sorted.forEach(([digit, freq]) => {
+          detailText += `「${digit}」が ${freq} 回\n`;
+        });
+
+        // 位置ごとの傾向
+        const positionCount = [{}, {}, {}, {}];
+        numbers.forEach(num => {
+          num.split('').forEach((digit, i) => {
+            positionCount[i][digit] = (positionCount[i][digit] || 0) + 1;
+          });
+        });
+
+        const positions = ["千の位", "百の位", "十の位", "一の位"];
+        detailText += "\n出現位置ごとの傾向だよ：\n";
+        positionCount.forEach((posMap, idx) => {
+          const entries = Object.entries(posMap).sort((a, b) => b[1] - a[1]);
+          const textLine = entries.map(([d, c]) => `「${d}」が ${c} 回`).join("、");
+          detailText += `${positions[idx]}：${textLine}\n`;
+        });
 
         details.textContent = detailText;
       };
