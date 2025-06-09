@@ -144,32 +144,39 @@ reader.onload = function (e) {
 
   // --- 未出現日数 ---
   const latestLine = targetLines[targetLines.length - 1];
-  let latestDateStr = targetLines[targetLines.length - 1].trim().split(",")[0];
+  // --- 未出現日数 ---
+let latestDateStr = targetLines[targetLines.length - 1].trim().split(",")[0];
 latestDateStr = latestDateStr.replace(/-/g, "/");
 const latestDate = new Date(latestDateStr);
 
-  const allLines = lines.filter(line => {
-    const cols = line.trim().split(",");
-    return cols[0] && cols[2] && /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(cols[0]) && /^\d{4}$/.test(cols[2]);
-  });
+const allLines = lines.filter(line => {
+  const cols = line.trim().split(",");
+  let dateStr = cols[0];
+  dateStr = dateStr.replace(/-/g, "/"); // ← 必須
+  return dateStr && cols[2] && /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr) && /^\d{4}$/.test(cols[2]);
+});
 
-  const lastSeenMap = {};
-  allLines.forEach(line => {
-    const cols = line.trim().split(",");
-    const dateStr = cols[0];
-    const number = cols[2];
-    const date = new Date(dateStr);
-    for (const digit of number) {
-      lastSeenMap[digit] = date;
-    }
-  });
-
-  detailText += "\n数字の未出現日数にゃ：\n";
-  for (const digit of Object.keys(count)) {
-    const lastDate = lastSeenMap[digit];
-    const diffDays = lastDate ? Math.floor((latestDate - lastDate) / (1000 * 60 * 60 * 24)) : "？";
-    detailText += `「${digit}」は ${diffDays} 日 出てないにゃ\n`;
+const lastSeenMap = {};
+allLines.forEach(line => {
+  const cols = line.trim().split(",");
+  let dateStr = cols[0];
+  dateStr = dateStr.replace(/-/g, "/"); // ← 必須
+  const number = cols[2];
+  const date = new Date(dateStr);
+  for (const digit of number) {
+    lastSeenMap[digit] = date;
   }
+});
+
+detailText += "\n数字の未出現日数だよ：\n";
+for (let digit = 0; digit <= 9; digit++) {
+  const d = digit.toString();
+  const lastDate = lastSeenMap[d];
+  const diffDays = lastDate ? Math.floor((latestDate - lastDate) / (1000 * 60 * 60 * 24)) : "？";
+  detailText += `「${d}」は ${diffDays} 日 出てないよ\n`;
+}
+
+
 
   details.textContent = detailText;
 };
