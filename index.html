@@ -86,7 +86,12 @@
         });
 
         const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-        const prediction = sorted.slice(0, 4).map(entry => entry[0]).join("");
+        const topDigits = sorted.slice(0, 6).map(entry => entry[0]);
+        const predictions = [];
+        for (let i = 0; i < 3; i++) {
+  const shuffled = [...topDigits].sort(() => Math.random() - 0.5);
+  predictions.push(shuffled.slice(0, 4).join(""));
+}
 
         result.innerHTML = `未来の数字は…<br><strong style="font-size:24px;">${prediction}</strong> だよ`;
 
