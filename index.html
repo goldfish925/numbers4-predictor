@@ -9,12 +9,11 @@
     body {
       font-family: "Hiragino Kaku Gothic ProN", sans-serif;
       background-color: #ffffff;
-      color: #c1a57b; /* ミルクティー系の色 */
+      color: #c1a57b;
       text-align: center;
       padding: 20px;
     }
     h1 {
-      color: #c1a57b;
       font-size: 28px;
     }
     button {
@@ -27,15 +26,8 @@
       cursor: pointer;
       margin-top: 10px;
     }
-    input[type="file"], label {
-      margin-top: 10px;
-      display: inline-block;
-      margin-right: 10px;
-      font-size: 14px;
-    }
     #result, #details {
       margin-top: 20px;
-      font-size: 18px;
     }
     #details {
       font-size: 14px;
@@ -52,25 +44,17 @@
   <h1>NUMBERS4予想</h1>
 
   <input type="file" id="csvFile" accept=".csv"><br>
-
-  <label>
-    <input type="radio" name="mode" value="recent" checked> 最新20件
-  </label>
-  <label>
-    <input type="radio" name="mode" value="all"> 全体
-  </label><br>
-
+  <label><input type="radio" name="mode" value="recent" checked> 最新20件</label>
+  <label><input type="radio" name="mode" value="all"> 全体</label><br>
   <button onclick="predict()">予測してみるね</button>
 
   <div id="result">ここに予測が表示されるよ</div>
   <div id="details"></div>
-
   <img src="neco.png" alt="にゃんこ">
 
   <script>
     function predict() {
-      const fileInput = document.getElementById("csvFile");
-      const file = fileInput.files[0];
+      const file = document.getElementById("csvFile").files[0];
       const result = document.getElementById("result");
       const details = document.getElementById("details");
 
@@ -79,109 +63,98 @@
         return;
       }
 
-      const mode = document.querySelector('input[name="mode"]:checked').value;
-
       const reader = new FileReader();
-reader.onload = function (e) {
-  const text = e.target.result;
+      reader.onload = function (e) {
+        const text = e.target.result;
+        const lines = text.split("\n").filter(line => line.trim() !== "");
 
-  const lines = text.split("\n").filter(line => line.trim() !== "");
-  const mode = document.querySelector('input[name="mode"]:checked').value;
-  const targetLines = mode === "recent" ? lines.slice(-20) : lines;
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        const targetLines = mode === "recent" ? lines.slice(-20) : lines;
 
-  // --- 数字抽出と頻度集計 ---
-  const numbers = targetLines
-    .map(line => {
-      const cell = line.trim().split(",")[2] || "";
-      const digits = cell.replace(/[^0-9]/g, "");
-      return digits.length === 4 ? digits : null;
-    })
-    .filter(Boolean);
+        // --- 数字の頻度 ---
+        const numbers = targetLines
+          .map(line => {
+            const cols = line.trim().split(",");
+            const cell = cols[2] || "";
+            const digits = cell.replace(/[^0-9]/g, "");
+            return digits.length === 4 ? digits : null;
+          })
+          .filter(Boolean);
 
-  const count = {};
-  numbers.forEach(num => {
-    for (const digit of num) {
-      count[digit] = (count[digit] || 0) + 1;
-    }
-  });
+        const count = {};
+        numbers.forEach(num => {
+          for (const digit of num) {
+            count[digit] = (count[digit] || 0) + 1;
+          }
+        });
 
-  const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-  const predictions = [
-    sorted.slice(0, 4).map(e => e[0]).join(""),
-    sorted.slice(1, 5).map(e => e[0]).join(""),
-    sorted.slice(2, 6).map(e => e[0]).join("")
-  ];
+        const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
+        const predictions = [
+          sorted.slice(0, 4).map(e => e[0]).join(""),
+          sorted.slice(1, 5).map(e => e[0]).join(""),
+          sorted.slice(2, 6).map(e => e[0]).join("")
+        ];
 
-  result.innerHTML = `未来の数字たち<br><strong style="font-size:24px;">${predictions.join(" / ")}</strong> ✨`;
+        result.innerHTML = `未来の数字たち<br><strong style="font-size:24px;">${predictions.join(" / ")}</strong> ✨`;
 
-  let detailText = "よく出た数字ランキング：\n";
-  sorted.forEach(([digit, freq]) => {
-    detailText += `「${digit}」が ${freq} 回\n`;
-  });
+        let detailText = "よく出た数字ランキング：\n";
+        sorted.forEach(([digit, freq]) => {
+          detailText += `「${digit}」が ${freq} 回\n`;
+        });
 
-  // --- 曜日別 ---
-  const weekdayCount = { "日": 0, "月": 0, "火": 0, "水": 0, "木": 0, "金": 0, "土": 0 };
-  const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+        // --- 曜日別出現数 ---
+        const weekdayCount = { "日": 0, "月": 0, "火": 0, "水": 0, "木": 0, "金": 0, "土": 0 };
+        const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
 
- targetLines.forEach(line => {
-  const cols = line.trim().split(",");
-  let dateStr = cols[0];
-  const num = cols[2];
-  if (!dateStr || !num) return;
+        targetLines.forEach(line => {
+          const cols = line.trim().split(",");
+          let dateStr = cols[0];
+          const num = cols[2];
+          if (!dateStr || !num) return;
 
-  dateStr = dateStr.replace(/-/g, "/"); // ← ハイフン→スラッシュ
-  if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr) && /^\d{4}$/.test(num)) {
-    const date = new Date(dateStr);
-    const weekday = weekdays[date.getDay()];
-    weekdayCount[weekday]++;
-  }
-});
-  
-  detailText += "\n曜日ごとの出現数だよ：\n";
-  for (const [day, count] of Object.entries(weekdayCount)) {
-    detailText += `${day}曜日：${count} 回\n`;
-  }
+          dateStr = dateStr.replace(/-/g, "/");
+          if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr)) {
+            const date = new Date(dateStr);
+            const weekday = weekdays[date.getDay()];
+            weekdayCount[weekday]++;
+          }
+        });
 
-  // --- 未出現日数 ---
-  const latestLine = targetLines[targetLines.length - 1];
-  // --- 未出現日数 ---
-let latestDateStr = targetLines[targetLines.length - 1].trim().split(",")[0];
-latestDateStr = latestDateStr.replace(/-/g, "/");
-const latestDate = new Date(latestDateStr);
+        detailText += "\n曜日ごとの出現数だよ：\n";
+        for (const [day, c] of Object.entries(weekdayCount)) {
+          detailText += `${day}曜日：${c} 回\n`;
+        }
 
-const allLines = lines.filter(line => {
-  const cols = line.trim().split(",");
-  let dateStr = cols[0];
-  dateStr = dateStr.replace(/-/g, "/"); // ← 必須
-  return dateStr && cols[2] && /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr) && /^\d{4}$/.test(cols[2]);
-});
+        // --- 未出現日数 ---
+        let latestDateStr = targetLines[targetLines.length - 1].split(",")[0];
+        latestDateStr = latestDateStr.replace(/-/g, "/");
+        const latestDate = new Date(latestDateStr);
 
-const lastSeenMap = {};
-allLines.forEach(line => {
-  const cols = line.trim().split(",");
-  let dateStr = cols[0];
-  dateStr = dateStr.replace(/-/g, "/"); // ← 必須
-  const number = cols[2];
-  const date = new Date(dateStr);
-  for (const digit of number) {
-    lastSeenMap[digit] = date;
-  }
-});
+        const lastSeenMap = {};
+        lines.forEach(line => {
+          const cols = line.trim().split(",");
+          let dateStr = cols[0];
+          const number = cols[2];
+          if (!dateStr || !number) return;
+          dateStr = dateStr.replace(/-/g, "/");
+          if (!/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr)) return;
+          const date = new Date(dateStr);
+          if (!/^\d{4}$/.test(number)) return;
+          for (const digit of number) {
+            lastSeenMap[digit] = date;
+          }
+        });
 
-detailText += "\n数字の未出現日数だよ：\n";
-for (let digit = 0; digit <= 9; digit++) {
-  const d = digit.toString();
-  const lastDate = lastSeenMap[d];
-  const diffDays = lastDate ? Math.floor((latestDate - lastDate) / (1000 * 60 * 60 * 24)) : "？";
-  detailText += `「${d}」は ${diffDays} 日 出てないよ\n`;
-}
+        detailText += "\n数字の未出現日数にゃ：\n";
+        for (let digit = 0; digit <= 9; digit++) {
+          const d = digit.toString();
+          const lastDate = lastSeenMap[d];
+          const diffDays = lastDate ? Math.floor((latestDate - lastDate) / (1000 * 60 * 60 * 24)) : "？";
+          detailText += `「${d}」は ${diffDays} 日 出てないにゃ\n`;
+        }
 
-
-
-  details.textContent = detailText;
-};
-
-
+        details.textContent = detailText;
+      };
 
       reader.readAsText(file, "UTF-8");
     }
