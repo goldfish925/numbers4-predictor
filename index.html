@@ -93,9 +93,9 @@
   predictions.push(shuffled.slice(0, 4).join(""));
 }
 
-        result.innerHTML = `未来の数字たちにゃ！<br><strong style="font-size:24px;">${predictions.join(" / ")}</strong> ✨`;
+        result.innerHTML = `未来の数字たちだよ！<br><strong style="font-size:24px;">${predictions.join(" / ")}</strong> ✨`;
 
-        let detailText = "よく出た数字ランキングにゃ：\n";
+        let detailText = "よく出た数字ランキング：\n";
 sorted.forEach(([digit, freq]) => {
   detailText += `「${digit}」が ${freq} 回\n`;
 });
