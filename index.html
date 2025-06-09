@@ -84,21 +84,20 @@
       const reader = new FileReader();
 reader.onload = function (e) {
   const text = e.target.result;
-  const lines = text.split("\n").slice(-20); // 最新20件
-  const numbers = lines
-    .map(line => {
-      const cell = line.trim().split(",")[2] || "";
-      const digits = cell.replace(/[^0-9]/g, "");
-      return digits.length === 4 ? digits : null;
-    })
-    .filter(Boolean);
+  const lines = text.split("\n").filter(line => line.trim() !== "");
+const targetLines = mode === "recent" ? lines.slice(-20) : lines;
+  const numbers = targetLines
+  .map(line => {
+    const cell = line.trim().split(",")[2] || "";
+    const digits = cell.replace(/[^0-9]/g, "");
+    return digits.length === 4 ? digits : null;
+  })
+  .filter(Boolean);
 
-  const count = {};
-  numbers.forEach(num => {
-    for (const digit of num) {
-      count[digit] = (count[digit] || 0) + 1;
-    }
-  });
+// ↓↓↓ 以下の処理すべて targetLines を使ってください
+targetLines.forEach(line => {
+  ...
+});
 
   const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
   const predictions = [
@@ -165,14 +164,6 @@ reader.onload = function (e) {
   details.textContent = detailText;
 };
 
-        let weekdayText = "\n曜日ごとの出現数にゃ：\n";
-for (const [day, count] of Object.entries(weekdayCount)) {
-  weekdayText += `${day}曜日：${count} 回\n`;
-}
-
-details.textContent += weekdayText;
-
-      };
 
       reader.readAsText(file, "UTF-8");
     }
