@@ -42,15 +42,17 @@
       max-width: 150px;
       margin-top: 20px;
     }
+    h1 {
+      font-family: 'Cinzel', serif;
+      color: #c1a57b;
+    }
   </style>
-  h1 {
-  font-family: 'Cinzel', serif;
-}
-</head>
+  </head>
 <body>
   <h1>NUMBERS4予想</h1>
   <input type="file" id="csvFile" accept=".csv">
-  <button onclick="predict()">予想してみるよ</button>
+  <!-- 以降のコンテンツ -->
+    <button onclick="predict()">予想してみるよ</button>
 
   <div id="result">ここに予想が表示されるよ</div>
   <div id="details"></div>
