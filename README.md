@@ -47,7 +47,7 @@
   <h1>numbers4-predictor</h1>
   <h2>ナンバーズ4予測するにゃ！🐾</h2>
   <img src="https://raw.githubusercontent.com/goldfish925/numbers4-predictor/main/cat.png" alt="にゃんこ" />
-  <br />
+  <input type="file" id="csvFile" accept=".csv" style="display:block; margin: 10px auto;">
   <button onclick="predict()">予測してみる</button>
   <div id="result">ここに予測が表示されるにゃ</div>
   <input type="file" id="csvFile" accept=".csv" />
