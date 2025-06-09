@@ -84,7 +84,7 @@ targetLines.forEach((line, i) => {
         // --- 数字の頻度 ---
         const numbers = targetLines
           .map(line => {
-            const cols = line.trim().split("\t");
+            const cols = line.trim().split(",");
             const cell = cols[2] || "";
             const digits = cell.replace(/[^0-9]/g, "");
             return digits.length === 4 ? digits : null;
@@ -117,7 +117,7 @@ targetLines.forEach((line, i) => {
         const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
 
         targetLines.forEach(line => {
-          const cols = line.trim().split("\t");
+          const cols = line.trim().split(",");
           let dateStr = cols[0];
           const num = cols[2];
           if (!dateStr || !num) return;
@@ -142,7 +142,7 @@ targetLines.forEach((line, i) => {
 
         const lastSeenMap = {};
         lines.forEach(line => {
-          const cols = line.trim().split("\t");
+          const cols = line.trim().split(",");
           let dateStr = cols[0];
           const number = cols[2];
           if (!dateStr || !number) return;
@@ -155,12 +155,12 @@ targetLines.forEach((line, i) => {
           }
         });
 
-        detailText += "\n数字の未出現日数にゃ：\n";
+        detailText += "\n数字の未出現日数だよ：\n";
         for (let digit = 0; digit <= 9; digit++) {
           const d = digit.toString();
           const lastDate = lastSeenMap[d];
           const diffDays = lastDate ? Math.floor((latestDate - lastDate) / (1000 * 60 * 60 * 24)) : "？";
-          detailText += `「${d}」は ${diffDays} 日 出てないにゃ\n`;
+          detailText += `「${d}」は ${diffDays} 日 出てないね\n`;
         }
 
         details.textContent = detailText;
