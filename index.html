@@ -74,7 +74,7 @@
         // --- 数字の頻度 ---
         const numbers = targetLines
           .map(line => {
-            const cols = line.trim().split(",");
+            const cols = line.trim().split("\t");
             const cell = cols[2] || "";
             const digits = cell.replace(/[^0-9]/g, "");
             return digits.length === 4 ? digits : null;
@@ -126,7 +126,7 @@
         }
 
         // --- 未出現日数 ---
-        let latestDateStr = targetLines[targetLines.length - 1].split("\t");[0];
+        let latestDateStr = targetLines[targetLines.length - 1].split("\t")[0];
         latestDateStr = latestDateStr.replace(/-/g, "/");
         const latestDate = new Date(latestDateStr);
 
