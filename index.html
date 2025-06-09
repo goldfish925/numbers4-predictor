@@ -47,9 +47,9 @@
 <body>
   <h1>NUMBERS4予想</h1>
   <input type="file" id="csvFile" accept=".csv">
-  <button onclick="predict()">予想してみるにゃ</button>
+  <button onclick="predict()">予想してみるよ</button>
 
-  <div id="result">ここに予想が表示されるにゃ</div>
+  <div id="result">ここに予想が表示されるよ</div>
   <div id="details"></div>
 
   <img src="neco.png" alt="にゃんこ">
@@ -62,7 +62,7 @@
       const details = document.getElementById("details");
 
       if (!file) {
-        result.textContent = "ファイルを選んでにゃ";
+        result.textContent = "ファイルを選んでね";
         return;
       }
 
@@ -88,9 +88,9 @@
         const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
         const prediction = sorted.slice(0, 4).map(entry => entry[0]).join("");
 
-        result.innerHTML = `未来の数字は…<br><strong style="font-size:24px;">${prediction}</strong> にゃ！✨`;
+        result.innerHTML = `未来の数字は…<br><strong style="font-size:24px;">${prediction}</strong> だよ`;
 
-        let detailText = "よく出た数字ランキングにゃ：\n";
+        let detailText = "よく出た数字ランキングだよ：\n";
         sorted.forEach(([digit, freq]) => {
           detailText += `「${digit}」が ${freq} 回\n`;
         });
