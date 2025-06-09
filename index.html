@@ -84,20 +84,26 @@
       const reader = new FileReader();
 reader.onload = function (e) {
   const text = e.target.result;
-  const lines = text.split("\n").filter(line => line.trim() !== "");
-const targetLines = mode === "recent" ? lines.slice(-20) : lines;
-  const numbers = targetLines
-  .map(line => {
-    const cell = line.trim().split(",")[2] || "";
-    const digits = cell.replace(/[^0-9]/g, "");
-    return digits.length === 4 ? digits : null;
-  })
-  .filter(Boolean);
 
-// ↓↓↓ 以下の処理すべて targetLines を使ってください
-targetLines.forEach(line => {
-  ...
-});
+  const lines = text.split("\n").filter(line => line.trim() !== "");
+  const mode = document.querySelector('input[name="mode"]:checked').value;
+  const targetLines = mode === "recent" ? lines.slice(-20) : lines;
+
+  // --- 数字抽出と頻度集計 ---
+  const numbers = targetLines
+    .map(line => {
+      const cell = line.trim().split(",")[2] || "";
+      const digits = cell.replace(/[^0-9]/g, "");
+      return digits.length === 4 ? digits : null;
+    })
+    .filter(Boolean);
+
+  const count = {};
+  numbers.forEach(num => {
+    for (const digit of num) {
+      count[digit] = (count[digit] || 0) + 1;
+    }
+  });
 
   const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
   const predictions = [
@@ -113,11 +119,11 @@ targetLines.forEach(line => {
     detailText += `「${digit}」が ${freq} 回\n`;
   });
 
-  // ✅ 曜日別集計
+  // --- 曜日別 ---
   const weekdayCount = { "日": 0, "月": 0, "火": 0, "水": 0, "木": 0, "金": 0, "土": 0 };
   const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
 
-  lines.forEach(line => {
+  targetLines.forEach(line => {
     const cols = line.trim().split(",");
     const dateStr = cols[0];
     const num = cols[2];
@@ -132,25 +138,25 @@ targetLines.forEach(line => {
   for (const [day, count] of Object.entries(weekdayCount)) {
     detailText += `${day}曜日：${count} 回\n`;
   }
-  // ✅ 未出現日数のカウント
-  const latestLine = lines[lines.length - 1];
+
+  // --- 未出現日数 ---
+  const latestLine = targetLines[targetLines.length - 1];
   const latestDateStr = latestLine.trim().split(",")[0];
   const latestDate = new Date(latestDateStr);
 
-  let allLines = text.split("\n").filter(line => {
+  const allLines = lines.filter(line => {
     const cols = line.trim().split(",");
     return cols[0] && cols[2] && /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(cols[0]) && /^\d{4}$/.test(cols[2]);
   });
 
-  const lastSeenMap = {}; // 数字: 最後に出た日
+  const lastSeenMap = {};
   allLines.forEach(line => {
     const cols = line.trim().split(",");
     const dateStr = cols[0];
     const number = cols[2];
-    if (!/^\d{4}$/.test(number)) return;
     const date = new Date(dateStr);
     for (const digit of number) {
-      lastSeenMap[digit] = date; // 更新され続ける → 最後に出た日になる
+      lastSeenMap[digit] = date;
     }
   });
 
@@ -163,6 +169,7 @@ targetLines.forEach(line => {
 
   details.textContent = detailText;
 };
+
 
 
       reader.readAsText(file, "UTF-8");
