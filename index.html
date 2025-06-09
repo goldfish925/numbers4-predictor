@@ -51,18 +51,14 @@
   <div id="result">ここに予測が表示されるよ</div>
   <div id="details"></div>
   <img src="neco.png" alt="にゃんこ">
- 
+
   <script>
     function predict() {
       const file = document.getElementById("csvFile").files[0];
       const result = document.getElementById("result");
       const details = document.getElementById("details");
 
-      if (!file) 
-    console.log("頻度集計:", count);
-console.log("ソート結果:", sorted);
-console.log("予測候補:", predictions);
-
+      if (!file) {
         result.textContent = "ファイルを選んでね";
         return;
       }
@@ -74,21 +70,14 @@ console.log("予測候補:", predictions);
 
         const mode = document.querySelector('input[name="mode"]:checked').value;
         const targetLines = mode === "recent" ? lines.slice(-20) : lines;
-        console.log("読み込んだ行数:", targetLines.length);
-targetLines.forEach((line, i) => {
-  console.log(`Line ${i}:`, line);
-  const cols = line.trim().split("\t");
-  console.log("列3（当選番号）:", cols[2]);
-}
-
 
         // --- 数字の頻度 ---
         const numbers = targetLines
           .map(line => {
             const cols = line.trim().split(",");
-            const cell = cols[2] || "";
-            const digits = cell.replace(/[^0-9]/g, "");
-            return digits.length === 4 ? digits : null;
+            const raw = cols[2] || "";
+            const match = raw.match(/\d{4}/); // "=""1234""" などから 1234 を抽出
+            return match ? match[0] : null;
           })
           .filter(Boolean);
 
@@ -106,6 +95,10 @@ targetLines.forEach((line, i) => {
           sorted.slice(2, 6).map(e => e[0]).join("")
         ];
 
+        console.log("頻度集計:", count);
+        console.log("ソート結果:", sorted);
+        console.log("予測候補:", predictions);
+
         result.innerHTML = `未来の数字たち<br><strong style="font-size:24px;">${predictions.join(" / ")}</strong> ✨`;
 
         let detailText = "よく出た数字ランキング：\n";
@@ -119,9 +112,9 @@ targetLines.forEach((line, i) => {
 
         targetLines.forEach(line => {
           const cols = line.trim().split(",");
-          let dateStr = cols[0];
-          const num = cols[2];
-          if (!dateStr || !num) return;
+          let dateStr = cols[1];
+          const raw = cols[2];
+          if (!dateStr || !raw) return;
 
           dateStr = dateStr.replace(/-/g, "/");
           if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr)) {
@@ -137,20 +130,22 @@ targetLines.forEach((line, i) => {
         }
 
         // --- 未出現日数 ---
-        let latestDateStr = targetLines[targetLines.length - 1].split("\t")[0];
+        let latestDateStr = targetLines[targetLines.length - 1].split(",")[1];
         latestDateStr = latestDateStr.replace(/-/g, "/");
         const latestDate = new Date(latestDateStr);
 
         const lastSeenMap = {};
         lines.forEach(line => {
           const cols = line.trim().split(",");
-          let dateStr = cols[0];
-          const number = cols[2];
+          let dateStr = cols[1];
+          const raw = cols[2];
+          const match = raw ? raw.match(/\d{4}/) : null;
+          const number = match ? match[0] : null;
           if (!dateStr || !number) return;
+
           dateStr = dateStr.replace(/-/g, "/");
           if (!/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr)) return;
           const date = new Date(dateStr);
-          if (!/^\d{4}$/.test(number)) return;
           for (const digit of number) {
             lastSeenMap[digit] = date;
           }
