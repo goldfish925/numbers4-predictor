@@ -78,6 +78,7 @@
     return digits.length === 4 ? digits : null;
   })
   .filter(Boolean);
+        const count = {};
         numbers.forEach(num => {
           for (const digit of num) {
             count[digit] = (count[digit] || 0) + 1;
