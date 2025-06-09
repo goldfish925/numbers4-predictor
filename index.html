@@ -71,7 +71,7 @@
         const text = e.target.result;
         const lines = text.split("\n").slice(-20); // 最新20件
         const numbers = lines
-          .map(line => line.trim().split(",")[2]) // 2列目を使用
+          .map(line => line.trim().split(",")[2]) // 3列目を使用
           .filter(n => /^\d{4}$/.test(n));
 
         const count = {};
