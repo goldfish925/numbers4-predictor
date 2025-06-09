@@ -50,15 +50,18 @@
 
   <div id="result">ここに予測が表示されるよ</div>
   <div id="details"></div>
-  <img src="neco.png" alt="にゃんこ">
-
+ 
   <script>
     function predict() {
       const file = document.getElementById("csvFile").files[0];
       const result = document.getElementById("result");
       const details = document.getElementById("details");
 
-      if (!file) {
+      if (!file) 
+    console.log("頻度集計:", count);
+console.log("ソート結果:", sorted);
+console.log("予測候補:", predictions);
+
         result.textContent = "ファイルを選んでね";
         return;
       }
