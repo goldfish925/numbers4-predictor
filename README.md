@@ -3,102 +3,84 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ナンバーズ4予測するにゃ！</title>
+  <title>ナンバーズ4予測にゃ！</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
       background-color: #fffaf0;
       color: #333;
+      text-align: center;
       padding: 20px;
     }
     h1 {
+      color: #1e90ff;
+    }
+    h2 {
       color: #d2691e;
     }
     button {
       background-color: #f4a460;
-      border: none;
-      padding: 10px 20px;
-      font-size: 18px;
-      border-radius: 10px;
-      cursor: pointer;
       color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
     }
-    table {
-      border-collapse: collapse;
-      width: 100%;
+    input[type="file"] {
+      margin-top: 10px;
+    }
+    #result {
       margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-    }
-    #prediction {
-      font-size: 24px;
+      font-size: 18px;
       color: #ff4500;
+    }
+    img {
+      max-width: 200px;
       margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>ナンバーズ4予測するにゃ！🐾</h1>
+  <h1>numbers4-predictor</h1>
+  <h2>ナンバーズ4予測するにゃ！🐾</h2>
+  <img src="https://raw.githubusercontent.com/goldfish925/numbers4-predictor/main/cat.png" alt="にゃんこ" />
+  <br />
   <button onclick="predict()">予測してみる</button>
-  <div id="prediction">ここに予測が表示されるにゃ</div>
-  <input type="file" id="fileInput" accept=".csv" />
-  <table id="dataTable"></table>
+  <div id="result">ここに予測が表示されるにゃ</div>
+  <input type="file" id="csvFile" accept=".csv" />
 
   <script>
-    let numbers = [];
-
-    document.getElementById('fileInput').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const csv = e.target.result;
-        const lines = csv.split('\n').slice(1);
-        const table = document.getElementById('dataTable');
-        table.innerHTML = "<tr><th>開催回</th><th>開催日</th><th>抽選数字</th></tr>";
-        numbers = [];
-
-        lines.forEach(line => {
-          const cols = line.split(',');
-          if (cols.length > 2) {
-            const draw = cols[2].replace(/="|"/g, '').trim();
-            if (draw.length === 4 && !isNaN(draw)) {
-              numbers.push(draw);
-              const row = `<tr><td>${cols[0]}</td><td>${cols[1]}</td><td>${draw}</td></tr>`;
-              table.innerHTML += row;
-            }
-          }
-        });
-      };
-      reader.readAsText(file, 'Shift_JIS');
-    });
-
     function predict() {
-      if (numbers.length === 0) {
-        document.getElementById('prediction').innerText = '先にCSVを読み込んでにゃ！';
+      const fileInput = document.getElementById("csvFile");
+      const file = fileInput.files[0];
+      if (!file) {
+        document.getElementById("result").textContent = "ファイルを選んでにゃ";
         return;
       }
 
-      let digitFreq = Array(10).fill(0);
-      numbers.forEach(num => {
-        num.split('').forEach(d => digitFreq[parseInt(d)]++);
-      });
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const text = e.target.result;
+        const lines = text.split("\n").slice(-20); // 最新20件
+        const numbers = lines
+          .map(line => line.trim().split(",")[1])
+          .filter(n => /^\d{4}$/.test(n));
+        
+        const count = {};
+        numbers.forEach(num => {
+          for (const digit of num) {
+            count[digit] = (count[digit] || 0) + 1;
+          }
+        });
 
-      const topDigits = [...digitFreq.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .map(pair => pair[0].toString());
+        const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
+        const prediction = sorted.slice(0, 4).map(entry => entry[0]).join("");
 
-      let prediction = '';
-      for (let i = 0; i < 4; i++) {
-        prediction += topDigits[Math.floor(Math.random() * topDigits.length)];
-      }
-
-      document.getElementById('prediction').innerText = `にゃんこの予測は… ${prediction} にゃ！`;
+        document.getElementById("result").textContent = `未来の数字は…「${prediction}」にゃ！✨`;
+      };
+      reader.readAsText(file);
     }
   </script>
 </body>
