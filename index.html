@@ -70,6 +70,13 @@
 
         const mode = document.querySelector('input[name="mode"]:checked').value;
         const targetLines = mode === "recent" ? lines.slice(-20) : lines;
+        console.log("読み込んだ行数:", targetLines.length);
+targetLines.forEach((line, i) => {
+  console.log(`Line ${i}:`, line);
+  const cols = line.trim().split("\t");
+  console.log("列3（当選番号）:", cols[2]);
+});
+
 
         // --- 数字の頻度 ---
         const numbers = targetLines
