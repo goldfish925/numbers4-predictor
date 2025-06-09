@@ -112,9 +112,9 @@ reader.onload = function (e) {
     sorted.slice(2, 6).map(e => e[0]).join("")
   ];
 
-  result.innerHTML = `未来の数字たちにゃ！<br><strong style="font-size:24px;">${predictions.join(" / ")}</strong> ✨`;
+  result.innerHTML = `未来の数字たち<br><strong style="font-size:24px;">${predictions.join(" / ")}</strong> ✨`;
 
-  let detailText = "よく出た数字ランキングにゃ：\n";
+  let detailText = "よく出た数字ランキング：\n";
   sorted.forEach(([digit, freq]) => {
     detailText += `「${digit}」が ${freq} 回\n`;
   });
@@ -136,9 +136,8 @@ reader.onload = function (e) {
     weekdayCount[weekday]++;
   }
 });
-
-
-  detailText += "\n曜日ごとの出現数にゃ：\n";
+  
+  detailText += "\n曜日ごとの出現数だよ：\n";
   for (const [day, count] of Object.entries(weekdayCount)) {
     detailText += `${day}曜日：${count} 回\n`;
   }
