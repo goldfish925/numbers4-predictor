@@ -72,12 +72,12 @@
         const lines = text.split("\n").slice(-20); // 最新20件
         console.log("読み込んだ行：", lines);
         const numbers = lines
-          .map(line => {
-          const cell = line.trim().split(",")[2] || "";
-　　　　const digits = cell.replace(/[^0-9]/g, "");
-        return digits.length === 4 ? digits : null;
+  .map(line => {
+    const cell = line.trim().split(",")[2] || "";
+    const digits = cell.replace(/[^0-9]/g, "");
+    return digits.length === 4 ? digits : null;
   })
-        .filter(Boolean);
+  .filter(Boolean);
         numbers.forEach(num => {
           for (const digit of num) {
             count[digit] = (count[digit] || 0) + 1;
