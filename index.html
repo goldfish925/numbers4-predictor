@@ -2,11 +2,65 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ナンバーズ4予測にゃ！</title>
+  <title>にゃんこのナンバーズ4予測</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background-color: #fffaf0;
+      padding: 20px;
+    }
+    h1 {
+      color: #ff6f61;
+    }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 1rem;
+    }
+    #result {
+      font-size: 1.5rem;
+      color: #ff4500;
+      margin-top: 20px;
+    }
+  </style>
 </head>
-<body style="text-align:center; font-family:sans-serif;">
-  <h1>ナンバーズ4予測するにゃ！🐾</h1>
-  <img src="neco.png" alt="ねこ" width="200">
-  <p>こんにちはにゃ、画像は見えてるかにゃ？</p>
+<body>
+  <h1>にゃんこのナンバーズ4予測🐾</h1>
+
+  <input type="file" id="csvFile" accept=".csv" />
+  <button onclick="predict()">予測してみる</button>
+
+  <div id="result">ここに予測が表示されるにゃ</div>
+
+  <script>
+    function predict() {
+      const fileInput = document.getElementById("csvFile");
+      const file = fileInput.files[0];
+      if (!file) {
+        document.getElementById("result").textContent = "ファイルを選んでにゃ";
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const text = e.target.result;
+        const lines = text.split("\n").slice(-20); // 最新20件
+        const numbers = lines
+          .map(line => line.trim().split(",")[1])
+          .filter(n => /^\d{4}$/.test(n));
+        const count = {};
+        numbers.forEach(num => {
+          for (const digit of num) {
+            count[digit] = (count[digit] || 0) + 1;
+          }
+        });
+        const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
+        const prediction = sorted.slice(0, 4).map(entry => entry[0]).join("");
+        document.getElementById("result").textContent = `未来の数字は…「${prediction}」にゃ！✨`;
+      };
+      reader.readAsText(file);
+    }
+  </script>
 </body>
 </html>
