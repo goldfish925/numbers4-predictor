@@ -133,6 +133,34 @@ reader.onload = function (e) {
   for (const [day, count] of Object.entries(weekdayCount)) {
     detailText += `${day}曜日：${count} 回\n`;
   }
+  // ✅ 未出現日数のカウント
+  const latestLine = lines[lines.length - 1];
+  const latestDateStr = latestLine.trim().split(",")[0];
+  const latestDate = new Date(latestDateStr);
+
+  let allLines = text.split("\n").filter(line => {
+    const cols = line.trim().split(",");
+    return cols[0] && cols[2] && /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(cols[0]) && /^\d{4}$/.test(cols[2]);
+  });
+
+  const lastSeenMap = {}; // 数字: 最後に出た日
+  allLines.forEach(line => {
+    const cols = line.trim().split(",");
+    const dateStr = cols[0];
+    const number = cols[2];
+    if (!/^\d{4}$/.test(number)) return;
+    const date = new Date(dateStr);
+    for (const digit of number) {
+      lastSeenMap[digit] = date; // 更新され続ける → 最後に出た日になる
+    }
+  });
+
+  detailText += "\n数字の未出現日数にゃ：\n";
+  for (const digit of Object.keys(count)) {
+    const lastDate = lastSeenMap[digit];
+    const diffDays = lastDate ? Math.floor((latestDate - lastDate) / (1000 * 60 * 60 * 24)) : "？";
+    detailText += `「${digit}」は ${diffDays} 日 出てないにゃ\n`;
+  }
 
   details.textContent = detailText;
 };
