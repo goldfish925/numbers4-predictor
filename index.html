@@ -15,9 +15,6 @@
     h1 {
       color: #1e90ff;
     }
-    h2 {
-      color: #d2691e;
-    }
     button {
       background-color: #f4a460;
       color: white;
@@ -44,12 +41,18 @@
 </head>
 <body>
   <h1>ナンバーズ4予測にゃ！</h1>
-  <img src="./neko.png" alt="ネコの画像" style="width: 200px; margin: 20px auto; display: block;">
-  
+
+  <!-- にゃんこ画像 -->
+  <img src="./neco.png" alt="にゃんこ">
+
+  <!-- ファイル選択とボタン -->
   <input type="file" id="csvFile" accept=".csv">
   <button onclick="predict()">予測してみる</button>
+
+  <!-- 結果表示 -->
   <div id="result">ここに予測が表示されるにゃ</div>
 
+  <!-- スクリプト -->
   <script>
     function predict() {
       const fileInput = document.getElementById("csvFile");
@@ -61,7 +64,7 @@
       const reader = new FileReader();
       reader.onload = function (e) {
         const text = e.target.result;
-        const lines = text.split("\n").slice(-20); // 最新20件
+        const lines = text.split("\n").slice(-20);
         const numbers = lines
           .map(line => line.trim().split(",")[1])
           .filter(n => /^\d{4}$/.test(n));
