@@ -9,16 +9,17 @@
     body {
       font-family: "Hiragino Kaku Gothic ProN", sans-serif;
       background-color: #ffffff;
-      color: #333;
+      color: #c1a57b; /* ミルクティー系の色 */
       text-align: center;
       padding: 20px;
     }
     h1 {
-      color: #e6caa3;
+      color: #c1a57b;
+      font-size: 28px;
     }
     button {
-      background-color: #e6caa3;
-      color: white;
+      background-color: #c1a57b;
+      color: #5a4635;
       padding: 10px 20px;
       border: none;
       border-radius: 8px;
@@ -26,18 +27,20 @@
       cursor: pointer;
       margin-top: 10px;
     }
-    input[type="file"], select {
+    input[type="file"], label {
       margin-top: 10px;
-      font-size: 16px;
+      display: inline-block;
+      margin-right: 10px;
+      font-size: 14px;
     }
     #result, #details {
       margin-top: 20px;
       font-size: 18px;
     }
     #details {
-      color: #555;
       font-size: 14px;
       white-space: pre-line;
+      color: #7c6240;
     }
     img {
       max-width: 150px;
@@ -49,11 +52,13 @@
   <h1>NUMBERS4予想</h1>
 
   <input type="file" id="csvFile" accept=".csv"><br>
-  <label for="modeSelect">集計モード：</label>
-  <select id="modeSelect">
-    <option value="latest">最新20件</option>
-    <option value="all">全体</option>
-  </select><br>
+
+  <label>
+    <input type="radio" name="mode" value="recent" checked> 最新20件
+  </label>
+  <label>
+    <input type="radio" name="mode" value="all"> 全体
+  </label><br>
 
   <button onclick="predict()">予測してみるね</button>
 
@@ -65,7 +70,6 @@
   <script>
     function predict() {
       const fileInput = document.getElementById("csvFile");
-      const mode = document.getElementById("modeSelect").value;
       const file = fileInput.files[0];
       const result = document.getElementById("result");
       const details = document.getElementById("details");
@@ -75,41 +79,50 @@
         return;
       }
 
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+
       const reader = new FileReader();
       reader.onload = function (e) {
         const text = e.target.result;
-        let lines = text.split("\n").filter(line => line.trim() !== "");
+        const lines = text.split("\n").filter(line => line.trim());
+        const dataLines = mode === "recent" ? lines.slice(-20) : lines;
 
-        if (mode === "latest") {
-          lines = lines.slice(-20); // 最新20件
-        }
-
-        const numbers = lines.map(line => {
+        const numbers = dataLines.map(line => {
           const cell = line.trim().split(",")[2] || "";
           const digits = cell.replace(/[^0-9]/g, "");
           return digits.length === 4 ? digits : null;
         }).filter(Boolean);
 
         const count = {};
+        const positionCounts = [ {}, {}, {}, {} ];
+
         numbers.forEach(num => {
-          for (let i = 0; i < 4; i++) {
-            const digit = num[i];
+          [...num].forEach((digit, i) => {
+            positionCounts[i][digit] = (positionCounts[i][digit] || 0) + 1;
             count[digit] = (count[digit] || 0) + 1;
-          }
+          });
         });
 
         const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-        const predictions = [
-          sorted.slice(0, 4).map(entry => entry[0]).join(""),
-          sorted.slice(1, 5).map(entry => entry[0]).join(""),
-          sorted.slice(2, 6).map(entry => entry[0]).join("")
-        ];
+        const predictions = [];
+        for (let i = 0; i < 3; i++) {
+          const pick = sorted.slice(i, i + 4).map(entry => entry[0]).join("");
+          if (!predictions.includes(pick)) predictions.push(pick);
+        }
 
         result.innerHTML = `未来の数字たちだよ！<br><strong style="font-size:24px;">${predictions.join(" / ")}</strong> ✨`;
 
         let detailText = "よく出た数字ランキングだよ：\n";
         sorted.forEach(([digit, freq]) => {
           detailText += `「${digit}」が ${freq} 回\n`;
+        });
+
+        detailText += "\n▼出現位置別統計：\n";
+        const labels = ["千の位", "百の位", "十の位", "一の位"];
+        positionCounts.forEach((posCount, idx) => {
+          const sortedPos = Object.entries(posCount).sort((a, b) => b[1] - a[1]);
+          detailText += `${labels[idx]}：`;
+          detailText += sortedPos.map(([d, f]) => `${d}(${f})`).join(" ") + "\n";
         });
 
         details.textContent = detailText;
