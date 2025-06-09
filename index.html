@@ -107,7 +107,7 @@
         const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
 
         targetLines.forEach(line => {
-          const cols = line.trim().split(",");
+          const cols = line.trim().split("\t");
           let dateStr = cols[0];
           const num = cols[2];
           if (!dateStr || !num) return;
@@ -126,13 +126,13 @@
         }
 
         // --- 未出現日数 ---
-        let latestDateStr = targetLines[targetLines.length - 1].split(",")[0];
+        let latestDateStr = targetLines[targetLines.length - 1].split("\t");[0];
         latestDateStr = latestDateStr.replace(/-/g, "/");
         const latestDate = new Date(latestDateStr);
 
         const lastSeenMap = {};
         lines.forEach(line => {
-          const cols = line.trim().split(",");
+          const cols = line.trim().split("\t");
           let dateStr = cols[0];
           const number = cols[2];
           if (!dateStr || !number) return;
