@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
+<img src="./cat.png" alt="ネコ" style="width: 200px; margin: 20px auto; display: block;" />
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ナンバーズ4予測にゃ！</title>
