@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>ナンバーズ4予測にゃ！</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: "Hiragino Kaku Gothic ProN", sans-serif;
@@ -13,7 +14,7 @@
       padding: 20px;
     }
     h1 {
-      color: #1e90ff;
+      color: #fffff7;
     }
     button {
       background-color: #f4a460;
@@ -28,57 +29,72 @@
     input[type="file"] {
       margin-top: 10px;
     }
-    #result {
+    #result, #details {
       margin-top: 20px;
       font-size: 18px;
-      color: #ff4500;
+    }
+    #details {
+      color: #555;
+      font-size: 14px;
+      white-space: pre-line;
     }
     img {
-      max-width: 200px;
+      max-width: 150px;
       margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>ナンバーズ4予測にゃ！</h1>
-
-  <!-- にゃんこ画像 -->
-  <img src="./neco.png" alt="にゃんこ">
-
-  <!-- ファイル選択とボタン -->
+  <h1>ナンバーズ4予測にゃ！🐾</h1>
   <input type="file" id="csvFile" accept=".csv">
-  <button onclick="predict()">予測してみる</button>
+  <button onclick="predict()">予測してみるにゃ</button>
 
-  <!-- 結果表示 -->
   <div id="result">ここに予測が表示されるにゃ</div>
+  <div id="details"></div>
 
-  <!-- スクリプト -->
+  <img src="neco.png" alt="にゃんこ">
+
   <script>
     function predict() {
       const fileInput = document.getElementById("csvFile");
       const file = fileInput.files[0];
+      const result = document.getElementById("result");
+      const details = document.getElementById("details");
+
       if (!file) {
-        document.getElementById("result").textContent = "ファイルを選んでにゃ";
+        result.textContent = "ファイルを選んでにゃ";
         return;
       }
+
       const reader = new FileReader();
       reader.onload = function (e) {
         const text = e.target.result;
-        const lines = text.split("\n").slice(-20);
+        const lines = text.split("\n").slice(-20); // 最新20件
         const numbers = lines
-          .map(line => line.trim().split(",")[1])
+          .map(line => line.trim().split(",")[1]) // 2列目を使用
           .filter(n => /^\d{4}$/.test(n));
+
         const count = {};
         numbers.forEach(num => {
           for (const digit of num) {
             count[digit] = (count[digit] || 0) + 1;
           }
         });
+
         const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
         const prediction = sorted.slice(0, 4).map(entry => entry[0]).join("");
-        document.getElementById("result").textContent = `未来の数字は…「${prediction}」にゃ！✨`;
+
+        result.innerHTML = `未来の数字は…<br><strong style="font-size:24px;">${prediction}</strong> にゃ！✨`;
+
+        let detailText = "よく出た数字ランキングにゃ：\n";
+        sorted.forEach(([digit, freq]) => {
+          detailText += `「${digit}」が ${freq} 回\n`;
+        });
+
+        details.textContent = detailText;
       };
-      reader.readAsText(file);
+
+      reader.readAsText(file, "UTF-8");
     }
   </script>
 </body>
