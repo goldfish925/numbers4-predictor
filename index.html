@@ -199,7 +199,9 @@ sortedSlides.forEach(([pattern, count]) => {
           digitSlides.push(diffs);
           slideDetails += `#${i}: ${prev} → ${curr} ｜ 差分: ${diffs.map(d => (d >= 0 ? "+" + d : d)).join(", ")}\n`;
         }
-　　　　
+　　　　　　　
+        detailText += slideDetails;
+
 　　　　// === スライド差の分析 ===
 const slidePatterns = {};
 for (let i = 1; i < numbers.length; i++) {
@@ -235,10 +237,8 @@ for (let i = 0; i < 4; i++) {
 }
 
 result.innerHTML += `<br>スライド傾向予測 👉 <strong style="font-size:20px;">${slidePrediction}</strong> 🌠`;
-　　　　　
+
         
-        detailText += slideDetails;
-            
         details.textContent = detailText;
       };
 
