@@ -241,12 +241,13 @@ for (let i = 0; i < 4; i++) {
   const currentDigit = parseInt(latestNumber[i], 10);
 
   if (isNaN(diff) || isNaN(currentDigit)) {
-    slidePrediction += "❓";
+    slidePrediction += "❓";  // わからないときは記号で埋める
   } else {
     const digit = (currentDigit + diff + 10) % 10;
     slidePrediction += digit.toString();
   }
 }
+
 
 result.innerHTML += `<br>スライド傾向予測 👉 <strong style="font-size:20px;">${slidePrediction}</strong> 🌠`;
 
