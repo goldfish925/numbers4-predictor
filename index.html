@@ -53,23 +53,25 @@
   <img src="neco.png" alt="にゃんこ">
 
   <script>
-    function getSlideDiffText(nums, label) {
-      if (nums.length < 2) return `${label}：データ不足\n`;
-      const prev = nums[nums.length - 2];
-      const curr = nums[nums.length - 1];
-      let slideText = `\n🔁 ${label}のスライド差：\n`;
-      slideText += `前回：${prev}\n`;
-      slideText += `今回：${curr}\n`;
-      slideText += "差分：";
+    function getSlideDiffTextAll(nums, label) {
+  if (nums.length < 2) return `${label}：データ不足\n`;
+  let slideText = `\n🔁 ${label}のスライド差（全件）：\n`;
+  
+  for (let i = 1; i < nums.length; i++) {
+    const prev = nums[i - 1];
+    const curr = nums[i];
+    slideText += `\n[${i}] ${prev} → ${curr}\n差分：`;
 
-      for (let i = 0; i < 4; i++) {
-        const diff = (parseInt(curr[i]) - parseInt(prev[i]) + 10) % 10;
-        const slide = (diff <= 5) ? diff : diff - 10;
-        slideText += (slide >= 0 ? "+" : "") + slide + " ";
-      }
-
-      return slideText + "\n";
+    for (let j = 0; j < 4; j++) {
+      const diff = (parseInt(curr[j]) - parseInt(prev[j]) + 10) % 10;
+      const slide = (diff <= 5) ? diff : diff - 10;
+      slideText += (slide >= 0 ? "+" : "") + slide + " ";
     }
+  }
+
+  return slideText + "\n";
+}
+
 
     function predict() {
       const fileInput = document.getElementById("csvFile");
