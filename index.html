@@ -158,6 +158,28 @@
           const diffDays = lastDate ? Math.floor((latestDate - lastDate) / (1000 * 60 * 60 * 24)) : "？";
           detailText += `「${d}」は ${diffDays} 日 出てないね\n`;
         }
+　　　　// --- スライド分析 ---
+let slidePatterns = {};
+for (let i = 1; i < numbers.length; i++) {
+  const prev = numbers[i - 1];
+  const curr = numbers[i];
+  const slide = [];
+
+  for (let j = 0; j < 4; j++) {
+    const diff = parseInt(curr[j]) - parseInt(prev[j]);
+    slide.push(diff);
+  }
+
+  const pattern = slide.join(",");
+  slidePatterns[pattern] = (slidePatterns[pattern] || 0) + 1;
+}
+
+// スライド結果をソートして表示用にまとめる
+detailText += `\nスライド分析（前回との差）:\n`;
+const sortedSlides = Object.entries(slidePatterns).sort((a, b) => b[1] - a[1]);
+sortedSlides.forEach(([pattern, count]) => {
+  detailText += `${pattern} → ${count} 回\n`;
+});
 
         details.textContent = detailText;
       };
