@@ -223,7 +223,7 @@ sortedSlide.slice(0, 5).forEach(([pattern, count]) => {
   slideText += `${pattern.trim()}：${count} 回\n`;
 });
 detailText += slideText;
-
+};
           
 // === スライド傾向予測 ===
 
@@ -249,7 +249,6 @@ for (let i = 0; i < 4; i++) {
     detailText += `・${digit}：${count} 回\n`;
   });
 }
-
         
 // --- スライド傾向予測 ---
 const latestNumber = numbers[numbers.length - 1];
