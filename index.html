@@ -225,17 +225,31 @@ sortedSlide.slice(0, 5).forEach(([pattern, count]) => {
 details.textContent += slideText;
 
 // === スライド予測 ===
+// --- スライド傾向予測 ---
 const latestNumber = numbers[numbers.length - 1];
-const topPattern = sortedSlide[0] ? sortedSlide[0][0].trim().split(" ") : [];
+
+// パターン取り出しと補完
+const topPatternRaw = sortedSlide[0] ? sortedSlide[0][0].trim() : "";
+const topPattern = topPatternRaw.split(/\s+/);
+while (topPattern.length < 4) {
+  topPattern.push("0");
+}
 
 let slidePrediction = '';
 for (let i = 0; i < 4; i++) {
   const diff = parseInt(topPattern[i], 10);
-  let digit = (parseInt(latestNumber[i]) + diff + 10) % 10;
-  slidePrediction += digit.toString();
+  const currentDigit = parseInt(latestNumber[i], 10);
+
+  if (isNaN(diff) || isNaN(currentDigit)) {
+    slidePrediction += "❓";
+  } else {
+    const digit = (currentDigit + diff + 10) % 10;
+    slidePrediction += digit.toString();
+  }
 }
 
 result.innerHTML += `<br>スライド傾向予測 👉 <strong style="font-size:20px;">${slidePrediction}</strong> 🌠`;
+
 
         
         details.textContent = detailText;
