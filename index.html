@@ -90,7 +90,7 @@ function predict() {
       }
     });
     const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-    let detailText = "🎲 よく出た数字ランキング：\n";
+    let detailText = "よく出た数字ランキング：\n";
     sorted.forEach(([digit, freq]) => {
       detailText += `「${digit}」が ${freq} 回\n`;
     });
@@ -99,7 +99,7 @@ function predict() {
     if (numbers.length >= 2) {
       const prev = numbers[numbers.length - 2];
       const curr = numbers[numbers.length - 1];
-      detailText += "\n🪐 前回とのスライド差：\n";
+      detailText += "\n 前回とのスライド差：\n";
       detailText += `前回：${prev}\n`;
       detailText += `今回：${curr}\n`;
       detailText += "差分：";
@@ -113,7 +113,7 @@ function predict() {
       detailText += "\n";
     }
 
-    result.innerHTML = "予測完了！🌟";
+    result.innerHTML = "予想完了！🌟";
     details.textContent = detailText;
   };
 
