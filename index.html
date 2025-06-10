@@ -224,6 +224,9 @@ sortedSlide.slice(0, 5).forEach(([pattern, count]) => {
 });
 detailText += slideText;
 
+          
+// === スライド傾向予測 ===
+
         // --- 各桁ごとの出現傾向 ---
 let positionStats = [ {}, {}, {}, {} ]; // 各桁（千, 百, 十, 一）
 
@@ -248,7 +251,6 @@ for (let i = 0; i < 4; i++) {
 }
 
         
-// === スライド傾向予測 ===
 // --- スライド傾向予測 ---
 const latestNumber = numbers[numbers.length - 1];
 
