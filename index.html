@@ -276,7 +276,20 @@ detailText += `\n桁ごとの数字出現数：\n`;
   detailText += "\n";
 });
 
-        
+    // --- 桁別出現数からの予測 ---
+let positionPrediction = "";
+
+for (let i = 0; i < 4; i++) {
+  // 各桁で最も出現頻度が高い数字を選ぶ
+  const stats = positionStats[i]
+    .map((count, digit) => ({ digit, count }))
+    .sort((a, b) => b.count - a.count);
+
+  positionPrediction += stats[0].digit.toString(); // 一番頻度の高い数字
+}
+
+result.innerHTML += `<br>桁ごと予測 👉 <strong style="font-size:20px;">${positionPrediction}</strong> 🐾`;
+    
         details.textContent = detailText;
       };
 
