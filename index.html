@@ -224,6 +224,30 @@ sortedSlide.slice(0, 5).forEach(([pattern, count]) => {
 });
 detailText += slideText;
 
+        // --- 各桁ごとの出現傾向 ---
+let positionStats = [ {}, {}, {}, {} ]; // 各桁（千, 百, 十, 一）
+
+numbers.forEach(num => {
+  for (let i = 0; i < 4; i++) {
+    const digit = num[i];
+    if (!positionStats[i][digit]) {
+      positionStats[i][digit] = 0;
+    }
+    positionStats[i][digit]++;
+  }
+});
+
+detailText += `\n各桁ごとの出やすい数字：\n`;
+const posName = ["千", "百", "十", "一"];
+for (let i = 0; i < 4; i++) {
+  detailText += `【${posName[i]}の位】\n`;
+  const sorted = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
+  sorted.forEach(([digit, count]) => {
+    detailText += `・${digit}：${count} 回\n`;
+  });
+}
+
+        
 // === スライド傾向予測 ===
 // --- スライド傾向予測 ---
 const latestNumber = numbers[numbers.length - 1];
