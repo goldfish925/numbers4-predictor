@@ -199,7 +199,44 @@ sortedSlides.forEach(([pattern, count]) => {
           digitSlides.push(diffs);
           slideDetails += `#${i}: ${prev} → ${curr} ｜ 差分: ${diffs.map(d => (d >= 0 ? "+" + d : d)).join(", ")}\n`;
         }
+　　　　
+　　　　// === スライド差の分析 ===
+const slidePatterns = {};
+for (let i = 1; i < numbers.length; i++) {
+  const prev = numbers[i - 1];
+  const curr = numbers[i];
 
+  let pattern = '';
+  for (let j = 0; j < 4; j++) {
+    const diff = parseInt(curr[j]) - parseInt(prev[j]);
+    pattern += (diff >= 0 ? "+" : "") + diff + " ";
+  }
+
+  slidePatterns[pattern] = (slidePatterns[pattern] || 0) + 1;
+}
+
+let slideText = "\nよく出るスライド変化パターン：\n";
+const sortedSlide = Object.entries(slidePatterns).sort((a, b) => b[1] - a[1]);
+
+sortedSlide.slice(0, 5).forEach(([pattern, count]) => {
+  slideText += `${pattern.trim()}：${count} 回\n`;
+});
+detailText += slideText;
+
+// === スライド傾向予測 ===
+const latestNumber = numbers[numbers.length - 1];
+const topPattern = sortedSlide[0] ? sortedSlide[0][0].trim().split(" ") : [];
+
+let slidePrediction = '';
+for (let i = 0; i < 4; i++) {
+  const diff = parseInt(topPattern[i], 10);
+  let digit = (parseInt(latestNumber[i]) + diff + 10) % 10;
+  slidePrediction += digit.toString();
+}
+
+result.innerHTML += `<br>スライド傾向予測 👉 <strong style="font-size:20px;">${slidePrediction}</strong> 🌠`;
+　　　　　
+        
         detailText += slideDetails;
             
         details.textContent = detailText;
