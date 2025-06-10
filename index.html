@@ -53,351 +53,167 @@
   <img src="neco.png" alt="にゃんこ">
 
   <script>
-    function predict() {
-      const file = document.getElementById("csvFile").files[0];
-      const result = document.getElementById("result");
-      const details = document.getElementById("details");
+  function predict() {
+    const file = document.getElementById("csvFile").files[0];
+    const result = document.getElementById("result");
+    const details = document.getElementById("details");
 
-      if (!file) {
-        result.textContent = "ファイルを選んでね";
-        return;
+    if (!file) {
+      result.textContent = "ファイルを選んでね";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const text = e.target.result;
+      const lines = text.split("\n").filter(line => line.trim() !== "");
+
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+      const targetLines = mode === "recent" ? lines.slice(-20) : lines;
+
+      const numbers = targetLines
+        .map(line => {
+          const cols = line.trim().split(",");
+          const raw = cols[2] || "";
+          const match = raw.match(/\d{4}/);
+          return match ? match[0] : null;
+        })
+        .filter(Boolean);
+
+      const count = {};
+      numbers.forEach(num => {
+        for (const digit of num) {
+          count[digit] = (count[digit] || 0) + 1;
+        }
+      });
+
+      const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
+      const predictions = [
+        sorted.slice(0, 4).map(e => e[0]).join(""),
+        sorted.slice(1, 5).map(e => e[0]).join(""),
+        sorted.slice(2, 6).map(e => e[0]).join("")
+      ];
+
+      result.innerHTML = `未来の数字たち<br><strong style="font-size:24px;">${predictions.join(" / ")}</strong> ✨`;
+
+      let detailText = "よく出た数字ランキング：\n";
+      sorted.forEach(([digit, freq]) => {
+        detailText += `「${digit}」が ${freq} 回\n`;
+      });
+
+      // --- 曜日ごとの出現数 ---
+      const weekdayCount = { "日": 0, "月": 0, "火": 0, "水": 0, "木": 0, "金": 0, "土": 0 };
+      const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+
+      targetLines.forEach(line => {
+        const cols = line.trim().split(",");
+        let dateStr = cols[1];
+        const raw = cols[2];
+        if (!dateStr || !raw) return;
+
+        dateStr = dateStr.replace(/-/g, "/");
+        if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr)) {
+          const date = new Date(dateStr);
+          const weekday = weekdays[date.getDay()];
+          weekdayCount[weekday]++;
+        }
+      });
+
+      detailText += "\n曜日ごとの出現数だよ：\n";
+      for (const [day, c] of Object.entries(weekdayCount)) {
+        detailText += `${day}曜日：${c} 回\n`;
       }
 
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const text = e.target.result;
-        const lines = text.split("\n").filter(line => line.trim() !== "");
+      // --- 未出現日数 ---
+      let latestDateStr = targetLines[targetLines.length - 1].split(",")[1];
+      latestDateStr = latestDateStr.replace(/-/g, "/");
+      const latestDate = new Date(latestDateStr);
 
-        const mode = document.querySelector('input[name="mode"]:checked').value;
-        const targetLines = mode === "recent" ? lines.slice(-20) : lines;
+      const lastSeenMap = {};
+      lines.forEach(line => {
+        const cols = line.trim().split(",");
+        let dateStr = cols[1];
+        const raw = cols[2];
+        const match = raw ? raw.match(/\d{4}/) : null;
+        const number = match ? match[0] : null;
+        if (!dateStr || !number) return;
 
-        // --- 数字の頻度 ---
-        const numbers = targetLines
-          .map(line => {
-            const cols = line.trim().split(",");
-            const raw = cols[2] || "";
-            const match = raw.match(/\d{4}/); // "=""1234""" などから 1234 を抽出
-            return match ? match[0] : null;
-          })
-          .filter(Boolean);
-
-        const count = {};
-        numbers.forEach(num => {
-          for (const digit of num) {
-            count[digit] = (count[digit] || 0) + 1;
-          }
-        });
-
-        const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-        const predictions = [
-          sorted.slice(0, 4).map(e => e[0]).join(""),
-          sorted.slice(1, 5).map(e => e[0]).join(""),
-          sorted.slice(2, 6).map(e => e[0]).join("")
-        ];
-
-        console.log("頻度集計:", count);
-        console.log("ソート結果:", sorted);
-        console.log("予測候補:", predictions);
-
-        result.innerHTML = `未来の数字たち<br><strong style="font-size:24px;">${predictions.join(" / ")}</strong> ✨`;
-
-        let detailText = "よく出た数字ランキング：\n";
-        sorted.forEach(([digit, freq]) => {
-          detailText += `「${digit}」が ${freq} 回\n`;
-        });
-
-        // --- 曜日別出現数 ---
-        const weekdayCount = { "日": 0, "月": 0, "火": 0, "水": 0, "木": 0, "金": 0, "土": 0 };
-        const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
-
-        targetLines.forEach(line => {
-          const cols = line.trim().split(",");
-          let dateStr = cols[1];
-          const raw = cols[2];
-          if (!dateStr || !raw) return;
-
-          dateStr = dateStr.replace(/-/g, "/");
-          if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr)) {
-            const date = new Date(dateStr);
-            const weekday = weekdays[date.getDay()];
-            weekdayCount[weekday]++;
-          }
-        });
-
-        detailText += "\n曜日ごとの出現数だよ：\n";
-        for (const [day, c] of Object.entries(weekdayCount)) {
-          detailText += `${day}曜日：${c} 回\n`;
+        dateStr = dateStr.replace(/-/g, "/");
+        if (!/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr)) return;
+        const date = new Date(dateStr);
+        for (const digit of number) {
+          lastSeenMap[digit] = date;
         }
+      });
 
-        // --- 未出現日数 ---
-        let latestDateStr = targetLines[targetLines.length - 1].split(",")[1];
-        latestDateStr = latestDateStr.replace(/-/g, "/");
-        const latestDate = new Date(latestDateStr);
+      detailText += "\n数字の未出現日数だよ：\n";
+      for (let digit = 0; digit <= 9; digit++) {
+        const d = digit.toString();
+        const lastDate = lastSeenMap[d];
+        const diffDays = lastDate ? Math.floor((latestDate - lastDate) / (1000 * 60 * 60 * 24)) : "？";
+        detailText += `「${d}」は ${diffDays} 日 出てないね\n`;
+      }
 
-        const lastSeenMap = {};
-        lines.forEach(line => {
-          const cols = line.trim().split(",");
-          let dateStr = cols[1];
-          const raw = cols[2];
-          const match = raw ? raw.match(/\d{4}/) : null;
-          const number = match ? match[0] : null;
-          if (!dateStr || !number) return;
+      // --- スライド分析 ---
+      const slidePatterns = {};
+      for (let i = 1; i < numbers.length; i++) {
+        const prev = numbers[i - 1];
+        const curr = numbers[i];
+        let pattern = '';
+        for (let j = 0; j < 4; j++) {
+          const diff = parseInt(curr[j]) - parseInt(prev[j]);
+          pattern += (diff >= 0 ? "+" : "") + diff + " ";
+        }
+        slidePatterns[pattern] = (slidePatterns[pattern] || 0) + 1;
+      }
 
-          dateStr = dateStr.replace(/-/g, "/");
-          if (!/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr)) return;
-          const date = new Date(dateStr);
-          for (const digit of number) {
-            lastSeenMap[digit] = date;
-          }
+      let slideText = "\nよく出るスライド変化パターン：\n";
+      const sortedSlide = Object.entries(slidePatterns).sort((a, b) => b[1] - a[1]);
+      sortedSlide.slice(0, 5).forEach(([pattern, count]) => {
+        slideText += `${pattern.trim()}：${count} 回\n`;
+      });
+
+      detailText += slideText;
+
+      // --- 各桁ごとの出現傾向 ---
+      let positionStats = [{}, {}, {}, {}];
+      numbers.forEach(num => {
+        for (let i = 0; i < 4; i++) {
+          const digit = num[i];
+          positionStats[i][digit] = (positionStats[i][digit] || 0) + 1;
+        }
+      });
+
+      detailText += `\n各桁ごとの出やすい数字：\n`;
+      const posName = ["千", "百", "十", "一"];
+      for (let i = 0; i < 4; i++) {
+        detailText += `【${posName[i]}の位】\n`;
+        const sorted = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
+        sorted.forEach(([digit, count]) => {
+          detailText += `・${digit}：${count} 回\n`;
         });
+      }
 
-        detailText += "\n数字の未出現日数だよ：\n";
-        for (let digit = 0; digit <= 9; digit++) {
-          const d = digit.toString();
-          const lastDate = lastSeenMap[d];
-          const diffDays = lastDate ? Math.floor((latestDate - lastDate) / (1000 * 60 * 60 * 24)) : "？";
-          detailText += `「${d}」は ${diffDays} 日 出てないね\n`;
-        }
-　　　　// --- スライド分析 ---
-let slidePatterns = {};
-for (let i = 1; i < numbers.length; i++) {
-  const prev = numbers[i - 1];
-  const curr = numbers[i];
-  const slide = [];
+      // --- スライド傾向予測 ---
+      const latestNumber = numbers[numbers.length - 1];
+      const topPatternRaw = sortedSlide[0] ? sortedSlide[0][0].trim() : "";
+      const topPattern = topPatternRaw.split(/\s+/);
+      while (topPattern.length < 4) topPattern.push("0");
 
-  for (let j = 0; j < 4; j++) {
-    const diff = parseInt(curr[j]) - parseInt(prev[j]);
-    slide.push(diff);
+      let slidePrediction = '';
+      for (let i = 0; i < 4; i++) {
+        const diff = parseInt(topPattern[i], 10);
+        const currentDigit = parseInt(latestNumber[i], 10);
+        slidePrediction += (isNaN(diff) || isNaN(currentDigit)) ? "❓" : ((currentDigit + diff + 10) % 10).toString();
+      }
+
+      result.innerHTML += `<br>スライド傾向予測 👉 <strong style="font-size:20px;">${slidePrediction}</strong> 🌠`;
+      details.textContent = detailText;
+    };
+
+    reader.readAsText(file, "UTF-8");
   }
+</script>
 
-  const pattern = slide.join(",");
-  slidePatterns[pattern] = (slidePatterns[pattern] || 0) + 1;
-}
-
-// スライド結果をソートして表示用にまとめる
-detailText += `\nスライド分析（前回との差）:\n`;
-const sortedSlides = Object.entries(slidePatterns).sort((a, b) => b[1] - a[1]);
-sortedSlides.forEach(([pattern, count]) => {
-  detailText += `${pattern} → ${count} 回\n`;
-});
-
-        // --- スライド分析（各桁ごとの変化） ---
-        let slideDetails = "\nスライド分析（前回との差）：\n";
-
-        const digitSlides = [];
-
-        for (let i = 1; i < numbers.length; i++) {
-          const prev = numbers[i - 1];
-          const curr = numbers[i];
-          const diffs = [];
-
-          for (let j = 0; j < 4; j++) {
-            const diff = parseInt(curr[j], 10) - parseInt(prev[j], 10);
-            diffs.push(diff);
-          }
-
-          digitSlides.push(diffs);
-          slideDetails += `#${i}: ${prev} → ${curr} ｜ 差分: ${diffs.map(d => (d >= 0 ? "+" + d : d)).join(", ")}\n`;
-        }
-　　　　　　　
-        detailText += slideDetails;
-
-　　　　// === スライド差の分析 ===
-for (let i = 1; i < numbers.length; i++) {
-  const prev = numbers[i - 1];
-  const curr = numbers[i];
-
-  let pattern = '';
-  for (let j = 0; j < 4; j++) {
-    const diff = parseInt(curr[j]) - parseInt(prev[j]);
-    pattern += (diff >= 0 ? "+" : "") + diff + " ";
-  }
-
-  slidePatterns[pattern] = (slidePatterns[pattern] || 0) + 1;
-}
-
-let slideText = "\nよく出るスライド変化パターン：\n";
-const sortedSlide = Object.entries(slidePatterns).sort((a, b) => b[1] - a[1]);
-
-sortedSlide.slice(0, 5).forEach(([pattern, count]) => {
-  slideText += `${pattern.trim()}：${count} 回\n`;
-});
-detailText += slideText;
-         
-// === スライド傾向予測 ===
-
-        // --- 各桁ごとの出現傾向 ---
-let positionStats = [ {}, {}, {}, {} ]; // 各桁（千, 百, 十, 一）
-
-numbers.forEach(num => {
-  for (let i = 0; i < 4; i++) {
-    const digit = num[i];
-    if (!positionStats[i][digit]) {
-      positionStats[i][digit] = 0;
-    }
-    positionStats[i][digit]++;
-  }
-});
-
-detailText += `\n各桁ごとの出やすい数字：\n`;
-const posName = ["千", "百", "十", "一"];
-for (let i = 0; i < 4; i++) {
-  detailText += `【${posName[i]}の位】\n`;
-  const sorted = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
-  sorted.forEach(([digit, count]) => {
-    detailText += `・${digit}：${count} 回\n`;
-  });
-}
-        
-// --- スライド傾向予測 ---
-const latestNumber = numbers[numbers.length - 1];
-
-// パターン取り出しと補完
-const topPatternRaw = sortedSlide[0] ? sortedSlide[0][0].trim() : "";
-const topPattern = topPatternRaw.split(/\s+/);
-while (topPattern.length < 4) {
-  topPattern.push("0");
-}
-
-let slidePrediction = '';
-for (let i = 0; i < 4; i++) {
-  const diff = parseInt(topPattern[i], 10);
-  const currentDigit = parseInt(latestNumber[i], 10);
-
-  if (isNaN(diff) || isNaN(currentDigit)) {
-    slidePrediction += "❓";
-  } else {
-    const digit = (currentDigit + diff + 10) % 10;
-    slidePrediction += digit.toString();
-  }
-}
-
-result.innerHTML += `<br>スライド傾向予測 👉 <strong style="font-size:20px;">${slidePrediction}</strong> 🌠`;
-
-        details.textContent = detailText;
-        
-// --- 桁別出現数 ---
-const positionStats = [
-  Array(10).fill(0), // 千の位（1桁目）
-  Array(10).fill(0), // 百の位（2桁目）
-  Array(10).fill(0), // 十の位（3桁目）
-  Array(10).fill(0)  // 一の位（4桁目）
-];
-
-numbers.forEach(num => {
-  for (let i = 0; i < 4; i++) {
-    const digit = parseInt(num[i]);
-    if (!isNaN(digit)) {
-      positionStats[i][digit]++;
-    }
-  }
-});
-
-detailText += `\n桁ごとの数字出現数：\n`;
-["千", "百", "十", "一"].forEach((label, i) => {
-  detailText += `${label}の位：`;
-  positionStats[i].forEach((count, digit) => {
-    if (count > 0) detailText += `${digit}(${count}) `;
-  });
-  detailText += "\n";
-});
-
-    // --- 桁別出現数からの予測 ---
-let positionPrediction = "";
-
-for (let i = 0; i < 4; i++) {
-  // 各桁で最も出現頻度が高い数字を選ぶ
-  const stats = positionStats[i]
-    .map((count, digit) => ({ digit, count }))
-    .sort((a, b) => b.count - a.count);
-
-  positionPrediction += stats[0].digit.toString(); // 一番頻度の高い数字
-}
-
-result.innerHTML += `<br>桁ごと予測 👉 <strong style="font-size:20px;">${positionPrediction}</strong> 🐾`;
-
-// --- 出現していない数字で予測 ---
-const unappearedDigits = [];
-for (let d = 0; d <= 9; d++) {
-  if (!count[d]) unappearedDigits.push(d.toString());
-}
-
-let reversePrediction = "----";
-if (unappearedDigits.length >= 4) {
-  reversePrediction = unappearedDigits.slice(0, 4).join("");
-} else {
-  // 足りない場合は少ない順に補う
-  const remaining = Object.entries(count)
-    .sort((a, b) => a[1] - b[1])
-    .map(([digit]) => digit)
-    .filter(d => !unappearedDigits.includes(d));
-
-  const candidates = unappearedDigits.concat(remaining).slice(0, 4);
-  reversePrediction = candidates.join("");
-}
-
-result.innerHTML += `<br>未出現予測 👉 <strong style="font-size:20px;">${reversePrediction}</strong> 🌀`;
-
-        // --- ダブル・トリプル分析 ---
-let singleCount = 0;
-let doubleCount = 0;
-let tripleCount = 0;
-let quadCount = 0;
-
-numbers.forEach(num => {
-  const freq = {};
-  for (let digit of num) {
-    freq[digit] = (freq[digit] || 0) + 1;
-  }
-  const counts = Object.values(freq).sort((a, b) => b - a);
-
-  if (counts[0] === 4) {
-    quadCount++;
-  } else if (counts[0] === 3) {
-    tripleCount++;
-  } else if (counts[0] === 2 && counts.length === 2) {
-    doubleCount++; // 1122 など
-  } else if (counts[0] === 2) {
-    doubleCount++;
-  } else {
-    singleCount++;
-  }
-});
-
-detailText += `\nゾロ目傾向（過去${numbers.length}件）:\n`;
-detailText += `・全部バラバラ（シングル）：${singleCount} 回\n`;
-detailText += `・同じ数字2つ（ダブル）：${doubleCount} 回\n`;
-detailText += `・同じ数字3つ（トリプル）：${tripleCount} 回\n`;
-detailText += `・全部同じ（フォー・オブ・ア・カインド）：${quadCount} 回\n`;
-
- // --- 連番分析 ---
-let totalConsecutivePairs = 0;
-let consecutiveCounts = [0, 0, 0, 0, 0]; // 0〜4組の連番の数を記録
-
-numbers.forEach(num => {
-  let count = 0;
-  for (let i = 0; i < 3; i++) {
-    const a = parseInt(num[i]);
-    const b = parseInt(num[i + 1]);
-    if (Math.abs(a - b) === 1) {
-      count++;
-    }
-  }
-  totalConsecutivePairs += count;
-  consecutiveCounts[count]++;
-});
-
-detailText += `\n連番（隣り合う数字）傾向：\n`;
-detailText += `・0組：${consecutiveCounts[0]} 回\n`;
-detailText += `・1組：${consecutiveCounts[1]} 回\n`;
-detailText += `・2組：${consecutiveCounts[2]} 回\n`;
-detailText += `・3組：${consecutiveCounts[3]} 回\n`;
-       
-        details.textContent = detailText;
-      };
-
-      reader.readAsText(file, "UTF-8");
-    }
-  </script>
 </body>
 </html>
