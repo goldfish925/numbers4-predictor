@@ -137,8 +137,10 @@
         }
 
         // スライド差分（最新20件・全体）
-        detailText += getSlideDiffText(numbers, "最新20件");
-        detailText += getSlideDiffText(allNumbers, "全体");
+        // スライド差分（最新20件・全体）
+detailText += getSlideDiffTextAll(numbers, "最新20件");
+detailText += getSlideDiffTextAll(allNumbers, "全体");
+
 
         result.innerHTML = "予想完了✨";
         details.textContent = detailText;
