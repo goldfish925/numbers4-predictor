@@ -52,6 +52,7 @@
   <div id="details"></div>
   <img src="neco.png" alt="にゃんこ">
     <script>
+<script>
 function predict() {
   const fileInput = document.getElementById("csvFile");
   const mode = document.querySelector('input[name="mode"]:checked').value;
@@ -60,14 +61,14 @@ function predict() {
 
   const file = fileInput.files[0];
   if (!file) {
-    alert("CSVファイルを選択してね！");
+    alert("CSVファイルを選んでね！");
     return;
   }
 
   const reader = new FileReader();
   reader.onload = function (e) {
     const text = e.target.result;
-    const lines = text.trim().split("\n").slice(1); // ヘッダーを除外
+    const lines = text.trim().split("\n").slice(1); // ヘッダー除外
 
     let numbers = lines
       .map(line => {
@@ -78,11 +79,12 @@ function predict() {
       })
       .filter(Boolean);
 
+    const allNumbers = [...numbers]; // 全体用コピー
     if (mode === "recent") {
       numbers = numbers.slice(-20);
     }
 
-    // --- よく出た数字ランキング ---
+    // --- よく出た数字 ---
     const count = {};
     numbers.forEach(num => {
       for (const digit of num) {
@@ -95,11 +97,12 @@ function predict() {
       detailText += `「${digit}」が ${freq} 回\n`;
     });
 
-    // --- スライド差分の追加 ---
-    if (numbers.length >= 2) {
-      const prev = numbers[numbers.length - 2];
-      const curr = numbers[numbers.length - 1];
-      detailText += "\n 前回とのスライド差：\n";
+    // --- スライド差分：最新20件 or 全体 ---
+    const sourceNumbers = (mode === "recent") ? numbers : allNumbers;
+    if (sourceNumbers.length >= 2) {
+      const prev = sourceNumbers[sourceNumbers.length - 2];
+      const curr = sourceNumbers[sourceNumbers.length - 1];
+      detailText += "\nスライド差（直近2件）：\n";
       detailText += `前回：${prev}\n`;
       detailText += `今回：${curr}\n`;
       detailText += "差分：";
@@ -113,7 +116,7 @@ function predict() {
       detailText += "\n";
     }
 
-    result.innerHTML = "予想完了！🌟";
+    result.innerHTML = "予想完了";
     details.textContent = detailText;
   };
 
