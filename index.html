@@ -344,7 +344,29 @@ detailText += `・同じ数字2つ（ダブル）：${doubleCount} 回\n`;
 detailText += `・同じ数字3つ（トリプル）：${tripleCount} 回\n`;
 detailText += `・全部同じ（フォー・オブ・ア・カインド）：${quadCount} 回\n`;
 
-        
+ // --- 連番分析 ---
+let totalConsecutivePairs = 0;
+let consecutiveCounts = [0, 0, 0, 0, 0]; // 0〜4組の連番の数を記録
+
+numbers.forEach(num => {
+  let count = 0;
+  for (let i = 0; i < 3; i++) {
+    const a = parseInt(num[i]);
+    const b = parseInt(num[i + 1]);
+    if (Math.abs(a - b) === 1) {
+      count++;
+    }
+  }
+  totalConsecutivePairs += count;
+  consecutiveCounts[count]++;
+});
+
+detailText += `\n連番（隣り合う数字）傾向：\n`;
+detailText += `・0組：${consecutiveCounts[0]} 回\n`;
+detailText += `・1組：${consecutiveCounts[1]} 回\n`;
+detailText += `・2組：${consecutiveCounts[2]} 回\n`;
+detailText += `・3組：${consecutiveCounts[3]} 回\n`;
+       
         details.textContent = detailText;
       };
 
