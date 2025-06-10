@@ -121,22 +121,28 @@
           detailText += "\n";
         }
 
-        // --- スライド差分（直近2件） ---
-        const sourceNumbers = (mode === "recent") ? numbers : allNumbers;
-        if (sourceNumbers.length >= 2) {
-          const prev = sourceNumbers[sourceNumbers.length - 2];
-          const curr = sourceNumbers[sourceNumbers.length - 1];
-          detailText += "\n🔁 スライド差（直近2件）：\n";
-          detailText += `前回：${prev}\n`;
-          detailText += `今回：${curr}\n`;
-          detailText += "差分：";
+        // --- スライド差分（最新20件と全体） ---
+function getSlideDiffText(nums, label) {
+  if (nums.length < 2) return `${label}：データ不足\n`;
+  const prev = nums[nums.length - 2];
+  const curr = nums[nums.length - 1];
+  let slideText = `\n🔁 ${label}のスライド差：\n`;
+  slideText += `前回：${prev}\n`;
+  slideText += `今回：${curr}\n`;
+  slideText += "差分：";
 
-          for (let i = 0; i < 4; i++) {
-            const diff = (parseInt(curr[i]) - parseInt(prev[i]) + 10) % 10;
-            const slide = (diff <= 5) ? diff : diff - 10;
-            detailText += (slide >= 0 ? "+" : "") + slide + " ";
-          }
-          detailText += "\n";
+  for (let i = 0; i < 4; i++) {
+    const diff = (parseInt(curr[i]) - parseInt(prev[i]) + 10) % 10;
+    const slide = (diff <= 5) ? diff : diff - 10;
+    slideText += (slide >= 0 ? "+" : "") + slide + " ";
+  }
+
+  return slideText + "\n";
+}
+
+detailText += getSlideDiffText(numbers, "最新20件");
+detailText += getSlideDiffText(allNumbers, "全体");
+
         }
 
         result.innerHTML = "予想完了✨";
