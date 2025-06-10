@@ -98,6 +98,30 @@ function predict() {
     });
 
     // --- スライド差分：最新20件 or 全体 ---
+        // --- 各桁ごとの出やすい数字 ---
+    let positionStats = [ {}, {}, {}, {} ]; // 各桁（千, 百, 十, 一）
+
+    numbers.forEach(num => {
+      for (let i = 0; i < 4; i++) {
+        const digit = num[i];
+        if (!positionStats[i][digit]) {
+          positionStats[i][digit] = 0;
+        }
+        positionStats[i][digit]++;
+      }
+    });
+
+    const posName = ["千", "百", "十", "一"];
+    detailText += "\n🧩 各桁ごとの出やすい数字：\n";
+    for (let i = 0; i < 4; i++) {
+      detailText += `【${posName[i]}の位】\n`;
+      const sorted = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
+      sorted.forEach(([digit, count]) => {
+        detailText += `・${digit}：${count} 回\n`;
+      });
+      detailText += "\n";
+    }
+
     const sourceNumbers = (mode === "recent") ? numbers : allNumbers;
     if (sourceNumbers.length >= 2) {
       const prev = sourceNumbers[sourceNumbers.length - 2];
