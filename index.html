@@ -17,7 +17,7 @@
       font-size: 28px;
     }
     button {
-      background-color: #c1a57b;
+      background-color: #5a4635;
       color: #5a4635;
       padding: 10px 20px;
       border: none;
@@ -51,9 +51,9 @@
   <div id="result">ここに予測が表示されるよ</div>
   <div id="details"></div>
   <img src="neco.png" alt="にゃんこ">
-    <script>
-<script>
-function predict() {
+
+  <script>
+    function predict() {
       const fileInput = document.getElementById("csvFile");
       const mode = document.querySelector('input[name="mode"]:checked').value;
       const result = document.getElementById("result");
@@ -92,7 +92,7 @@ function predict() {
           }
         });
         const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-        let detailText = "🎲 よく出た数字ランキング：\n";
+        let detailText = "よく出た数字ランキング：\n";
         sorted.forEach(([digit, freq]) => {
           detailText += `「${digit}」が ${freq} 回\n`;
         });
@@ -111,7 +111,7 @@ function predict() {
         });
 
         const posName = ["千", "百", "十", "一"];
-        detailText += "\n🧩 各桁ごとの出やすい数字：\n";
+        detailText += "\n各桁ごとの出やすい数字：\n";
         for (let i = 0; i < 4; i++) {
           detailText += `【${posName[i]}の位】\n`;
           const sorted = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
@@ -139,7 +139,7 @@ function predict() {
           detailText += "\n";
         }
 
-        result.innerHTML = "予想完了！✨";
+        result.innerHTML = "予想完了✨";
         details.textContent = detailText;
       };
 
