@@ -146,6 +146,29 @@
           }
         });
 
+        // --- スライド分析 ---
+let slidePatterns = {};
+for (let i = 1; i < numbers.length; i++) {
+  const prev = numbers[i - 1];
+  const curr = numbers[i];
+  const slide = [];
+
+  for (let j = 0; j < 4; j++) {
+    const diff = parseInt(curr[j]) - parseInt(prev[j]);
+    slide.push(diff);
+  }
+
+  const pattern = slide.join(",");
+  slidePatterns[pattern] = (slidePatterns[pattern] || 0) + 1;
+}
+
+// スライド結果をソートして表示用にまとめる
+detailText += `\nスライド分析（前回との差）:\n`;
+const sortedSlides = Object.entries(slidePatterns).sort((a, b) => b[1] - a[1]);
+sortedSlides.forEach(([pattern, count]) => {
+  detailText += `${pattern} → ${count} 回\n`;
+});
+
         detailText += "\n⏳ 数字の未出現日数：\n";
         for (let digit = 0; digit <= 9; digit++) {
           const d = digit.toString();
@@ -212,31 +235,7 @@
           }
         }
 
-        result.innerHTML += `<br>🔮 スライド傾向予測 👉 <strong style="font-size:20px;">${slidePrediction}</strong> 🌠`;
-// --- スライド分析 ---
-let slidePatterns = {};
-for (let i = 1; i < numbers.length; i++) {
-  const prev = numbers[i - 1];
-  const curr = numbers[i];
-  const slide = [];
-
-  for (let j = 0; j < 4; j++) {
-    const diff = parseInt(curr[j]) - parseInt(prev[j]);
-    slide.push(diff);
-  }
-
-  const pattern = slide.join(",");
-  slidePatterns[pattern] = (slidePatterns[pattern] || 0) + 1;
-}
-
-// スライド結果をソートして表示用にまとめる
-detailText += `\nスライド分析（前回との差）:\n`;
-const sortedSlides = Object.entries(slidePatterns).sort((a, b) => b[1] - a[1]);
-sortedSlides.forEach(([pattern, count]) => {
-  detailText += `${pattern} → ${count} 回\n`;
-});
-
-        
+        result.innerHTML += `<br>🔮 スライド傾向予測 👉 <strong style="font-size:20px;">${slidePrediction}</strong> 🌠`;       
         details.textContent = detailText;
       
       };
