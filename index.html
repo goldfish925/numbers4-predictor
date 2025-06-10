@@ -250,6 +250,31 @@ for (let i = 0; i < 4; i++) {
 
 result.innerHTML += `<br>スライド傾向予測 👉 <strong style="font-size:20px;">${slidePrediction}</strong> 🌠`;
 
+// --- 桁別出現数 ---
+const positionStats = [
+  Array(10).fill(0), // 千の位（1桁目）
+  Array(10).fill(0), // 百の位（2桁目）
+  Array(10).fill(0), // 十の位（3桁目）
+  Array(10).fill(0)  // 一の位（4桁目）
+];
+
+numbers.forEach(num => {
+  for (let i = 0; i < 4; i++) {
+    const digit = parseInt(num[i]);
+    if (!isNaN(digit)) {
+      positionStats[i][digit]++;
+    }
+  }
+});
+
+detailText += `\n桁ごとの数字出現数：\n`;
+["千", "百", "十", "一"].forEach((label, i) => {
+  detailText += `${label}の位：`;
+  positionStats[i].forEach((count, digit) => {
+    if (count > 0) detailText += `${digit}(${count}) `;
+  });
+  detailText += "\n";
+});
 
         
         details.textContent = detailText;
