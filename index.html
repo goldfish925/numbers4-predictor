@@ -181,6 +181,28 @@ sortedSlides.forEach(([pattern, count]) => {
   detailText += `${pattern} → ${count} 回\n`;
 });
 
+        // --- スライド分析（各桁ごとの変化） ---
+        let slideDetails = "\nスライド分析（前回との差）：\n";
+
+        const digitSlides = [];
+
+        for (let i = 1; i < numbers.length; i++) {
+          const prev = numbers[i - 1];
+          const curr = numbers[i];
+          const diffs = [];
+
+          for (let j = 0; j < 4; j++) {
+            const diff = parseInt(curr[j], 10) - parseInt(prev[j], 10);
+            diffs.push(diff);
+          }
+
+          digitSlides.push(diffs);
+          slideDetails += `#${i}: ${prev} → ${curr} ｜ 差分: ${diffs.map(d => (d >= 0 ? "+" + d : d)).join(", ")}\n`;
+        }
+
+        detailText += slideDetails;
+
+        
         details.textContent = detailText;
       };
 
