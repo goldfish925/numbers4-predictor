@@ -223,8 +223,7 @@ sortedSlide.slice(0, 5).forEach(([pattern, count]) => {
   slideText += `${pattern.trim()}：${count} 回\n`;
 });
 detailText += slideText;
-};
-          
+         
 // === スライド傾向予測 ===
 
         // --- 各桁ごとの出現傾向 ---
@@ -275,6 +274,8 @@ for (let i = 0; i < 4; i++) {
 
 result.innerHTML += `<br>スライド傾向予測 👉 <strong style="font-size:20px;">${slidePrediction}</strong> 🌠`;
 
+        details.textContent = detailText;
+        
 // --- 桁別出現数 ---
 const positionStats = [
   Array(10).fill(0), // 千の位（1桁目）
