@@ -52,4 +52,31 @@
   <div id="details"></div>
   <img src="neco.png" alt="にゃんこ">
     <script>
+      // --- 数字の頻度集計 ---
+const numbers = lines
+  .map(line => {
+    const cols = line.trim().split(",");
+    const raw = cols[2] || "";
+    const match = raw.match(/\d{4}/); // 例: "=""1234""" から 1234 を抽出
+    return match ? match[0] : null;
+  })
+  .filter(Boolean); // null や空文字を除外
+
+const count = {};
+numbers.forEach(num => {
+  for (const digit of num) {
+    count[digit] = (count[digit] || 0) + 1;
+  }
+});
+
+const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
+
+// 結果表示
+let detailText = "🎲 よく出た数字ランキング：\n";
+sorted.forEach(([digit, freq]) => {
+  detailText += `「${digit}」が ${freq} 回\n`;
+});
+
+details.textContent = detailText;
+
       
