@@ -231,9 +231,14 @@ const topPattern = sortedSlide[0] ? sortedSlide[0][0].trim().split(" ") : [];
 let slidePrediction = '';
 for (let i = 0; i < 4; i++) {
   const diff = parseInt(topPattern[i], 10);
-  let digit = (parseInt(latestNumber[i]) + diff + 10) % 10;
-  slidePrediction += digit.toString();
-}
+  const currentDigit = parseInt(latestNumber[i], 10);
+
+  if (isNaN(diff) || isNaN(currentDigit)) {
+    slidePrediction += "❓";  // わからないときは記号で埋める
+  } else {
+    const digit = (currentDigit + diff + 10) % 10;
+    slidePrediction += digit.toString();
+  }
 
 result.innerHTML += `<br>スライド傾向予測 👉 <strong style="font-size:20px;">${slidePrediction}</strong> 🌠`;
 
