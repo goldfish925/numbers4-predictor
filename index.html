@@ -289,7 +289,30 @@ for (let i = 0; i < 4; i++) {
 }
 
 result.innerHTML += `<br>桁ごと予測 👉 <strong style="font-size:20px;">${positionPrediction}</strong> 🐾`;
-    
+
+// --- 出現していない数字で予測 ---
+const unappearedDigits = [];
+for (let d = 0; d <= 9; d++) {
+  if (!count[d]) unappearedDigits.push(d.toString());
+}
+
+let reversePrediction = "----";
+if (unappearedDigits.length >= 4) {
+  reversePrediction = unappearedDigits.slice(0, 4).join("");
+} else {
+  // 足りない場合は少ない順に補う
+  const remaining = Object.entries(count)
+    .sort((a, b) => a[1] - b[1])
+    .map(([digit]) => digit)
+    .filter(d => !unappearedDigits.includes(d));
+
+  const candidates = unappearedDigits.concat(remaining).slice(0, 4);
+  reversePrediction = candidates.join("");
+}
+
+result.innerHTML += `<br>未出現予測 👉 <strong style="font-size:20px;">${reversePrediction}</strong> 🌀`;
+
+        
         details.textContent = detailText;
       };
 
