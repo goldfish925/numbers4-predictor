@@ -54,101 +54,96 @@
     <script>
 <script>
 function predict() {
-  const fileInput = document.getElementById("csvFile");
-  const mode = document.querySelector('input[name="mode"]:checked').value;
-  const result = document.getElementById("result");
-  const details = document.getElementById("details");
+      const fileInput = document.getElementById("csvFile");
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+      const result = document.getElementById("result");
+      const details = document.getElementById("details");
 
-  const file = fileInput.files[0];
-  if (!file) {
-    alert("CSVファイルを選んでね！");
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    const text = e.target.result;
-    const lines = text.trim().split("\n").slice(1); // ヘッダー除外
-
-    let numbers = lines
-      .map(line => {
-        const cols = line.split(",");
-        const raw = cols[2] || "";
-        const match = raw.match(/\d{4}/);
-        return match ? match[0] : null;
-      })
-      .filter(Boolean);
-
-    const allNumbers = [...numbers]; // 全体用コピー
-    if (mode === "recent") {
-      numbers = numbers.slice(-20);
-    }
-
-    // --- よく出た数字 ---
-    const count = {};
-    numbers.forEach(num => {
-      for (const digit of num) {
-        count[digit] = (count[digit] || 0) + 1;
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("CSVファイルを選んでね！");
+        return;
       }
-    });
-    const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-    let detailText = "よく出た数字ランキング：\n";
-    sorted.forEach(([digit, freq]) => {
-      detailText += `「${digit}」が ${freq} 回\n`;
-    });
 
-    // --- スライド差分：最新20件 or 全体 ---
-        // --- 各桁ごとの出やすい数字 ---
-    let positionStats = [ {}, {}, {}, {} ]; // 各桁（千, 百, 十, 一）
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const text = e.target.result;
+        const lines = text.trim().split("\n").slice(1); // ヘッダー除外
 
-    numbers.forEach(num => {
-      for (let i = 0; i < 4; i++) {
-        const digit = num[i];
-        if (!positionStats[i][digit]) {
-          positionStats[i][digit] = 0;
+        let numbers = lines
+          .map(line => {
+            const cols = line.split(",");
+            const raw = cols[2] || "";
+            const match = raw.match(/\d{4}/);
+            return match ? match[0] : null;
+          })
+          .filter(Boolean);
+
+        const allNumbers = [...numbers]; // 全体用コピー
+        if (mode === "recent") {
+          numbers = numbers.slice(-20);
         }
-        positionStats[i][digit]++;
-      }
-    });
 
-    const posName = ["千", "百", "十", "一"];
-    detailText += "\n🧩 各桁ごとの出やすい数字：\n";
-    for (let i = 0; i < 4; i++) {
-      detailText += `【${posName[i]}の位】\n`;
-      const sorted = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
-      sorted.forEach(([digit, count]) => {
-        detailText += `・${digit}：${count} 回\n`;
-      });
-      detailText += "\n";
-    }
+        // --- よく出た数字 ---
+        const count = {};
+        numbers.forEach(num => {
+          for (const digit of num) {
+            count[digit] = (count[digit] || 0) + 1;
+          }
+        });
+        const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
+        let detailText = "🎲 よく出た数字ランキング：\n";
+        sorted.forEach(([digit, freq]) => {
+          detailText += `「${digit}」が ${freq} 回\n`;
+        });
 
-    const sourceNumbers = (mode === "recent") ? numbers : allNumbers;
-    if (sourceNumbers.length >= 2) {
-      const prev = sourceNumbers[sourceNumbers.length - 2];
-      const curr = sourceNumbers[sourceNumbers.length - 1];
-      detailText += "\nスライド差（直近2件）：\n";
-      detailText += `前回：${prev}\n`;
-      detailText += `今回：${curr}\n`;
-      detailText += "差分：";
+        // --- 各桁ごとの出やすい数字 ---
+        let positionStats = [ {}, {}, {}, {} ]; // 各桁（千, 百, 十, 一）
 
-      for (let i = 0; i < 4; i++) {
-        const diff = (parseInt(curr[i]) - parseInt(prev[i]) + 10) % 10;
-        const slide = (diff <= 5) ? diff : diff - 10;
-        detailText += (slide >= 0 ? "+" : "") + slide + " ";
-      }
+        numbers.forEach(num => {
+          for (let i = 0; i < 4; i++) {
+            const digit = num[i];
+            if (!positionStats[i][digit]) {
+              positionStats[i][digit] = 0;
+            }
+            positionStats[i][digit]++;
+          }
+        });
 
-      detailText += "\n";
-    }
+        const posName = ["千", "百", "十", "一"];
+        detailText += "\n🧩 各桁ごとの出やすい数字：\n";
+        for (let i = 0; i < 4; i++) {
+          detailText += `【${posName[i]}の位】\n`;
+          const sorted = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
+          sorted.forEach(([digit, count]) => {
+            detailText += `・${digit}：${count} 回\n`;
+          });
+          detailText += "\n";
+        }
 
-    result.innerHTML = "予想完了";
-    details.textContent = detailText;
-  };
+        // --- スライド差分（直近2件） ---
+        const sourceNumbers = (mode === "recent") ? numbers : allNumbers;
+        if (sourceNumbers.length >= 2) {
+          const prev = sourceNumbers[sourceNumbers.length - 2];
+          const curr = sourceNumbers[sourceNumbers.length - 1];
+          detailText += "\n🔁 スライド差（直近2件）：\n";
+          detailText += `前回：${prev}\n`;
+          detailText += `今回：${curr}\n`;
+          detailText += "差分：";
 
-  reader.readAsText(file);
-}
-</script>
+          for (let i = 0; i < 4; i++) {
+            const diff = (parseInt(curr[i]) - parseInt(prev[i]) + 10) % 10;
+            const slide = (diff <= 5) ? diff : diff - 10;
+            detailText += (slide >= 0 ? "+" : "") + slide + " ";
+          }
+          detailText += "\n";
+        }
 
-      reader.readAsText(file, "UTF-8");
+        result.innerHTML = "予想完了！✨";
+        details.textContent = detailText;
+      };
+
+      reader.readAsText(file);
     }
   </script>
 </body>
