@@ -2,57 +2,49 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>NUMBERS4予想</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Numbers4予測ツール🐾</title>
   <style>
     body {
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-      background-color: #ffffff;
-      color: #c1a57b;
-      text-align: center;
+      font-family: 'Arial', sans-serif;
       padding: 20px;
+      background: #fffafc;
+      color: #333;
     }
     h1 {
-      font-size: 28px;
+      font-size: 24px;
+      color: #8b5e83;
     }
-    button {
-      background-color: #c1a57b;
-      color: #5a4635;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 10px;
+    table {
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      width: 100%;
     }
-    #result, #details {
-      margin-top: 20px;
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: center;
     }
-    #details {
-      font-size: 14px;
-      white-space: pre-line;
-      color: #7c6240;
-    }
-    img {
-      max-width: 150px;
-      margin-top: 20px;
+    th {
+      background-color: #f7e8f0;
     }
   </style>
 </head>
 <body>
-  <h1>NUMBERS4予想</h1>
+  <h1>Numbers4予測ツール🐾</h1>
 
-  <input type="file" id="csvFile" accept=".csv"><br>
-  <label><input type="radio" name="mode" value="recent" checked> 最新20件</label>
-  <label><input type="radio" name="mode" value="all"> 全体</label><br>
-  <button onclick="predict()">予測してみるね</button>
+  <input type="file" id="csvFile" accept=".csv" />
+  <br /><br />
+  <label><input type="radio" name="mode" value="recent" checked /> 最新20件</label>
+  <label><input type="radio" name="mode" value="all" /> 全体</label>
+  <br /><br />
+  <button onclick="predict()">予測する！</button>
 
-  <div id="result">ここに予測が表示されるよ</div>
+  <p id="result"></p>
   <div id="details"></div>
-  <img src="neco.png" alt="にゃんこ">
 
-  function getSlideDiffTable(nums, label) {
+  <script>
+    function getSlideDiffTable(nums, label) {
       if (nums.length < 2) return `<p>${label}：データ不足</p>`;
       let table = `<h3>🔁 ${label}のスライド差（表）</h3>`;
       table += `
