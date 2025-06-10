@@ -60,7 +60,7 @@
       const details = document.getElementById("details");
 
       if (!file) {
-        result.textContent = "ファイルを選んでにゃ";
+        result.textContent = "ファイルを選んでね";
         return;
       }
 
@@ -95,9 +95,9 @@
           if (!predictions.includes(pick)) predictions.push(pick);
         }
 
-        result.innerHTML = `未来の数字たちにゃ！<br><strong style="font-size:24px;">${predictions.join(" / ")}</strong> ✨`;
+        result.innerHTML = `未来の数字たち<br><strong style="font-size:24px;">${predictions.join(" / ")}</strong> ✨`;
 
-        let detailText = "よく出た数字ランキングにゃ：\n";
+        let detailText = "よく出た数字ランキングだよ：\n";
         sorted.forEach(([digit, freq]) => {
           detailText += `「${digit}」が ${freq} 回\n`;
         });
