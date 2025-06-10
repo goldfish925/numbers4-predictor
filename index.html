@@ -312,6 +312,38 @@ if (unappearedDigits.length >= 4) {
 
 result.innerHTML += `<br>未出現予測 👉 <strong style="font-size:20px;">${reversePrediction}</strong> 🌀`;
 
+        // --- ダブル・トリプル分析 ---
+let singleCount = 0;
+let doubleCount = 0;
+let tripleCount = 0;
+let quadCount = 0;
+
+numbers.forEach(num => {
+  const freq = {};
+  for (let digit of num) {
+    freq[digit] = (freq[digit] || 0) + 1;
+  }
+  const counts = Object.values(freq).sort((a, b) => b - a);
+
+  if (counts[0] === 4) {
+    quadCount++;
+  } else if (counts[0] === 3) {
+    tripleCount++;
+  } else if (counts[0] === 2 && counts.length === 2) {
+    doubleCount++; // 1122 など
+  } else if (counts[0] === 2) {
+    doubleCount++;
+  } else {
+    singleCount++;
+  }
+});
+
+detailText += `\nゾロ目傾向（過去${numbers.length}件）:\n`;
+detailText += `・全部バラバラ（シングル）：${singleCount} 回\n`;
+detailText += `・同じ数字2つ（ダブル）：${doubleCount} 回\n`;
+detailText += `・同じ数字3つ（トリプル）：${tripleCount} 回\n`;
+detailText += `・全部同じ（フォー・オブ・ア・カインド）：${quadCount} 回\n`;
+
         
         details.textContent = detailText;
       };
