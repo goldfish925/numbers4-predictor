@@ -2,48 +2,56 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>Numbers4予想</title>
+  <meta charset="UTF-8">
+  <title>NUMBERS4予想</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+      background-color: #ffffff;
+      color: #c1a57b;
+      text-align: center;
       padding: 20px;
-      background: ##ffffff;
-      color: #333;
     }
     h1 {
-      font-size: 24px;
-      color: #cc9966;
+      font-size: 28px;
     }
-    table {
-      border-collapse: collapse;
-      margin-bottom: 20px;
-      width: 100%;
+    button {
+      background-color: #c1a57b;
+      color: #5a4635;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
     }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 6px 8px;
-      text-align: center;
+    #result, #details {
+      margin-top: 20px;
     }
-    th {
-      background-color: #cc9966;
+    #details {
+      font-size: 14px;
+      white-space: pre-line;
+      color: #7c6240;
+    }
+    img {
+      max-width: 150px;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>Numbers4予想</h1>
+  <h1>NUMBERS4予想</h1>
 
-  <input type="file" id="csvFile" accept=".csv" />
-  <br /><br />
-  <label><input type="radio" name="mode" value="recent" checked /> 最新20件</label>
-  <label><input type="radio" name="mode" value="all" /> 全体</label>
-  <br /><br />
-  <button onclick="predict()">予測する！</button>
+  <input type="file" id="csvFile" accept=".csv"><br>
+  <label><input type="radio" name="mode" value="recent" checked> 最新20件</label>
+  <label><input type="radio" name="mode" value="all"> 全体</label><br>
+  <button onclick="predict()">予測してみるね</button>
 
-  <p id="result"></p>
+  <div id="result">ここに予測が表示されるよ</div>
   <div id="details"></div>
-<img src="neco.png" alt="にゃんこ">　
-  <script>
+  <img src="neco.png" alt="にゃんこ">
+
     <script>
   function generateSlideTable(nums, label) {
     if (nums.length < 2) return `${label}：データ不足\n`;
