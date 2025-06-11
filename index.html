@@ -65,7 +65,7 @@
   <div id="details"></div>
   <img src="neco.png" alt="にゃんこ">
 
-    <script>
+  <script>
 // 🌪️ 風車差分（ステップ1）用関数
 function getWindmillDiffText(numbers) {
   if (numbers.length < 2) return "";
@@ -100,7 +100,9 @@ function getWindmillDiffText(numbers) {
   }
   html += `</pre></details>`;
   return html;
-}  
+}
+</script>
+
     if (nums.length < 2) return `${label}：データ不足\n`;
     let html = `<h3>${label}のスライド差分</h3>`;
     html += `<table border="1" style="border-collapse: collapse;"><tr><th>#</th><th>前回</th><th>今回</th><th>差分</th></tr>`;
