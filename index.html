@@ -6,20 +6,39 @@
   <title>NUMBERS4予想</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-      table {
-    border-collapse: collapse;
-    margin: 1em auto; /* ←中央寄せ */
-    width: auto;
-  }
-  th, td {
-    border: 1px solid #ccc;
-    padding: 0.4em 0.8em;
-    text-align: center;
-  }
-  th {
-    background-color: #f6f6f6;
-  }  
-    </style>
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+      background-color: #ffffff;
+      color: #c1a57b;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 28px;
+    }
+    button {
+      background-color: #c1a57b;
+      color: #5a4635;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #result, #details {
+      margin-top: 20px;
+    }
+    #details {
+      font-size: 14px;
+      white-space: pre-line;
+      color: #7c6240;
+    }
+    img {
+      max-width: 150px;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
   <h1>NUMBERS4予想</h1>
@@ -32,6 +51,7 @@
   <div id="result">ここに予測が表示されるよ</div>
   <div id="details"></div>
   <img src="neco.png" alt="にゃんこ">
+
 
   <script>
   function generateSlideTable(nums, label) {
