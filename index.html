@@ -75,7 +75,31 @@
   };
   
   function generateSlideTable(nums, label) {
-    
+    function getWindmillDiffText(nums) {
+  if (nums.length < 2) return "風車差分：データ不足\n";
+  let text = `<details><summary>🌪️ 風車差分（千・百・十・一の各桁）</summary><pre>`;
+  
+  for (let i = 1; i < nums.length; i++) {
+    const prev = nums[i - 1];
+    const curr = nums[i];
+    text += `\n[${i}] ${prev} → ${curr}\n差分：`;
+
+    for (let pos = 0; pos < 4; pos++) {
+      const map = windmillMaps[pos];
+      const prevIdx = map.indexOf(prev[pos]);
+      const currIdx = map.indexOf(curr[pos]);
+      let diff = currIdx - prevIdx;
+      if (diff > 5) diff -= 10;
+      if (diff < -5) diff += 10;
+      text += `${["千","百","十","一"][pos]}:${diff >= 0 ? "+" : ""}${diff} `;
+    }
+    text += "\n";
+  }
+
+  text += "</pre></details>";
+  return text;
+}
+   
     if (nums.length < 2) return `${label}：データ不足\n`;
     let html = `<h3>${label}のスライド差分</h3>`;
     html += `<table border="1" style="border-collapse: collapse;"><tr><th>#</th><th>前回</th><th>今回</th><th>差分</th></tr>`;
@@ -421,6 +445,8 @@ if (numbers.length >= 4) {
 
       result.innerHTML = "予想完了✨";
       details.innerHTML = detailText;
+      details.innerHTML = detailText.replace(/\n/g, "<br>");
+details.innerHTML += getWindmillDiffText(numbers);
     };
 
     reader.readAsText(file);
