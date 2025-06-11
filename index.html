@@ -6,6 +6,22 @@
   <title>NUMBERS4予想</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    <style>
+  table {
+    border-collapse: collapse;
+    margin: 1em auto; /* ←中央寄せ */
+    width: auto;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 0.4em 0.8em;
+    text-align: center;
+  }
+  th {
+    background-color: #f6f6f6;
+  }
+</style>
+
     body {
       font-family: "Hiragino Kaku Gothic ProN", sans-serif;
       background-color: #ffffff;
@@ -166,8 +182,7 @@ if (mode === "recent") {
   detailText += generateSlideTable(numbers, "最新20件");
 } else {
   // 表と折りたたみ両方表示（全体モード）
-  detailText += generateSlideTable(numbers, "最新20件");
-  detailText += getSlideDiffTextAll(allNumbers, "全体");
+    detailText += getSlideDiffTextAll(allNumbers, "全体");
 }
 
       // スライド差分からの予測（直近3件）
