@@ -89,9 +89,10 @@ const rows = lines.slice(1);
 const parsed = rows.map(row => {
   return {
     date: new Date(row[0]),
-    number: row[2].replace(/[^0-9]/g, '').padStart(4, '0')
+    number: row[2].replace(/[^0-9]/g, '').padStart(4, '0')  // 数字だけ取り出して4桁に
   };
 });
+
 
 // 最新順（降順）に並び替え
 parsed.sort((a, b) => b.date - a.date);
