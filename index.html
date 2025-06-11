@@ -53,84 +53,90 @@
   <img src="neco.png" alt="にゃんこ">
 
   <script>
-    function predict() {
-      const file = document.getElementById("csvFile").files[0];
-      const details = document.getElementById("details");
+function predict() {
+  const file = document.getElementById("csvFile").files[0];
+  const details = document.getElementById("details");
 
-      if (!file) {
-        details.textContent = "CSVファイルを選んでね！";
-        return;
+  if (!file) {
+    details.textContent = "CSVファイルを選んでね！";
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const text = e.target.result;
+    const lines = text.split("\n").filter(line => line.trim() !== "");
+    const numbers = lines
+      .map(line => {
+        const cols = line.trim().split(",");
+        const raw = cols[2] || "";
+        const match = raw.match(/\d{4}/); 
+        return match ? match[0] : null;
+      })
+      .filter(Boolean);
+
+    // よく出た数字ランキング
+    const count = {};
+    numbers.forEach(num => {
+      for (const digit of num) {
+        count[digit] = (count[digit] || 0) + 1;
       }
-const slidePatterns = {};
-for (let i = 1; i < numbers.length; i++) {
-  const prev = numbers[i - 1];
-  const curr = numbers[i];
-  let pattern = "";
-  for (let j = 0; j < 4; j++) {
-    const diff = (parseInt(curr[j]) - parseInt(prev[j]) + 10) % 10;
-    const slide = (diff <= 5) ? diff : diff - 10; 
-    pattern += `${slide} `;
-  }
-  pattern = pattern.trim();
-  slidePatterns[pattern] = (slidePatterns[pattern] || 0) + 1;
-}
-const sortedSlide = Object.entries(slidePatterns).sort((a, b) => b[1] - a[1]);
-let slideText = "\n🌀 スライド傾向パターン（頻出順）：\n";
-sortedSlide.slice(0, 5).forEach(([pattern, count]) => {
-  slideText += `・${pattern}：${count} 回\n`;
-});
-const latestNumber = numbers[numbers.length - 1];
-const topPatternRaw = sortedSlide[0] ? sortedSlide[0][0].trim() : "";
-const topPattern = topPatternRaw.split(/\s+/);
-while (topPattern.length < 4) topPattern.push("0");
+    });
 
-let slidePrediction = "";
-for (let i = 0; i < 4; i++) {
-  const diff = parseInt(topPattern[i], 10);
-  const currentDigit = parseInt(latestNumber[i], 10);
-  if (isNaN(diff) || isNaN(currentDigit)) {
-    slidePrediction += "❓";
-  } else {
-    const digit = (currentDigit + diff + 10) % 10;
-    slidePrediction += digit.toString();
-  }
-}
+    const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
+    let detailText = "よく出た数字ランキング：\n";
+    sorted.forEach(([digit, freq]) => {
+      detailText += `「${digit}」が ${freq} 回\n`;
+    });
 
-slideText += `\n🔮 スライド傾向予測 👉 <strong style="font-size:20px;">${slidePrediction}</strong> 🌠\n`;
-details.innerHTML = details.textContent.replace(/\n/g, "<br>") + "<br>" + slideText;
-
-      
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const text = e.target.result;
-        const lines = text.split("\n").filter(line => line.trim() !== "");
-        const numbers = lines
-          .map(line => {
-            const cols = line.trim().split(",");
-            const raw = cols[2] || "";
-            const match = raw.match(/\d{4}/); 
-            return match ? match[0] : null;
-          })
-          .filter(Boolean); // null や空文字を除外
-
-        const count = {};
-        numbers.forEach(num => {
-          for (const digit of num) {
-            count[digit] = (count[digit] || 0) + 1;
-          }
-        });
-
-        const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-        let detailText = "よく出た数字ランキング：\n";
-        sorted.forEach(([digit, freq]) => {
-          detailText += `「${digit}」が ${freq} 回\n`;
-        });
-
-        details.textContent = detailText;
-      };
-
-      reader.readAsText(file, "UTF-8");
+    // 🌀 スライド傾向パターン
+    const slidePatterns = {};
+    for (let i = 1; i < numbers.length; i++) {
+      const prev = numbers[i - 1];
+      const curr = numbers[i];
+      let pattern = "";
+      for (let j = 0; j < 4; j++) {
+        const diff = (parseInt(curr[j]) - parseInt(prev[j]) + 10) % 10;
+        const slide = (diff <= 5) ? diff : diff - 10;
+        pattern += `${slide} `;
+      }
+      pattern = pattern.trim();
+      slidePatterns[pattern] = (slidePatterns[pattern] || 0) + 1;
     }
-  </script>
+
+    const sortedSlide = Object.entries(slidePatterns).sort((a, b) => b[1] - a[1]);
+    let slideText = "\n🌀 スライド傾向パターン（頻出順）：\n";
+    sortedSlide.slice(0, 5).forEach(([pattern, count]) => {
+      slideText += `・${pattern}：${count} 回\n`;
+    });
+
+    // 🔮 スライド傾向予測
+    const latestNumber = numbers[numbers.length - 1];
+    const topPatternRaw = sortedSlide[0] ? sortedSlide[0][0].trim() : "";
+    const topPattern = topPatternRaw.split(/\s+/);
+    while (topPattern.length < 4) topPattern.push("0");
+
+    let slidePrediction = "";
+    for (let i = 0; i < 4; i++) {
+      const diff = parseInt(topPattern[i], 10);
+      const currentDigit = parseInt(latestNumber[i], 10);
+      if (isNaN(diff) || isNaN(currentDigit)) {
+        slidePrediction += "❓";
+      } else {
+        const digit = (currentDigit + diff + 10) % 10;
+        slidePrediction += digit.toString();
+      }
+    }
+
+    slideText += `\n🔮 スライド傾向予測 👉 <strong style="font-size:20px;">${slidePrediction}</strong> 🌠\n`;
+
+    // 結果を表示
+    details.innerHTML = detailText.replace(/\n/g, "<br>") + "<br>" + slideText;
+  };
+
+  reader.readAsText(file, "UTF-8");
+}
+</script>
+
 </body>
 </html>
