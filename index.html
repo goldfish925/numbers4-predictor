@@ -86,9 +86,13 @@ function predict() {
 const rows = lines.slice(1);
 
 // 日付と抽選数字を抽出（列は [日付, 回数, 数字] 想定）
-const parsed = rows.map(row => {
+const parsed = rows.map((row, idx) => {
+  const rawDate = row[0].replace(/["年月日]/g, '/').replace(/\/\//g, '/').replace(/\/$/, '');
+  const parsedDate = new Date(rawDate);
+  console.log(`行${idx + 1}:`, row[0], '→', rawDate, '→', parsedDate);
+
   return {
-    date: new Date(row[0].replace(/-/g, '/')),  // ← 日付パース補正
+    date: parsedDate,
     number: row[2].replace(/[^0-9]/g, '').padStart(4, '0')
   };
 });
