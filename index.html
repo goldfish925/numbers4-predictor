@@ -101,7 +101,10 @@ for (let i = 0; i < rows.length; i += 12) {
 parsed.sort((a, b) => b.date - a.date);
 
 let usedNumbers;
-if (mode === 'month') {
+
+if (mode === 'recent') {
+  usedNumbers = parsed.slice(0, 20).map(p => p.number);
+} else if (mode === 'month') {
   const oneMonthAgo = new Date();
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
@@ -114,6 +117,7 @@ if (mode === 'month') {
     return;
   }
 }
+
 
 
     // 予測ロジック（例：出現回数上位4個をランダムに並べて予測）
