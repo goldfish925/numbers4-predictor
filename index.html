@@ -79,8 +79,6 @@ function predict() {
 
     const rows = lines.slice(1);
     const parsed = [];
-const thirtyDaysAgo = new Date();
-thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
 for (let i = 0; i < rows.length; i += 12) {
   const dateStr = rows[i + 1][0].trim();
@@ -88,21 +86,27 @@ for (let i = 0; i < rows.length; i += 12) {
 
   const dateObj = new Date(dateStr.replace(/-/g, '/'));
 
-  if (dateObj >= thirtyDaysAgo) {
-    parsed.push({
-      date: dateObj,
-      number: numberStr
-    });
-  }
+  parsed.push({
+    date: dateObj,
+    number: numberStr
+  });
 }
 
+// 🔽 日付で新しい順にソート
+parsed.sort((a, b) => b.date - a.date);
 
-if (parsed.length < 2) {
+// ⏱ 30日以内に絞る
+const thirtyDaysAgo = new Date();
+thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+const recentParsed = parsed.filter(p => p.date >= thirtyDaysAgo);
+
+if (recentParsed.length < 2) {
   alert("直近30日分のデータが少なすぎます！");
   return;
 }
 
-const usedNumbers = parsed.map(p => p.number);
+const usedNumbers = recentParsed.map(p => p.number);
 
     // 🔢 頻出数字集計 → 予測
     const digitCount = Array(10).fill(0);
