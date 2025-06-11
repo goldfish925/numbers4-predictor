@@ -146,6 +146,15 @@
 
       const posName = ["千", "百", "十", "一"];
       detailText += "\n各桁ごとの出やすい数字：\n";
+        for (let i = 0; i < 4; i++) {
+        detailText += `【${posName[i]}の位】\n`;
+        const sortedPos = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
+        sortedPos.forEach(([digit, count]) => {
+          detailText += `・${digit}：${count} 回\n`;
+        });
+        detailText += "\n";
+      }
+
       // スライド差分表示
 if (mode === "recent") {
   // 最新20件のみ表示（表）
@@ -156,20 +165,6 @@ if (mode === "recent") {
   detailText += getSlideDiffTextAll(allNumbers, "全体");
 }
 
-      for (let i = 0; i < 4; i++) {
-        detailText += `【${posName[i]}の位】\n`;
-        const sortedPos = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
-        sortedPos.forEach(([digit, count]) => {
-          detailText += `・${digit}：${count} 回\n`;
-        });
-        detailText += "\n";
-      }
-
-      // スライド差（テーブル表示）
-      detailText += generateSlideTable(numbers, "最新20件");
-
-      // 全体のスライド差（折りたたみ）
-      detailText += getSlideDiffTextAll(allNumbers, "全体");
 
       // スライド差分からの予測（直近3件）
       if (numbers.length >= 4) {
