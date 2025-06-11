@@ -89,7 +89,7 @@ const rows = lines.slice(1);
 const parsed = rows.map(row => {
   return {
     date: new Date(row[0]),
-    number: row[2].padStart(4, '0')
+    number: row[2].replace(/[^0-9]/g, '').padStart(4, '0')
   };
 });
 
