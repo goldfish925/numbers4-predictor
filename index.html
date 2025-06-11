@@ -250,50 +250,51 @@
 
 ﻿
 
-   const posName = ["千", "百", "十", "一"];
-      // 各桁ごとの出やすい数字を1つの表にまとめる
-detailText += "\n各桁ごとの出やすい数字（まとめ表）：\n";
-detailText += `<table>
+   // 各桁の統計を初期化
+const positionStats = [{}, {}, {}, {}]; // 千・百・十・一
+
+numbers.forEach(num => {
+  for (let i = 0; i < 4; i++) {
+    const digit = num[i];
+    if (digit !== undefined) {
+      positionStats[i][digit] = (positionStats[i][digit] || 0) + 1;
+    }
+  }
+});
+
+// ランキング表の作成
+const posName = ["千", "百", "十", "一"];
+let tableHtml = "<br><br>各桁ごとの出やすい数字（まとめ表）：<br>";
+tableHtml += `<table border="1" cellspacing="0" cellpadding="4" style="border-collapse: collapse;">
   <tr>
     <th>順位</th>
-    <th>千の位</th>
-    <th>百の位</th>
-    <th>十の位</th>
-    <th>一の位</th>
+    <th>${posName[0]}の位</th>
+    <th>${posName[1]}の位</th>
+    <th>${posName[2]}の位</th>
+    <th>${posName[3]}の位</th>
   </tr>`;
 
-const maxRows = Math.max(
-  Object.keys(positionStats[0]).length,
-  Object.keys(positionStats[1]).length,
-  Object.keys(positionStats[2]).length,
-  Object.keys(positionStats[3]).length
-);
-
+// 各桁の頻出数字をソート
 const sortedStats = positionStats.map(pos =>
   Object.entries(pos).sort((a, b) => b[1] - a[1])
 );
 
+// 最大行数を取得（どこかの桁で最多種類の数字があるとき）
+const maxRows = Math.max(...sortedStats.map(stats => stats.length));
+
 for (let i = 0; i < maxRows; i++) {
-  detailText += "<tr><td>" + (i + 1) + "</td>";
+  tableHtml += `<tr><td>${i + 1}</td>`;
   for (let j = 0; j < 4; j++) {
     const item = sortedStats[j][i];
     if (item) {
-      detailText += `<td>${item[0]} (${item[1]})</td>`;
+      tableHtml += `<td>${item[0]} (${item[1]})</td>`;
     } else {
-      detailText += "<td>-</td>";
+      tableHtml += "<td>-</td>";
     }
   }
-  detailText += "</tr>";
+  tableHtml += "</tr>";
 }
-
-detailText += "</table>\n";
-
-
-    });
-
-    detailText += "\n";
-
-   }
+tableHtml += "</table><br>";
 
 
 
