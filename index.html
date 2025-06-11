@@ -390,7 +390,8 @@ tableHtml += "</table><br>";
 
    result.innerHTML = "予想完了✨";
 
-   details.innerHTML = detailText;
+   details.innerHTML = detailText.replace(/\n/g, "<br>") + slideText + tableHtml;
+
 
   };
 
