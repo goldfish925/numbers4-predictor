@@ -58,7 +58,7 @@
 
   <input type="file" id="csvFile" accept=".csv"><br>
   <label><input type="radio" name="mode" value="recent" checked> 最新20件</label>
-  <label><input type="radio" name="mode" value="all"> 全体</label><br>
+<label><input type="radio" name="mode" value="month"> 直近1か月</label>
   <button onclick="predict()">予測してみるね</button>
 
   <div id="result">ここに予測が表示されるよ</div>
@@ -82,9 +82,32 @@ function predict() {
     const lines = text.trim().split('\n').map(line => line.split(','));
 
     // 見出し行を除去し、「抽選数字」列を取得（3列目 index=2）
-    const numbers = lines.slice(1).map(row => row[2].replace(/="|"/g, '').trim());
+    // 全行取得（見出し除く）
+const rows = lines.slice(1);
 
-    const usedNumbers = (mode === 'recent') ? numbers.slice(-20) : numbers;
+// 日付と抽選数字を抽出（列は [日付, 回数, 数字] 想定）
+const parsed = rows.map(row => ({
+  date: new Date(row[0].trim()),
+  number: row[2].replace(/="|"/g, '').trim()
+}));
+
+// 抽出対象
+let usedNumbers;
+if (mode === 'recent') {
+  usedNumbers = parsed.slice(-20).map(p => p.number);
+} else if (mode === 'month') {
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+  usedNumbers = parsed
+    .filter(p => p.date >= oneMonthAgo)
+    .map(p => p.number);
+
+  if (usedNumbers.length < 2) {
+    alert("直近1か月のデータが少なすぎます！");
+    return;
+  }
+}
 
     // 予測ロジック（例：出現回数上位4個をランダムに並べて予測）
     const digitCount = Array(10).fill(0);
