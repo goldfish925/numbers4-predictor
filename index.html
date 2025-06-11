@@ -81,7 +81,7 @@ function getWindmillDiffText(numbers) {
   for (let i = 1; i < numbers.length; i++) {
     const prev = numbers[i - 1];
     const curr = numbers[i];
-    html += `[${i}] ${prev} → ${curr}\n差分：`;
+    html += `[${i}] ${prev} → ${curr}<br>差分：`;
 
     for (let j = 0; j < 4; j++) {
       const map = windmillMaps[j];
@@ -96,7 +96,7 @@ function getWindmillDiffText(numbers) {
       if (diff < -5) diff += 10;
       html += (diff >= 0 ? "+" : "") + diff + " ";
     }
-    html += `\n`;
+    html += `<br>`;
   }
   html += `</pre></details>`;
   return html;
