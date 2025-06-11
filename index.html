@@ -67,184 +67,94 @@
 
 
    <script>
-function generateSlideTable(nums, label) {
-  if (nums.length < 2) return `${label}：データ不足\n`;
-
-  let html = `<h3>${label}のスライド差分</h3>`;
-  html += `<table border="1" style="border-collapse: collapse;"><tr><th>#</th><th>前回</th><th>今回</th><th>差分</th></tr>`;
-
-  const start = nums.length > 20 ? nums.length - 20 : 1;
-  for (let i = start; i < nums.length; i++) {
-    const prev = nums[i - 1];
-    const curr = nums[i];
-    let diffText = "";
-    for (let j = 0; j < 4; j++) {
-      const diff = (parseInt(curr[j]) - parseInt(prev[j]) + 10) % 10;
-      const slide = (diff <= 5) ? diff : diff - 10;
-      diffText += (slide >= 0 ? "+" : "") + slide + " ";
-    }
-    html += `<tr><td>${i}</td><td>${prev}</td><td>${curr}</td><td>${diffText}</td></tr>`;
-  }
-
-  html += `</table>`;
-  return html;
-}
-
-function getSlideDiffTextAll(nums, label) {
-  if (nums.length < 2) return `${label}：データ不足\n`;
-
-  let text = `<details><summary>🔁 ${label}のスライド差（全件）</summary><pre>`;
-  for (let i = 1; i < nums.length; i++) {
-    const prev = nums[i - 1];
-    const curr = nums[i];
-    text += `\n[${i}] ${prev} → ${curr}\n差分：`;
-    for (let j = 0; j < 4; j++) {
-      const diff = (parseInt(curr[j]) - parseInt(prev[j]) + 10) % 10;
-      const slide = (diff <= 5) ? diff : diff - 10;
-      text += (slide >= 0 ? "+" : "") + slide + " ";
-    }
-    text += "\n";
-  }
-  text += `</pre></details>`;
-  return text;
-}
-
+<script>
 function predict() {
-  const fileInput = document.getElementById("csvFile");
-  const result = document.getElementById("result");
-  const details = document.getElementById("details");
+  const fileInput = document.getElementById('csvFile');
+  const mode = document.querySelector('input[name="mode"]:checked').value;
 
-  const file = fileInput.files[0];
-  if (!file) {
-    alert("CSVファイルを選んでね！");
+  if (!fileInput.files.length) {
+    alert('CSVファイルを選んでね');
     return;
   }
 
   const reader = new FileReader();
-  reader.onload = function (e) {
+  reader.onload = function(e) {
     const text = e.target.result;
-    const lines = text.split("\n").filter(line => line.trim() !== "");
-    const numbers = lines
-      .map(line => {
-        const cols = line.trim().split(",");
-        const raw = cols[2] || "";
-        const match = raw.match(/\d{4}/);
-        return match ? match[0] : null;
-      })
-      .filter(Boolean);
+    const lines = text.trim().split('\n').map(line => line.split(','));
 
-    const detailTextParts = [];
+    // 見出し行を除去し、「抽選数字」列を取得（3列目 index=2）
+    const numbers = lines.slice(1).map(row => row[2].replace(/="|"/g, '').trim());
 
-    // ========== よく出た数字 ==========
-    const count = {};
-    numbers.forEach(num => {
-      for (const digit of num) {
-        count[digit] = (count[digit] || 0) + 1;
-      }
-    });
-    const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-    let detailText = "よく出た数字ランキング：\n";
-    sorted.forEach(([digit, freq]) => {
-      detailText += `「${digit}」が ${freq} 回\n`;
-    });
-    detailTextParts.push(detailText);
+    const usedNumbers = (mode === 'recent') ? numbers.slice(-20) : numbers;
 
-    // ========== 各桁ごとの集計表 ==========
-    const positionStats = [{}, {}, {}, {}];
-    numbers.forEach(num => {
-      for (let i = 0; i < 4; i++) {
-        const digit = num[i];
-        if (digit !== undefined) {
-          positionStats[i][digit] = (positionStats[i][digit] || 0) + 1;
-        }
-      }
+    // 予測ロジック（例：出現回数上位4個をランダムに並べて予測）
+    const digitCount = Array(10).fill(0);
+    usedNumbers.forEach(num => {
+      num.split('').forEach(d => digitCount[parseInt(d)]++);
     });
 
-    const posName = ["千", "百", "十", "一"];
-    let tableHtml = "<br><br>各桁ごとの出やすい数字（まとめ表）：<br>";
-    tableHtml += `<table border="1" cellspacing="0" cellpadding="4" style="border-collapse: collapse;">
-      <tr>
-        <th>順位</th>
-        <th>${posName[0]}の位</th>
-        <th>${posName[1]}の位</th>
-        <th>${posName[2]}の位</th>
-        <th>${posName[3]}の位</th>
-      </tr>`;
+    const topDigits = digitCount
+      .map((count, digit) => ({ digit, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 4)
+      .map(entry => entry.digit);
 
-    const sortedStats = positionStats.map(pos =>
-      Object.entries(pos).sort((a, b) => b[1] - a[1])
-    );
-    const maxRows = Math.max(...sortedStats.map(stats => stats.length));
+    const predicted = topDigits.sort(() => 0.5 - Math.random()).join('');
+    document.getElementById('result').innerText = `予測: ${predicted}`;
 
-    for (let i = 0; i < maxRows; i++) {
-      tableHtml += `<tr><td>${i + 1}</td>`;
-      for (let j = 0; j < 4; j++) {
-        const item = sortedStats[j][i];
-        if (item) {
-          tableHtml += `<td>${item[0]} (${item[1]})</td>`;
-        } else {
-          tableHtml += "<td>-</td>";
-        }
-      }
-      tableHtml += "</tr>";
-    }
-    tableHtml += "</table><br>";
-    detailTextParts.push(tableHtml);
+    // 詳細統計（頻出数字）
+    let detailText = '頻出数字:\n';
+    detailText += digitCount
+      .map((count, digit) => ` ${digit}: ${count}`)
+      .join('\n');
+    document.getElementById('details').innerText = detailText;
 
-    // ========== スライド差分テーブル（最新20件） ==========
-    detailTextParts.push(generateSlideTable(numbers, "最新20件"));
-
-    // ========== スライド差分全文（折りたたみ） ==========
-    detailTextParts.push(getSlideDiffTextAll(numbers, "全体"));
-
-    // ========== スライド傾向予測 ==========
-    if (numbers.length >= 4) {
-      const diffs = [];
-      for (let i = numbers.length - 3; i < numbers.length; i++) {
-        const prev = numbers[i - 1];
-        const curr = numbers[i];
-        const diff = [];
-        for (let j = 0; j < 4; j++) {
-          const d = (parseInt(curr[j]) - parseInt(prev[j]) + 10) % 10;
-          const slide = (d <= 5) ? d : d - 10;
-          diff.push(slide);
-        }
-        diffs.push(diff);
-      }
-
-      const avgSlide = [0, 0, 0, 0];
-      for (let i = 0; i < 4; i++) {
-        let total = 0;
-        for (let j = 0; j < diffs.length; j++) {
-          total += diffs[j][i];
-        }
-        avgSlide[i] = Math.round(total / diffs.length);
-      }
-
-      const latest = numbers[numbers.length - 1];
-      let prediction = "";
-      for (let i = 0; i < 4; i++) {
-        const newDigit = (parseInt(latest[i]) + avgSlide[i] + 10) % 10;
-        prediction += newDigit;
-      }
-
-      detailTextParts.push(`<h3>🔮 スライド傾向からの予想</h3>`);
-      detailTextParts.push(`平均スライド：${avgSlide.map(v => (v >= 0 ? "+" : "") + v).join(" ")}<br>`);
-      detailTextParts.push(`最新：${latest} → 予想：<b>${prediction}</b><br>`);
-    }
-
-    result.innerHTML = "予想完了✨";
-    details.innerHTML = detailTextParts.join("<br>");
+    // 🌀 風車差分分析の表示
+    const diffs = computeKurumagasaDifferences(usedNumbers);
+    showWindmillTable(diffs);
   };
 
-  reader.readAsText(file, "UTF-8");
+  reader.readAsText(fileInput.files[0]);
+}
+
+// 風車差分計算
+function computeKurumagasaDifferences(numbers) {
+  const diffs = [];
+
+  for (let i = 1; i < numbers.length; i++) {
+    const prev = numbers[i - 1].split('').map(Number);
+    const curr = numbers[i].split('').map(Number);
+
+    const slide = curr.map((digit, j) => {
+      const rawDiff = digit - prev[j];
+      const modDiff = ((rawDiff + 10) % 10);
+      return modDiff <= 5 ? modDiff : modDiff - 10; // -5〜+5 の範囲にする
+    });
+
+    diffs.push({
+      index: i,
+      prev: numbers[i - 1],
+      curr: numbers[i],
+      slide: slide  // [千, 百, 十, 一]
+    });
+  }
+
+  return diffs;
+}
+
+// テーブル表示
+function showWindmillTable(data) {
+  let html = '<h3>風車差分（直近20件）</h3>';
+  html += '<table><tr><th>#</th><th>前回</th><th>今回</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
+
+  data.forEach((row, idx) => {
+    html += `<tr><td>${idx + 1}</td><td>${row.prev}</td><td>${row.curr}</td>`;
+    html += row.slide.map(s => `<td>${s >= 0 ? '+' + s : s}</td>`).join('');
+    html += '</tr>';
+  });
+
+  html += '</table>';
+  document.getElementById('details').innerHTML += html;
 }
 </script>
 
-      result.innerHTML = "予想完了✨";
-    details.innerHTML = detailText + tableHtml;
-  }; // ← onload 関数ここで終わり
-
-  reader.readAsText(file, "UTF-8"); // ← この位置でOK！
-
-} // ← predict関数ここで終わり
