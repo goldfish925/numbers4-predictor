@@ -165,7 +165,7 @@ if (numbers.length >= 2) {
 }
 
 // 🎲 ミックス型A（頻出×未出の組み合わせ）
-const topDigitsA = sorted.slice(0, 3).map(entry => entry[0]); // 上位3位
+const topDigitsA = sorted.slice(0, 5).map(entry => entry[0]); // 上位5位に拡張
 const appearedDigits = new Set(numbers.join("").split(""));
 const allDigitsA = Array.from({ length: 10 }, (_, i) => i.toString());
 const unappearedDigitsA = allDigitsA.filter(d => !appearedDigits.has(d));
@@ -183,11 +183,17 @@ for (let i = 0; i < topDigitsA.length; i++) {
     }
   }
 }
+
 mixPredictionsA = mixPredictionsA.slice(0, 5);
-detailText += `\n🎲 ミックス型A（頻出×未出の組み合わせ）：\n`;
-mixPredictionsA.forEach((p, i) => {
-  detailText += `予想${i + 1}：${p}\n`;
-});
+if (mixPredictionsA.length > 0) {
+  detailText += `\n🎲 ミックス型A（頻出×未出の組み合わせ）：\n`;
+  mixPredictionsA.forEach((p, i) => {
+    detailText += `予想${i + 1}：${p}\n`;
+  });
+} else {
+  detailText += `\n🎲 ミックス型A：有効な予測を生成できませんでした。\n`;
+}
+
 
 // 🌟 ミックス型B（頻出・未出・スライドのランダムMIX）
 if (numbers.length >= 4) {
