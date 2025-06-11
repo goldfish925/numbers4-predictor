@@ -2,138 +2,64 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>NUMBERS4予想</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-      background-color: #ffffff;
-      color: #c1a57b;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 {
-      font-size: 28px;
-    }
-    button {
-      background-color: #c1a57b;
-      color: #5a4635;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    #result, #details {
-      margin-top: 20px;
-    }
-    #details {
-      font-size: 14px;
-      white-space: pre-line;
-      color: #7c6240;
-    }
-    img {
-      max-width: 150px;
-      margin-top: 20px;
-    }
-      table {
-    border-collapse: collapse;
-    margin: 1em auto;
-    width: auto;
+ <meta charset="UTF-8">
+ <title>NUMBERS4予想</title>
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <style>
+  body {
+   font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+   background-color: #ffffff;
+   color: #c1a57b;
+   text-align: center;
+   padding: 20px;
   }
-  th, td {
-    border: 1px solid #ccc;
-    padding: 0.4em 0.8em;
-    text-align: center;
+  h1 {
+   font-size: 28px;
   }
-  th {
-    background-color: #f0f8ff;
+  button {
+  background-color: #c1a57b;
+  color: #5a4635;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
   }
-  </style>
+  #result, #details {
+   margin-top: 20px;
+  }
+  #details {
+   font-size: 14px;
+   white-space: pre-line;
+   color: #7c6240;
+  }
+  img {
+   max-width: 150px;
+   margin-top: 20px;
+  }
+   table {
+  border-collapse: collapse;
+  margin: 1em auto;
+  width: auto;
+ }
+ th, td {
+  border: 1px solid #ccc;
+  padding: 0.4em 0.8em;
+  text-align: center;
+ }
+ th {
+  background-color: #f0f8ff;
+ }
+ </style>
 </head>
-<body>
-  <h1>NUMBERS4予想</h1>
 
-  <input type="file" id="csvFile" accept=".csv"><br>
+  <body>
+ <h1>NUMBERS4予想</h1>
+<input type="file" id="csvFile" accept=".csv"><br>
+<label><input type="radio" name="mode" value="recent" checked> 最新20件</label>
+<label><input type="radio" name="mode" value="all"> 全体</label><br>
 <button onclick="predict()">予測してみるね</button>
-
 <div id="result">ここに予測が表示されるよ</div>
 <div id="details"></div>
-<img src="neco.png" alt="にゃんこ">
-
-    function predict() {
-  const fileInput = document.getElementById('csvFile');
-
-  if (!fileInput.files.length) {
-    alert('CSVファイルを選んでね');
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const text = e.target.result;
-    const lines = text.trim().split('\n').map(line => line.split(','));
-    const rows = lines.slice(1);
-    const parsed = [];
-
-    const today = new Date();
-    const thirtyDaysAgo = new Date(today);
-    thirtyDaysAgo.setDate(today.getDate() - 30);
-
-    // ✅ 12行ごとのループ中に日付をチェック
-    for (let i = 0; i < rows.length; i += 12) {
-      if (!rows[i + 1] || !rows[i + 2]) continue;
-
-      const dateStr = rows[i + 1][0].trim();
-      const numberStr = rows[i + 2][0].replace(/[^0-9]/g, '').padStart(4, '0');
-      const dateObj = new Date(dateStr.replace(/-/g, '/'));
-
-      // 🎯 ここでフィルタ
-      if (dateObj >= thirtyDaysAgo) {
-        parsed.push({
-          date: dateObj,
-          number: numberStr
-        });
-      }
-    }
-
-    if (parsed.length < 2) {
-      alert("直近30日分のデータが少なすぎます！");
-      return;
-    }
-
-    parsed.sort((a, b) => b.date - a.date);
-    const usedNumbers = parsed.map(p => p.number);
-
-    // 🔢 頻出数字集計 → 予測
-    const digitCount = Array(10).fill(0);
-    usedNumbers.forEach(num => {
-      num.split('').forEach(d => digitCount[parseInt(d)]++);
-    });
-
-    const topDigits = digitCount
-      .map((count, digit) => ({ digit, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 4)
-      .map(entry => entry.digit);
-
-    const predicted = topDigits.sort(() => 0.5 - Math.random()).join('');
-    document.getElementById('result').innerText = `予測: ${predicted}`;
-
-    // 📊 頻出数字の詳細
-    let detailText = '頻出数字:\n';
-    detailText += digitCount
-      .map((count, digit) => ` ${digit}: ${count}`)
-      .join('\n');
-    document.getElementById('details').innerText = detailText;
-
-    // 🌀 風車差分分析の表示
-    const diffs = computeKurumagasaDifferences(usedNumbers);
-    showWindmillTable(diffs);
-  };
-
-  reader.readAsText(fileInput.files[0]);
-}
-      </script>
+ <img src="neco.png" alt="にゃんこ">
