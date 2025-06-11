@@ -78,27 +78,29 @@ function getWindmillDiffText(numbers) {
   };
   
     if (nums.length < 2) return "風車差分：データ不足\n";
-  let text = `<details><summary>🌪️ 風車差分（千・百・十・一の各桁）</summary><pre>`;
-  
-  for (let i = 1; i < nums.length; i++) {
-    const prev = nums[i - 1];
-    const curr = nums[i];
-    text += `\n[${i}] ${prev} → ${curr}\n差分：`;
+  let html = `<br><details><summary>🌪️ 風車差分（ステップ1）</summary><pre>`;
+  for (let i = 1; i < numbers.length; i++) {
+    const prev = numbers[i - 1];
+    const curr = numbers[i];
+    html += `[${i}] ${prev} → ${curr}\n差分：`;
 
-    for (let pos = 0; pos < 4; pos++) {
-      const map = windmillMaps[pos];
-      const prevIdx = map.indexOf(prev[pos]);
-      const currIdx = map.indexOf(curr[pos]);
-      let diff = currIdx - prevIdx;
+    for (let j = 0; j < 4; j++) {
+      const map = windmillMaps[j];
+      const prevIndex = map.indexOf(prev[j]);
+      const currIndex = map.indexOf(curr[j]);
+      if (prevIndex === -1 || currIndex === -1) {
+        html += "? ";
+        continue;
+      }
+      let diff = currIndex - prevIndex;
       if (diff > 5) diff -= 10;
       if (diff < -5) diff += 10;
-      text += `${["千","百","十","一"][pos]}:${diff >= 0 ? "+" : ""}${diff} `;
+      html += (diff >= 0 ? "+" : "") + diff + " ";
     }
-    text += "\n";
+    html += `\n`;
   }
-
-  text += "</pre></details>";
-  return text;
+  html += `</pre></details>`;
+  return html;
 }
    
     if (nums.length < 2) return `${label}：データ不足\n`;
