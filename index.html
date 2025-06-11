@@ -159,15 +159,15 @@
 
       const posName = ["千", "百", "十", "一"];
       detailText += "\n各桁ごとの出やすい数字：\n";
-        for (let i = 0; i < 4; i++) {
-        detailText += `【${posName[i]}の位】\n`;
-        const sortedPos = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
-        sortedPos.forEach(([digit, count]) => {
-          detailText += `・${digit}：${count} 回\n`;
-        });
-        detailText += "\n";
-      }
-
+for (let i = 0; i < 4; i++) {
+  detailText += `\n【${posName[i]}の位】\n`;
+  detailText += "<table><tr><th>数字</th><th>出現回数</th></tr>";
+  const sortedPos = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
+  sortedPos.forEach(([digit, count]) => {
+    detailText += `<tr><td>${digit}</td><td>${count}</td></tr>`;
+  });
+  detailText += "</table>\n";
+}
       // スライド差分表示
 if (mode === "recent") {
   // 最新20件のみ表示（表）
