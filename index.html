@@ -66,7 +66,7 @@
   <img src="neco.png" alt="にゃんこ">
 
 
-  <script>
+   <script>
 
  function generateSlideTable(nums, label) {
 
@@ -248,53 +248,27 @@
 
    });
 
-﻿
 
-   // 各桁の統計を初期化
-const positionStats = [{}, {}, {}, {}]; // 千・百・十・一
 
-numbers.forEach(num => {
-  for (let i = 0; i < 4; i++) {
-    const digit = num[i];
-    if (digit !== undefined) {
-      positionStats[i][digit] = (positionStats[i][digit] || 0) + 1;
-    }
-  }
-});
+   const posName = ["千", "百", "十", "一"];
 
-// ランキング表の作成
-const posName = ["千", "百", "十", "一"];
-let tableHtml = "<br><br>各桁ごとの出やすい数字（まとめ表）：<br>";
-tableHtml += `<table border="1" cellspacing="0" cellpadding="4" style="border-collapse: collapse;">
-  <tr>
-    <th>順位</th>
-    <th>${posName[0]}の位</th>
-    <th>${posName[1]}の位</th>
-    <th>${posName[2]}の位</th>
-    <th>${posName[3]}の位</th>
-  </tr>`;
+   detailText += "\n各桁ごとの出やすい数字：\n";
 
-// 各桁の頻出数字をソート
-const sortedStats = positionStats.map(pos =>
-  Object.entries(pos).sort((a, b) => b[1] - a[1])
-);
+   for (let i = 0; i < 4; i++) {
 
-// 最大行数を取得（どこかの桁で最多種類の数字があるとき）
-const maxRows = Math.max(...sortedStats.map(stats => stats.length));
+    detailText += `【${posName[i]}の位】\n`;
 
-for (let i = 0; i < maxRows; i++) {
-  tableHtml += `<tr><td>${i + 1}</td>`;
-  for (let j = 0; j < 4; j++) {
-    const item = sortedStats[j][i];
-    if (item) {
-      tableHtml += `<td>${item[0]} (${item[1]})</td>`;
-    } else {
-      tableHtml += "<td>-</td>";
-    }
-  }
-  tableHtml += "</tr>";
-}
-tableHtml += "</table><br>";
+    const sortedPos = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
+
+    sortedPos.forEach(([digit, count]) => {
+
+     detailText += `・${digit}：${count} 回\n`;
+
+    });
+
+    detailText += "\n";
+
+   }
 
 
 
@@ -376,7 +350,7 @@ tableHtml += "</table><br>";
 
     }
 
-
+﻿
 
     detailText += `<h3>🔮 スライド傾向からの予想</h3>`;
 
@@ -390,8 +364,7 @@ tableHtml += "</table><br>";
 
    result.innerHTML = "予想完了✨";
 
-   details.innerHTML = detailText.replace(/\n/g, "<br>") + slideText + tableHtml;
-
+   details.innerHTML = detailText;
 
   };
 
