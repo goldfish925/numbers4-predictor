@@ -152,22 +152,43 @@
       // 各桁ごとの出現傾向
       let positionStats = [{}, {}, {}, {}];
       numbers.forEach(num => {
-        for (let i = 0; i < 4; i++) {
-          const digit = num[i];
-          positionStats[i][digit] = (positionStats[i][digit] || 0) + 1;
-        }
-      });
+       // 各桁ごとの出やすい数字を1つの表にまとめる
+detailText += "\n各桁ごとの出やすい数字（まとめ表）：\n";
+detailText += `<table>
+  <tr>
+    <th>順位</th>
+    <th>千の位</th>
+    <th>百の位</th>
+    <th>十の位</th>
+    <th>一の位</th>
+  </tr>`;
 
-      const posName = ["千", "百", "十", "一"];
-      detailText += "\n各桁ごとの出やすい数字：\n";
-      for (let i = 0; i < 4; i++) {
-        detailText += `【${posName[i]}の位】\n`;
-        const sortedPos = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
-        sortedPos.forEach(([digit, count]) => {
-          detailText += `・${digit}：${count} 回\n`;
-        });
-        detailText += "\n";
-      }
+const maxRows = Math.max(
+  Object.keys(positionStats[0]).length,
+  Object.keys(positionStats[1]).length,
+  Object.keys(positionStats[2]).length,
+  Object.keys(positionStats[3]).length
+);
+
+const sortedStats = positionStats.map(pos =>
+  Object.entries(pos).sort((a, b) => b[1] - a[1])
+);
+
+for (let i = 0; i < maxRows; i++) {
+  detailText += "<tr><td>" + (i + 1) + "</td>";
+  for (let j = 0; j < 4; j++) {
+    const item = sortedStats[j][i];
+    if (item) {
+      detailText += `<td>${item[0]} (${item[1]})</td>`;
+    } else {
+      detailText += "<td>-</td>";
+    }
+  }
+  detailText += "</tr>";
+}
+
+detailText += "</table>\n";
+
 
       // スライド差（テーブル表示）
       detailText += generateSlideTable(numbers, "最新20件");
