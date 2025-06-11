@@ -160,6 +160,15 @@
 
       // 全体のスライド差（折りたたみ）
       detailText += getSlideDiffTextAll(allNumbers, "全体");
+// スライド差分表示
+if (mode === "recent") {
+  // 最新20件のみ表示（表）
+  detailText += generateSlideTable(numbers, "最新20件");
+} else {
+  // 表と折りたたみ両方表示（全体モード）
+  detailText += generateSlideTable(numbers, "最新20件");
+  detailText += getSlideDiffTextAll(allNumbers, "全体");
+}
 
       // スライド差分からの予測（直近3件）
       if (numbers.length >= 4) {
