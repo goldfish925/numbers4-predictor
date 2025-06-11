@@ -146,47 +146,55 @@
       sorted.forEach(([digit, freq]) => {
         detailText += `「${digit}」が ${freq} 回\n`;
       });
-// 🔮 ミックス型予測（頻出数字と未出数字の組み合わせ）
-const topDigits = sorted.slice(0, 3).map(entry => entry[0]); // 上位3位
-const appearedDigits = new Set(numbers.join("").split(""));
-const allDigits = Array.from({ length: 10 }, (_, i) => i.toString());
-const unappearedDigits = allDigits.filter(d => !appearedDigits.has(d));
+// 🔁 スライド継承型（直近のスライド傾向から予測）
+if (numbers.length >= 2) {
+  const latest = numbers[numbers.length - 1];
+  const previous = numbers[numbers.length - 2];
+  let prediction = "";
+  let slides = "";
 
-// 組み合わせパターン（例：2個は頻出、2個は未出）
-let mixPredictions = [];
-for (let i = 0; i < topDigits.length; i++) {
-  for (let j = 0; j < topDigits.length; j++) {
-    for (let k = 0; k < unappearedDigits.length; k++) {
-      for (let l = 0; l < unappearedDigits.length; l++) {
-        if (new Set([i, j, k, l]).size === 4) {
-          mixPredictions.push(
-            topDigits[i] + topDigits[j] + unappearedDigits[k] + unappearedDigits[l]
-          );
+  for (let j = 0; j < 4; j++) {
+    const diff = (parseInt(latest[j]) - parseInt(previous[j]) + 10) % 10;
+    const slide = (diff <= 5) ? diff : diff - 10;
+    const nextDigit = (parseInt(latest[j]) + slide + 10) % 10;
+    prediction += nextDigit.toString();
+    slides += (slide >= 0 ? "+" : "") + slide + " ";
+  }
+
+  detailText += `\n📈 スライド継承型予測：${prediction}（直近差分：${slides.trim()}）\n`;
+}
+
+// 🎲 ミックス型A（頻出×未出の組み合わせ）
+const topDigitsA = sorted.slice(0, 3).map(entry => entry[0]); // 上位3位
+const appearedDigits = new Set(numbers.join("").split(""));
+const allDigitsA = Array.from({ length: 10 }, (_, i) => i.toString());
+const unappearedDigitsA = allDigitsA.filter(d => !appearedDigits.has(d));
+
+let mixPredictionsA = [];
+for (let i = 0; i < topDigitsA.length; i++) {
+  for (let j = 0; j < topDigitsA.length; j++) {
+    for (let k = 0; k < unappearedDigitsA.length; k++) {
+      for (let l = 0; l < unappearedDigitsA.length; l++) {
+        const combo = [topDigitsA[i], topDigitsA[j], unappearedDigitsA[k], unappearedDigitsA[l]];
+        if (new Set(combo).size === 4) {
+          mixPredictionsA.push(combo.join(""));
         }
       }
     }
   }
 }
-
-mixPredictions = mixPredictions.slice(0, 5); // 最初の5個だけ表示
-detailText += `\n🎲 ミックス型予想（頻出×未出の組み合わせ）：\n`;
-mixPredictions.forEach((p, i) => {
+mixPredictionsA = mixPredictionsA.slice(0, 5);
+detailText += `\n🎲 ミックス型A（頻出×未出の組み合わせ）：\n`;
+mixPredictionsA.forEach((p, i) => {
   detailText += `予想${i + 1}：${p}\n`;
 });
 
-      // --- ミックス型予測（頻出・未出・スライドMIX） ---
+// 🌟 ミックス型B（頻出・未出・スライドのランダムMIX）
 if (numbers.length >= 4) {
-  // 頻出ランキング（すでにあるcountでOK）
-  const topDigits = Object.entries(count)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 4)
-    .map(([digit]) => digit);
+  const topDigitsB = sorted.slice(0, 4).map(entry => entry[0]);
+  const allDigitsB = Array.from({ length: 10 }, (_, i) => i.toString());
+  const unusedDigitsB = allDigitsB.filter(d => !appearedDigits.has(d));
 
-  // 未出数字（0〜9から出てないやつ）
-  const allDigits = [...Array(10).keys()].map(String);
-  const unusedDigits = allDigits.filter(d => !count[d]);
-
-  // スライド平均
   const diffs = [];
   for (let i = numbers.length - 3; i < numbers.length; i++) {
     const prev = numbers[i - 1];
@@ -211,7 +219,7 @@ if (numbers.length >= 4) {
 
   const latest = numbers[numbers.length - 1];
 
-  detailText += `\n🌟 ミックス型予測：\n`;
+  detailText += `\n🌟 ミックス型B（頻出・未出・スライド混合）：\n`;
   detailText += `<table style="margin:auto; border-collapse:collapse;">`;
   detailText += `<tr><th style="border:1px solid #ccc;padding:4px;">構成</th><th style="border:1px solid #ccc;padding:4px;">予測番号</th></tr>`;
 
@@ -221,11 +229,11 @@ if (numbers.length >= 4) {
     for (let j = 0; j < 4; j++) {
       const choice = Math.floor(Math.random() * 3); // 0:頻出 1:未出 2:スライド
       let digit;
-      if (choice === 0 && topDigits.length > 0) {
-        digit = topDigits[Math.floor(Math.random() * topDigits.length)];
+      if (choice === 0 && topDigitsB.length > 0) {
+        digit = topDigitsB[Math.floor(Math.random() * topDigitsB.length)];
         desc += "頻 ";
-      } else if (choice === 1 && unusedDigits.length > 0) {
-        digit = unusedDigits[Math.floor(Math.random() * unusedDigits.length)];
+      } else if (choice === 1 && unusedDigitsB.length > 0) {
+        digit = unusedDigitsB[Math.floor(Math.random() * unusedDigitsB.length)];
         desc += "未 ";
       } else {
         digit = (parseInt(latest[j]) + avgSlide[j] + 10) % 10;
@@ -234,12 +242,12 @@ if (numbers.length >= 4) {
       }
       prediction += digit;
     }
-
     detailText += `<tr><td style="border:1px solid #ccc;padding:4px;">${desc.trim()}</td><td style="border:1px solid #ccc;padding:4px;">${prediction}</td></tr>`;
   }
 
   detailText += `</table>\n`;
 }
+
      
       // 各桁ごとの出現傾向
       let positionStats = [{}, {}, {}, {}];
