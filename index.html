@@ -158,16 +158,43 @@
       });
 
       const posName = ["千", "百", "十", "一"];
-      detailText += "\n各桁ごとの出やすい数字：\n";
-for (let i = 0; i < 4; i++) {
-  detailText += `\n【${posName[i]}の位】\n`;
-  detailText += "<table><tr><th>数字</th><th>出現回数</th></tr>";
-  const sortedPos = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
-  sortedPos.forEach(([digit, count]) => {
-    detailText += `<tr><td>${digit}</td><td>${count}</td></tr>`;
-  });
-  detailText += "</table>\n";
+      // 各桁ごとの出やすい数字を1つの表にまとめる
+detailText += "\n各桁ごとの出やすい数字（まとめ表）：\n";
+detailText += `<table>
+  <tr>
+    <th>順位</th>
+    <th>千の位</th>
+    <th>百の位</th>
+    <th>十の位</th>
+    <th>一の位</th>
+  </tr>`;
+
+const maxRows = Math.max(
+  Object.keys(positionStats[0]).length,
+  Object.keys(positionStats[1]).length,
+  Object.keys(positionStats[2]).length,
+  Object.keys(positionStats[3]).length
+);
+
+const sortedStats = positionStats.map(pos =>
+  Object.entries(pos).sort((a, b) => b[1] - a[1])
+);
+
+for (let i = 0; i < maxRows; i++) {
+  detailText += "<tr><td>" + (i + 1) + "</td>";
+  for (let j = 0; j < 4; j++) {
+    const item = sortedStats[j][i];
+    if (item) {
+      detailText += `<td>${item[0]} (${item[1]})</td>`;
+    } else {
+      detailText += "<td>-</td>";
+    }
+  }
+  detailText += "</tr>";
 }
+
+detailText += "</table>\n";
+
       // スライド差分表示
 if (mode === "recent") {
   // 最新20件のみ表示（表）
