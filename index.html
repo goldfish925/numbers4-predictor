@@ -87,6 +87,7 @@ const rows = lines.slice(1);
 
 // 日付と抽選数字を抽出（列は [日付, 回数, 数字] 想定）
 const parsed = rows.map(row => ({
+  parsed.sort((a, b) => b.date - a.date);
   date: new Date(row[0].trim()),
   number: row[2].replace(/="|"/g, '').trim()
 }));
