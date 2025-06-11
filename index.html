@@ -90,20 +90,22 @@ function predict() {
       });
     }
 
-    parsed.sort((a, b) => b.date - a.date);
+    // ソート
+parsed.sort((a, b) => b.date - a.date);
 
-    // ✅ 直近30日分のみを使う
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+// ✅ 直近30日分に絞る
+const thirtyDaysAgo = new Date();
+thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const usedNumbers = parsed
-      .filter(p => p.date >= thirtyDaysAgo)
-      .map(p => p.number);
+const usedNumbers = parsed
+  .filter(p => p.date >= thirtyDaysAgo)  // ← ここで30日以内に限定
+  .map(p => p.number);
 
-    if (usedNumbers.length < 2) {
-      alert("直近30日分のデータが少なすぎます！");
-      return;
-    }
+if (usedNumbers.length < 2) {
+  alert("直近30日分のデータが少なすぎます！");
+  return;
+}
+
 
     // 🔢 頻出数字集計 → 予測
     const digitCount = Array(10).fill(0);
