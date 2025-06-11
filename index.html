@@ -444,10 +444,10 @@ if (numbers.length >= 4) {
 }
 
       result.innerHTML = "予想完了✨";
-      details.innerHTML = detailText;
-      details.innerHTML = detailText.replace(/\n/g, "<br>");
-details.innerHTML += getWindmillDiffText(numbers);
-    };
+const formattedDetail = detailText.replace(/\n/g, "<br>");
+const windmillHTML = getWindmillDiffText(numbers);
+details.innerHTML = formattedDetail + windmillHTML;
+
 
     reader.readAsText(file);
   }
