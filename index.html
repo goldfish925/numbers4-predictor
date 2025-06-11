@@ -110,9 +110,6 @@ function getWindmillDiffText(numbers) {
   return html;
 }
 </script>
-
-
-
     if (nums.length < 2) return `${label}：データ不足\n`;
     let html = `<h3>${label}のスライド差分</h3>`;
     html += `<table border="1" style="border-collapse: collapse;"><tr><th>#</th><th>前回</th><th>今回</th><th>差分</th></tr>`;
@@ -458,9 +455,13 @@ if (numbers.length >= 4) {
 }
 
  result.innerHTML = "予想完了✨";
-const formattedDetail = detailText.replace(/\n/g, "<br>");
+
+    const formattedDetail = detailText.replace(/\n/g, "<br>");
+
 const windmillHTML = getWindmillDiffText(numbers);
-details.innerHTML = formattedDetail + windmillHTML;
+
+details.innerHTML = `${formattedDetail}<br><br>${windmillHTML}`;
+
 };
     reader.readAsText(file);
   }
