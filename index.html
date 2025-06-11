@@ -146,6 +146,16 @@
 
       const posName = ["千", "百", "十", "一"];
       detailText += "\n各桁ごとの出やすい数字：\n";
+      // スライド差分表示
+if (mode === "recent") {
+  // 最新20件のみ表示（表）
+  detailText += generateSlideTable(numbers, "最新20件");
+} else {
+  // 表と折りたたみ両方表示（全体モード）
+  detailText += generateSlideTable(numbers, "最新20件");
+  detailText += getSlideDiffTextAll(allNumbers, "全体");
+}
+
       for (let i = 0; i < 4; i++) {
         detailText += `【${posName[i]}の位】\n`;
         const sortedPos = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
