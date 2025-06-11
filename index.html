@@ -88,14 +88,10 @@ const rows = lines.slice(1);
 // 日付と抽選数字を抽出（列は [日付, 回数, 数字] 想定）
 const parsed = rows.map(row => ({
   parsed.sort((a, b) => b.date - a.date);
-  date: new Date(row[0].trim()),
-  number: row[2].replace(/="|"/g, '').trim()
-}));
-
-// 抽出対象
+ // parsed は最新順（降順）で並んでいる
 let usedNumbers;
 if (mode === 'recent') {
-  usedNumbers = parsed.slice(-20).map(p => p.number);
+  usedNumbers = parsed.slice(0, 20).map(p => p.number);  // 最新20件
 } else if (mode === 'month') {
   const oneMonthAgo = new Date();
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
