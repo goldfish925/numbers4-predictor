@@ -57,19 +57,15 @@
   <h1>NUMBERS4予想</h1>
 
   <input type="file" id="csvFile" accept=".csv"><br>
- <label><input type="radio" name="mode" value="recent" checked> 最新20件</label>
-<label><input type="radio" name="mode" value="month"> 直近30日</label>
-  <button onclick="predict()">予測してみるね</button>
+<button onclick="predict()">予測してみるね</button>
 
-  <div id="result">ここに予測が表示されるよ</div>
-  <div id="details"></div>
-  <img src="neco.png" alt="にゃんこ">
+<div id="result">ここに予測が表示されるよ</div>
+<div id="details"></div>
+<img src="neco.png" alt="にゃんこ">
 
-
-   <script>
+     <script>
 function predict() {
   const fileInput = document.getElementById('csvFile');
-  const mode = document.querySelector('input[name="mode"]:checked').value;
 
   if (!fileInput.files.length) {
     alert('CSVファイルを選んでね');
@@ -81,47 +77,35 @@ function predict() {
     const text = e.target.result;
     const lines = text.trim().split('\n').map(line => line.split(','));
 
-    // 見出し行を除去し、「抽選数字」列を取得（3列目 index=2）
-    // 全行取得（見出し除く）
-const rows = lines.slice(1);
+    const rows = lines.slice(1);
+    const parsed = [];
 
-// 日付と抽選数字を抽出（列は [日付, 回数, 数字] 想定）
-const parsed = [];
+    for (let i = 0; i < rows.length; i += 12) {
+      const dateStr = rows[i + 1][0].trim();
+      const numberStr = rows[i + 2][0].replace(/[^0-9]/g, '').padStart(4, '0');
 
-for (let i = 0; i < rows.length; i += 12) {
-  const dateStr = rows[i + 1][0].trim(); // 日付（例: 1994-10-07）
-  const numberStr = rows[i + 2][0].replace(/[^0-9]/g, '').padStart(4, '0'); // "1149" → "1149"
+      parsed.push({
+        date: new Date(dateStr.replace(/-/g, '/')),
+        number: numberStr
+      });
+    }
 
-  parsed.push({
-    date: new Date(dateStr.replace(/-/g, '/')),  // 日付を正しくパース
-    number: numberStr
-  });
-}
-  // 最新順（降順）に並び替え
-parsed.sort((a, b) => b.date - a.date);
+    parsed.sort((a, b) => b.date - a.date);
 
-let usedNumbers;
+    // ✅ 直近30日分のみを使う
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-if (mode === 'recent') {
-  usedNumbers = parsed.slice(0, 20).map(p => p.number);
-} else if (mode === 'month') {
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30); // ← 明確に30日前！
+    const usedNumbers = parsed
+      .filter(p => p.date >= thirtyDaysAgo)
+      .map(p => p.number);
 
-  usedNumbers = parsed
-    .filter(p => p.date >= thirtyDaysAgo)
-    .map(p => p.number);
+    if (usedNumbers.length < 2) {
+      alert("直近30日分のデータが少なすぎます！");
+      return;
+    }
 
-  if (usedNumbers.length < 2) {
-    alert("直近30日分のデータが少なすぎます！");
-    return;
-  }
-}
-
-
-
-
-    // 予測ロジック（例：出現回数上位4個をランダムに並べて予測）
+    // 🔢 頻出数字集計 → 予測
     const digitCount = Array(10).fill(0);
     usedNumbers.forEach(num => {
       num.split('').forEach(d => digitCount[parseInt(d)]++);
@@ -136,7 +120,7 @@ if (mode === 'recent') {
     const predicted = topDigits.sort(() => 0.5 - Math.random()).join('');
     document.getElementById('result').innerText = `予測: ${predicted}`;
 
-    // 詳細統計（頻出数字）
+    // 📊 頻出数字の詳細
     let detailText = '頻出数字:\n';
     detailText += digitCount
       .map((count, digit) => ` ${digit}: ${count}`)
