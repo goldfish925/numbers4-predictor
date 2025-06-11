@@ -165,10 +165,20 @@ if (numbers.length >= 2) {
 }
 
 // 🎲 ミックス型A（頻出×未出の組み合わせ）
-const topDigitsA = sorted.slice(0, 5).map(entry => entry[0]); // 上位5位に拡張
+// 頻出数字（上位6個）
+const topDigitsA = sorted.slice(0, 6).map(entry => entry[0]);
+
+// 未出数字
 const appearedDigits = new Set(numbers.join("").split(""));
 const allDigitsA = Array.from({ length: 10 }, (_, i) => i.toString());
-const unappearedDigitsA = allDigitsA.filter(d => !appearedDigits.has(d));
+let unappearedDigitsA = allDigitsA.filter(d => !appearedDigits.has(d));
+
+// 未出が足りなければ、出現回数の少ない3つを補う
+if (unappearedDigitsA.length < 4) {
+  const rareDigits = sorted.slice(-3).map(entry => entry[0]);
+  unappearedDigitsA.push(...rareDigits);
+  unappearedDigitsA = [...new Set(unappearedDigitsA)]; // 重複排除
+}
 
 let mixPredictionsA = [];
 for (let i = 0; i < topDigitsA.length; i++) {
@@ -184,7 +194,7 @@ for (let i = 0; i < topDigitsA.length; i++) {
   }
 }
 
-mixPredictionsA = mixPredictionsA.slice(0, 5);
+mixPredictionsA = mixPredictionsA.slice(0, 5); // 5件だけ表示
 if (mixPredictionsA.length > 0) {
   detailText += `\n🎲 ミックス型A（頻出×未出の組み合わせ）：\n`;
   mixPredictionsA.forEach((p, i) => {
