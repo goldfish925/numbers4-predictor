@@ -146,6 +146,33 @@
       sorted.forEach(([digit, freq]) => {
         detailText += `「${digit}」が ${freq} 回\n`;
       });
+// 🔮 ミックス型予測（頻出数字と未出数字の組み合わせ）
+const topDigits = sorted.slice(0, 3).map(entry => entry[0]); // 上位3位
+const appearedDigits = new Set(numbers.join("").split(""));
+const allDigits = Array.from({ length: 10 }, (_, i) => i.toString());
+const unappearedDigits = allDigits.filter(d => !appearedDigits.has(d));
+
+// 組み合わせパターン（例：2個は頻出、2個は未出）
+let mixPredictions = [];
+for (let i = 0; i < topDigits.length; i++) {
+  for (let j = 0; j < topDigits.length; j++) {
+    for (let k = 0; k < unappearedDigits.length; k++) {
+      for (let l = 0; l < unappearedDigits.length; l++) {
+        if (new Set([i, j, k, l]).size === 4) {
+          mixPredictions.push(
+            topDigits[i] + topDigits[j] + unappearedDigits[k] + unappearedDigits[l]
+          );
+        }
+      }
+    }
+  }
+}
+
+mixPredictions = mixPredictions.slice(0, 5); // 最初の5個だけ表示
+detailText += `\n🎲 ミックス型予想（頻出×未出の組み合わせ）：\n`;
+mixPredictions.forEach((p, i) => {
+  detailText += `予想${i + 1}：${p}\n`;
+});
 
       // --- ミックス型予測（頻出・未出・スライドMIX） ---
 if (numbers.length >= 4) {
