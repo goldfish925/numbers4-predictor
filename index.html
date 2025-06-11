@@ -443,12 +443,11 @@ if (numbers.length >= 4) {
   detailText += `</table>\n`;
 }
 
-      result.innerHTML = "予想完了✨";
+ result.innerHTML = "予想完了✨";
 const formattedDetail = detailText.replace(/\n/g, "<br>");
 const windmillHTML = getWindmillDiffText(numbers);
 details.innerHTML = formattedDetail + windmillHTML;
- };
-
+}
     reader.readAsText(file);
   }
   </script>
