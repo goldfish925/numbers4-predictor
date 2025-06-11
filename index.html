@@ -66,18 +66,18 @@
   <img src="neco.png" alt="にゃんこ">
 
     <script>
+<script>
+// 🌪️ 風車差分（ステップ1）用関数
 function getWindmillDiffText(numbers) {
   if (numbers.length < 2) return "";
-    
-       // 🌪️ 風車配置マップ（各桁ごとに右回り順）
+
   const windmillMaps = {
     0: ["0", "3", "6", "9", "2", "5", "8", "1", "4", "7"], // 千の桁
     1: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], // 百の桁
     2: ["0", "7", "4", "8", "5", "2", "9", "6", "3", "1"], // 十の桁
     3: ["0", "9", "8", "6", "5", "4", "3", "2", "1", "7"], // 一の桁
   };
-  
-    if (nums.length < 2) return "風車差分：データ不足\n";
+
   let html = `<br><details><summary>🌪️ 風車差分（ステップ1）</summary><pre>`;
   for (let i = 1; i < numbers.length; i++) {
     const prev = numbers[i - 1];
@@ -102,7 +102,8 @@ function getWindmillDiffText(numbers) {
   html += `</pre></details>`;
   return html;
 }
-   
+</script>
+  
     if (nums.length < 2) return `${label}：データ不足\n`;
     let html = `<h3>${label}のスライド差分</h3>`;
     html += `<table border="1" style="border-collapse: collapse;"><tr><th>#</th><th>前回</th><th>今回</th><th>差分</th></tr>`;
