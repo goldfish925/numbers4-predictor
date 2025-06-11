@@ -57,8 +57,8 @@
   <h1>NUMBERS4予想</h1>
 
   <input type="file" id="csvFile" accept=".csv"><br>
-  <label><input type="radio" name="mode" value="recent" checked> 最新20件</label>
-<label><input type="radio" name="mode" value="month"> 直近1か月</label>
+ <label><input type="radio" name="mode" value="recent" checked> 最新20件</label>
+<label><input type="radio" name="mode" value="month"> 直近30日</label>
   <button onclick="predict()">予測してみるね</button>
 
   <div id="result">ここに予測が表示されるよ</div>
@@ -105,18 +105,19 @@ let usedNumbers;
 if (mode === 'recent') {
   usedNumbers = parsed.slice(0, 20).map(p => p.number);
 } else if (mode === 'month') {
-  const oneMonthAgo = new Date();
-  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30); // ← 明確に30日前！
 
   usedNumbers = parsed
-    .filter(p => p.date >= oneMonthAgo)
+    .filter(p => p.date >= thirtyDaysAgo)
     .map(p => p.number);
 
   if (usedNumbers.length < 2) {
-    alert("直近1か月のデータが少なすぎます！");
+    alert("直近30日分のデータが少なすぎます！");
     return;
   }
 }
+
 
 
 
