@@ -86,26 +86,22 @@ function predict() {
 const rows = lines.slice(1);
 
 // 日付と抽選数字を抽出（列は [日付, 回数, 数字] 想定）
-const parsed = rows.map((row, idx) => {
-  const rawDate = row[0].replace(/["年月日]/g, '/').replace(/\/\//g, '/').replace(/\/$/, '');
-  const parsedDate = new Date(rawDate);
-  console.log(`行${idx + 1}:`, row[0], '→', rawDate, '→', parsedDate);
+const parsed = [];
 
-  return {
-    date: parsedDate,
-    number: row[2].replace(/[^0-9]/g, '').padStart(4, '0')
-  };
-});
+for (let i = 0; i < rows.length; i += 12) {
+  const dateStr = rows[i + 1][0].trim(); // 日付（例: 1994-10-07）
+  const numberStr = rows[i + 2][0].replace(/[^0-9]/g, '').padStart(4, '0'); // "1149" → "1149"
 
-
-
-// 最新順（降順）に並び替え
+  parsed.push({
+    date: new Date(dateStr.replace(/-/g, '/')),  // 日付を正しくパース
+    number: numberStr
+  });
+}
+  // 最新順（降順）に並び替え
 parsed.sort((a, b) => b.date - a.date);
 
 let usedNumbers;
-if (mode === 'recent') {
-  usedNumbers = parsed.slice(0, 20).map(p => p.number);
-} else if (mode === 'month') {
+if (mode === 'month') {
   const oneMonthAgo = new Date();
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
@@ -118,6 +114,7 @@ if (mode === 'recent') {
     return;
   }
 }
+
 
     // 予測ロジック（例：出現回数上位4個をランダムに並べて予測）
     const digitCount = Array(10).fill(0);
