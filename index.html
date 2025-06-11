@@ -236,43 +236,62 @@ if (mode === "recent") {
 
 
       // スライド差分からの予測（直近3件）
-      if (numbers.length >= 4) {
-        const diffs = [];
+      // --- スライド差分からの予測（直近3件の差を使う） ---
+if (numbers.length >= 4) {
+  const diffs = [];
 
-        for (let i = numbers.length - 3; i < numbers.length; i++) {
-          const prev = numbers[i - 1];
-          const curr = numbers[i];
-          const diff = [];
+  for (let i = numbers.length - 3; i < numbers.length; i++) {
+    const prev = numbers[i - 1];
+    const curr = numbers[i];
+    const diff = [];
 
-          for (let j = 0; j < 4; j++) {
-            const d = (parseInt(curr[j]) - parseInt(prev[j]) + 10) % 10;
-            const slide = (d <= 5) ? d : d - 10;
-            diff.push(slide);
-          }
+    for (let j = 0; j < 4; j++) {
+      const d = (parseInt(curr[j]) - parseInt(prev[j]) + 10) % 10;
+      const slide = (d <= 5) ? d : d - 10;
+      diff.push(slide);
+    }
 
-          diffs.push(diff);
-        }
+    diffs.push(diff);
+  }
 
-        const avgSlide = [0, 0, 0, 0];
-        for (let i = 0; i < 4; i++) {
-          let total = 0;
-          for (let j = 0; j < diffs.length; j++) {
-            total += diffs[j][i];
-          }
-          avgSlide[i] = Math.round(total / diffs.length);
-        }
+  const avgSlide = [0, 0, 0, 0];
+  for (let i = 0; i < 4; i++) {
+    let total = 0;
+    for (let j = 0; j < diffs.length; j++) {
+      total += diffs[j][i];
+    }
+    avgSlide[i] = Math.round(total / diffs.length);
+  }
 
-        const latest = numbers[numbers.length - 1];
-        let prediction = "";
-        for (let i = 0; i < 4; i++) {
-          const newDigit = (parseInt(latest[i]) + avgSlide[i] + 10) % 10;
-          prediction += newDigit;
-        }
+  const latest = numbers[numbers.length - 1];
 
-        detailText += `<h3>🔮 スライド傾向からの予想</h3>`;
-        detailText += `平均スライド：${avgSlide.map(v => (v >= 0 ? "+" : "") + v).join(" ")}<br>`;
-        detailText += `最新：${latest} → 予想：<b>${prediction}</b><br>`;
-      }
+  // 複数の予測を生成
+  const variations = [
+    [0, 0, 0, 0],  // 基本型
+    [-1, 0, 0, 0],
+    [1, 0, 0, 0],
+    [0, -1, 0, 0],
+    [0, 1, 0, 0]
+  ];
+
+  detailText += `\n🔮 スライド継承型予測：\n`;
+  detailText += `<table style="margin:auto; border-collapse:collapse;">`;
+  detailText += `<tr><th style="border:1px solid #ccc;padding:4px;">スライド値</th><th style="border:1px solid #ccc;padding:4px;">予測番号</th></tr>`;
+
+  variations.forEach(offset => {
+    let prediction = "";
+    let slideText = "";
+    for (let i = 0; i < 4; i++) {
+      const slide = avgSlide[i] + offset[i];
+      const newDigit = (parseInt(latest[i]) + slide + 10) % 10;
+      prediction += newDigit;
+      slideText += (slide >= 0 ? "+" : "") + slide + " ";
+    }
+    detailText += `<tr><td style="border:1px solid #ccc;padding:4px;">${slideText.trim()}</td><td style="border:1px solid #ccc;padding:4px;">${prediction}</td></tr>`;
+  });
+
+  detailText += `</table>\n`;
+}
 
       result.innerHTML = "予想完了✨";
       details.innerHTML = detailText;
