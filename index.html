@@ -279,23 +279,10 @@ reader.onload = function (e) {
     detailText += `最新：${latest} → 予想：<b>${prediction}</b><br>`;
   }
 
-  result.innerHTML = "予想完了✨";
-  details.innerHTML = detailText + tableHtml;
-};
+     result.innerHTML = "予想完了✨";
+    details.innerHTML = detailText + tableHtml;
+  }; // ← onload 関数ここで終わり
 
+  reader.readAsText(file, "UTF-8"); // ← この位置でOK！
 
-  };
-
-
-
-  reader.readAsText(file);
-
- }
-
-</script>
-
-
-
-</body>
-
-</html>
+} // ← predict関数ここで終わり
