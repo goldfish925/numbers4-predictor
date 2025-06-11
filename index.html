@@ -63,8 +63,7 @@
 <div id="details"></div>
 <img src="neco.png" alt="にゃんこ">
 
-     <script>
-function predict() {
+    function predict() {
   const fileInput = document.getElementById('csvFile');
 
   if (!fileInput.files.length) {
@@ -79,33 +78,34 @@ function predict() {
     const rows = lines.slice(1);
     const parsed = [];
 
-    // ⏳ すべてを読み込む
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+
+    // ✅ 12行ごとのループ中に日付をチェック
     for (let i = 0; i < rows.length; i += 12) {
+      if (!rows[i + 1] || !rows[i + 2]) continue;
+
       const dateStr = rows[i + 1][0].trim();
       const numberStr = rows[i + 2][0].replace(/[^0-9]/g, '').padStart(4, '0');
       const dateObj = new Date(dateStr.replace(/-/g, '/'));
 
-      parsed.push({
-        date: dateObj,
-        number: numberStr
-      });
+      // 🎯 ここでフィルタ
+      if (dateObj >= thirtyDaysAgo) {
+        parsed.push({
+          date: dateObj,
+          number: numberStr
+        });
+      }
     }
 
-    // 🧼 最新の日付順にソート
-    parsed.sort((a, b) => b.date - a.date);
-
-    // 📆 30日以内に限定
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const recentParsed = parsed.filter(p => p.date >= thirtyDaysAgo);
-
-    if (recentParsed.length < 2) {
+    if (parsed.length < 2) {
       alert("直近30日分のデータが少なすぎます！");
       return;
     }
 
-    const usedNumbers = recentParsed.map(p => p.number);
+    parsed.sort((a, b) => b.date - a.date);
+    const usedNumbers = parsed.map(p => p.number);
 
     // 🔢 頻出数字集計 → 予測
     const digitCount = Array(10).fill(0);
@@ -136,44 +136,3 @@ function predict() {
 
   reader.readAsText(fileInput.files[0]);
 }
-
-// 風車差分計算
-function computeKurumagasaDifferences(numbers) {
-  const diffs = [];
-
-  for (let i = 1; i < numbers.length; i++) {
-    const prev = numbers[i - 1].split('').map(Number);
-    const curr = numbers[i].split('').map(Number);
-
-    const slide = curr.map((digit, j) => {
-      const rawDiff = digit - prev[j];
-      const modDiff = ((rawDiff + 10) % 10);
-      return modDiff <= 5 ? modDiff : modDiff - 10; // -5〜+5 の範囲にする
-    });
-
-    diffs.push({
-      index: i,
-      prev: numbers[i - 1],
-      curr: numbers[i],
-      slide: slide  // [千, 百, 十, 一]
-    });
-  }
-
-  return diffs;
-}
-
-// テーブル表示
-function showWindmillTable(data) {
-  let html = '<h3>風車差分（直近30日）</h3>';
-  html += '<table><tr><th>#</th><th>前回</th><th>今回</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
-
-  data.forEach((row, idx) => {
-    html += `<tr><td>${idx + 1}</td><td>${row.prev}</td><td>${row.curr}</td>`;
-    html += row.slide.map(s => `<td>${s >= 0 ? '+' + s : s}</td>`).join('');
-    html += '</tr>';
-  });
-
-  html += '</table>';
-  document.getElementById('details').innerHTML += html;
-}
-</script>
