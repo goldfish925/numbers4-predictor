@@ -129,6 +129,24 @@
           return match ? match[0] : null;
         })
         .filter(Boolean);
+      
+      const allNumbers = [...numbers];
+      if (mode === "recent") {
+        numbers = numbers.slice(-20);
+      }
+
+      let detailText = "よく出た数字ランキング：\n";
+      const count = {};
+      numbers.forEach(num => {
+        for (const digit of num) {
+          count[digit] = (count[digit] || 0) + 1;
+        }
+      });
+      const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
+      sorted.forEach(([digit, freq]) => {
+        detailText += `「${digit}」が ${freq} 回\n`;
+      });
+
       // --- ミックス型予測（頻出・未出・スライドMIX） ---
 if (numbers.length >= 4) {
   // 頻出ランキング（すでにあるcountでOK）
@@ -196,24 +214,7 @@ if (numbers.length >= 4) {
   detailText += `</table>\n`;
 }
 
-
-      const allNumbers = [...numbers];
-      if (mode === "recent") {
-        numbers = numbers.slice(-20);
-      }
-
-      let detailText = "よく出た数字ランキング：\n";
-      const count = {};
-      numbers.forEach(num => {
-        for (const digit of num) {
-          count[digit] = (count[digit] || 0) + 1;
-        }
-      });
-      const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-      sorted.forEach(([digit, freq]) => {
-        detailText += `「${digit}」が ${freq} 回\n`;
-      });
-
+      
       // 各桁ごとの出現傾向
       let positionStats = [{}, {}, {}, {}];
       numbers.forEach(num => {
