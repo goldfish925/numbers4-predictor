@@ -411,8 +411,20 @@ if (numbers.length >= 4) {
 }
 
   result.innerHTML = "予想完了✨";
-  const formattedDetail = escapeHTML(detailText).replace(/\n/g, "<br>");
-　
+const formattedDetail = escapeHTML(detailText).replace(/\n/g, "<br>");
+details.innerHTML = formattedDetail;
+function escapeHTML(str) {
+  return str.replace(/[&<>"']/g, function (match) {
+    return {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[match];
+  });
+}
+
   };
     reader.readAsText(file);
   }
