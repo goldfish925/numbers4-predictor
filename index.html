@@ -151,6 +151,7 @@
     }
     const reader = new FileReader();
     reader.onload = function (e) {
+      
       const text = e.target.result;
       const lines = text.trim().split("\n").slice(1);
 
@@ -447,7 +448,7 @@ if (numbers.length >= 4) {
 const formattedDetail = detailText.replace(/\n/g, "<br>");
 const windmillHTML = getWindmillDiffText(numbers);
 details.innerHTML = formattedDetail + windmillHTML;
-}
+};
     reader.readAsText(file);
   }
   </script>
