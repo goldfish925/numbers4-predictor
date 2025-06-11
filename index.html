@@ -66,7 +66,7 @@
   <img src="neco.png" alt="にゃんこ">
 
 
-  <script>
+  <<script>
   function generateSlideTable(nums, label) {
     if (nums.length < 2) return `${label}：データ不足\n`;
     let html = `<h3>${label}のスライド差分</h3>`;
@@ -150,16 +150,25 @@
       });
 
       // 各桁ごとの出現傾向
+      let positionStats = [{}, {}, {}, {}];
+      numbers.forEach(num => {
+        for (let i = 0; i < 4; i++) {
+          const digit = num[i];
+          positionStats[i][digit] = (positionStats[i][digit] || 0) + 1;
+        }
+      });
+
+      const posName = ["千", "百", "十", "一"];
       detailText += "\n各桁ごとの出やすい数字：\n";
-for (let i = 0; i < 4; i++) {
-  detailText += `\n【${posName[i]}の位】\n`;
-  detailText += "<table><tr><th>数字</th><th>出現回数</th></tr>";
-  const sortedPos = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
-  sortedPos.forEach(([digit, count]) => {
-    detailText += `<tr><td>${digit}</td><td>${count}</td></tr>`;
-  });
-  detailText += "</table>\n";
-}
+      for (let i = 0; i < 4; i++) {
+        detailText += `【${posName[i]}の位】\n`;
+        const sortedPos = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
+        sortedPos.forEach(([digit, count]) => {
+          detailText += `・${digit}：${count} 回\n`;
+        });
+        detailText += "\n";
+      }
+
       // スライド差（テーブル表示）
       detailText += generateSlideTable(numbers, "最新20件");
 
