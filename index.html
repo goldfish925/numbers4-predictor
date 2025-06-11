@@ -2,11 +2,11 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
- <meta charset="UTF-8">
- <title>NUMBERS4予想</title>
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <style>
-  body {
+  <meta charset="UTF-8">
+  <title>NUMBERS4予想</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+     body {
    font-family: "Hiragino Kaku Gothic ProN", sans-serif;
    background-color: #ffffff;
    color: #c1a57b;
@@ -51,21 +51,22 @@
  th {
   background-color: #f0f8ff;
  }
- </style>
+  </style>
 </head>
+<body>
+  <h1>NUMBERS4予想</h1>
+  <input type="file" id="csvFile" accept=".csv"><br>
+  <label><input type="radio" name="mode" value="recent" checked> 最新20件</label>
+  <label><input type="radio" name="mode" value="month"> 直近1か月</label>
 
-  <body>
- <h1>NUMBERS4予想</h1>
-<input type="file" id="csvFile" accept=".csv"><br>
-<label><input type="radio" name="mode" value="recent" checked> 最新20件</label>
-<label><input type="radio" name="mode" value="month"> 直近1か月</label>
-   
-<button onclick="predict()">予測してみるね</button>
-<div id="result">ここに予測が表示されるよ</div>
-<div id="details"></div>
- <img src="neco.png" alt="にゃんこ">
+  <button onclick="predict()">予測してみるね</button>
+  <div id="result">ここに予測が表示されるよ</div>
+  <div id="details"></div>
+  <img src="neco.png" alt="にゃんこ">
 
-   function parseCSV(csvText) {
+  <script>
+    <script>
+function parseCSV(csvText) {
   const lines = csvText.trim().split('\n');
   return lines.map(line => {
     const [date, number] = line.split(',');
@@ -73,7 +74,7 @@
   });
 }
 
-   function getMostFrequentDigits(data, digitCount = 4) {
+function getMostFrequentDigits(data, digitCount = 4) {
   const digitFrequency = Array(10).fill(0);
 
   data.forEach(entry => {
@@ -89,7 +90,7 @@
   return rankedDigits.slice(0, digitCount).map(item => item.digit).join('');
 }
 
-   function predict() {
+function predict() {
   const fileInput = document.getElementById('csvFile');
   const mode = document.querySelector('input[name="mode"]:checked').value;
 
@@ -119,3 +120,8 @@
 
   reader.readAsText(fileInput.files[0]);
 }
+</script>
+
+  </script>
+</body>
+</html>
