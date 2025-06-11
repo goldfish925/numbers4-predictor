@@ -96,13 +96,13 @@ for (let i = 0; i < rows.length; i += 12) {
   }
 }
 
+
 if (parsed.length < 2) {
   alert("直近30日分のデータが少なすぎます！");
   return;
 }
 
 const usedNumbers = parsed.map(p => p.number);
-
 
     // 🔢 頻出数字集計 → 予測
     const digitCount = Array(10).fill(0);
