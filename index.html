@@ -116,6 +116,72 @@
       alert("CSVファイルを選んでね！");
       return;
     }
+// --- ミックス型予測（頻出・未出・スライドMIX） ---
+if (numbers.length >= 4) {
+  // 頻出ランキング（すでにあるcountでOK）
+  const topDigits = Object.entries(count)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([digit]) => digit);
+
+  // 未出数字（0〜9から出てないやつ）
+  const allDigits = [...Array(10).keys()].map(String);
+  const unusedDigits = allDigits.filter(d => !count[d]);
+
+  // スライド平均
+  const diffs = [];
+  for (let i = numbers.length - 3; i < numbers.length; i++) {
+    const prev = numbers[i - 1];
+    const curr = numbers[i];
+    const diff = [];
+    for (let j = 0; j < 4; j++) {
+      const d = (parseInt(curr[j]) - parseInt(prev[j]) + 10) % 10;
+      const slide = (d <= 5) ? d : d - 10;
+      diff.push(slide);
+    }
+    diffs.push(diff);
+  }
+
+  const avgSlide = [0, 0, 0, 0];
+  for (let i = 0; i < 4; i++) {
+    let total = 0;
+    for (let j = 0; j < diffs.length; j++) {
+      total += diffs[j][i];
+    }
+    avgSlide[i] = Math.round(total / diffs.length);
+  }
+
+  const latest = numbers[numbers.length - 1];
+
+  detailText += `\n🌟 ミックス型予測：\n`;
+  detailText += `<table style="margin:auto; border-collapse:collapse;">`;
+  detailText += `<tr><th style="border:1px solid #ccc;padding:4px;">構成</th><th style="border:1px solid #ccc;padding:4px;">予測番号</th></tr>`;
+
+  for (let i = 0; i < 3; i++) {
+    let prediction = "";
+    let desc = "";
+    for (let j = 0; j < 4; j++) {
+      const choice = Math.floor(Math.random() * 3); // 0:頻出 1:未出 2:スライド
+      let digit;
+      if (choice === 0 && topDigits.length > 0) {
+        digit = topDigits[Math.floor(Math.random() * topDigits.length)];
+        desc += "頻 ";
+      } else if (choice === 1 && unusedDigits.length > 0) {
+        digit = unusedDigits[Math.floor(Math.random() * unusedDigits.length)];
+        desc += "未 ";
+      } else {
+        digit = (parseInt(latest[j]) + avgSlide[j] + 10) % 10;
+        digit = digit.toString();
+        desc += "傾 ";
+      }
+      prediction += digit;
+    }
+
+    detailText += `<tr><td style="border:1px solid #ccc;padding:4px;">${desc.trim()}</td><td style="border:1px solid #ccc;padding:4px;">${prediction}</td></tr>`;
+  }
+
+  detailText += `</table>\n`;
+}
 
     const reader = new FileReader();
     reader.onload = function (e) {
