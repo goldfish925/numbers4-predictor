@@ -66,6 +66,13 @@
   <img src="neco.png" alt="にゃんこ">
 
   <script>
+function escapeHTML(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 // 🌪️ 風車差分（ステップ1）用関数
 function getWindmillDiffText(numbers) {
   if (numbers.length < 2) return "";
@@ -77,31 +84,33 @@ function getWindmillDiffText(numbers) {
     3: ["0", "9", "8", "6", "5", "4", "3", "2", "1", "7"], // 一の桁
   };
 
-  let html = `<br><details><summary>🌪️ 風車差分（ステップ1）</summary><pre>`;
+  let rawText = "";
   for (let i = 1; i < numbers.length; i++) {
     const prev = numbers[i - 1];
     const curr = numbers[i];
-    html += `[${i}] ${prev} → ${curr}<br>差分：`;
+    rawText += `[${i}] ${prev} → ${curr}\n差分：`;
 
     for (let j = 0; j < 4; j++) {
       const map = windmillMaps[j];
       const prevIndex = map.indexOf(prev[j]);
       const currIndex = map.indexOf(curr[j]);
       if (prevIndex === -1 || currIndex === -1) {
-        html += "? ";
+        rawText += "? ";
         continue;
       }
       let diff = currIndex - prevIndex;
       if (diff > 5) diff -= 10;
       if (diff < -5) diff += 10;
-      html += (diff >= 0 ? "+" : "") + diff + " ";
+      rawText += (diff >= 0 ? "+" : "") + diff + " ";
     }
-    html += `<br>`;
+    rawText += `\n`;
   }
-  html += `</pre></details>`;
+
+  let html = `<br><details><summary>🌪️ 風車差分（ステップ1）</summary><pre>${escapeHTML(rawText)}</pre></details>`;
   return html;
 }
 </script>
+
 
     if (nums.length < 2) return `${label}：データ不足\n`;
     let html = `<h3>${label}のスライド差分</h3>`;
