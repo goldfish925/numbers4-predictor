@@ -75,6 +75,7 @@
   };
   
   function generateSlideTable(nums, label) {
+    
     if (nums.length < 2) return `${label}：データ不足\n`;
     let html = `<h3>${label}のスライド差分</h3>`;
     html += `<table border="1" style="border-collapse: collapse;"><tr><th>#</th><th>前回</th><th>今回</th><th>差分</th></tr>`;
