@@ -76,37 +76,36 @@ function predict() {
   reader.onload = function(e) {
     const text = e.target.result;
     const lines = text.trim().split('\n').map(line => line.split(','));
-
     const rows = lines.slice(1);
     const parsed = [];
 
-for (let i = 0; i < rows.length; i += 12) {
-  const dateStr = rows[i + 1][0].trim();
-  const numberStr = rows[i + 2][0].replace(/[^0-9]/g, '').padStart(4, '0');
+    // ⏳ すべてを読み込む
+    for (let i = 0; i < rows.length; i += 12) {
+      const dateStr = rows[i + 1][0].trim();
+      const numberStr = rows[i + 2][0].replace(/[^0-9]/g, '').padStart(4, '0');
+      const dateObj = new Date(dateStr.replace(/-/g, '/'));
 
-  const dateObj = new Date(dateStr.replace(/-/g, '/'));
+      parsed.push({
+        date: dateObj,
+        number: numberStr
+      });
+    }
 
-  parsed.push({
-    date: dateObj,
-    number: numberStr
-  });
-}
+    // 🧼 最新の日付順にソート
+    parsed.sort((a, b) => b.date - a.date);
 
-// 🔽 日付で新しい順にソート
-parsed.sort((a, b) => b.date - a.date);
+    // 📆 30日以内に限定
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-// ⏱ 30日以内に絞る
-const thirtyDaysAgo = new Date();
-thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const recentParsed = parsed.filter(p => p.date >= thirtyDaysAgo);
 
-const recentParsed = parsed.filter(p => p.date >= thirtyDaysAgo);
+    if (recentParsed.length < 2) {
+      alert("直近30日分のデータが少なすぎます！");
+      return;
+    }
 
-if (recentParsed.length < 2) {
-  alert("直近30日分のデータが少なすぎます！");
-  return;
-}
-
-const usedNumbers = recentParsed.map(p => p.number);
+    const usedNumbers = recentParsed.map(p => p.number);
 
     // 🔢 頻出数字集計 → 予測
     const digitCount = Array(10).fill(0);
@@ -178,4 +177,3 @@ function showWindmillTable(data) {
   document.getElementById('details').innerHTML += html;
 }
 </script>
-
