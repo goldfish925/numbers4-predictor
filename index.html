@@ -173,100 +173,78 @@
   const reader = new FileReader();
 
   reader.onload = function (e) {
-
-   const text = e.target.result;
-
-   const lines = text.trim().split("\n").slice(1);
-
-
-
-   let numbers = lines
-
+  const text = e.target.result;
+  const lines = text.split("\n").filter(line => line.trim() !== "");
+  const numbers = lines
     .map(line => {
-
-     const cols = line.split(",");
-
-     const raw = cols[2] || "";
-
-     const match = raw.match(/\d{4}/);
-
-     return match ? match[0] : null;
-
+      const cols = line.trim().split(",");
+      const raw = cols[2] || "";
+      const match = raw.match(/\d{4}/); 
+      return match ? match[0] : null;
     })
-
     .filter(Boolean);
 
-
-
-   const allNumbers = [...numbers];
-
-   if (mode === "recent") {
-
-    numbers = numbers.slice(-20);
-
-   }
-
-
-
-   let detailText = "よく出た数字ランキング：\n";
-
-   const count = {};
-
-   numbers.forEach(num => {
-
+  // ======== 数字ランキング ========
+  const count = {};
+  numbers.forEach(num => {
     for (const digit of num) {
-
-     count[digit] = (count[digit] || 0) + 1;
-
+      count[digit] = (count[digit] || 0) + 1;
     }
+  });
 
-   });
-
-   const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-
-   sorted.forEach(([digit, freq]) => {
-
+  const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
+  let detailText = "よく出た数字ランキング：\n";
+  sorted.forEach(([digit, freq]) => {
     detailText += `「${digit}」が ${freq} 回\n`;
+  });
 
-   });
-
-
-
-   // 各桁ごとの出現傾向
-
-   let positionStats = [{}, {}, {}, {}];
-
-   numbers.forEach(num => {
-
+  // ======== 桁別統計 ========
+  const positionStats = [{}, {}, {}, {}]; // 千・百・十・一
+  numbers.forEach(num => {
     for (let i = 0; i < 4; i++) {
-
-     const digit = num[i];
-
-     positionStats[i][digit] = (positionStats[i][digit] || 0) + 1;
-
+      const digit = num[i];
+      if (digit !== undefined) {
+        positionStats[i][digit] = (positionStats[i][digit] || 0) + 1;
+      }
     }
+  });
 
-   });
+  const posName = ["千", "百", "十", "一"];
+  let tableHtml = "<br><br>各桁ごとの出やすい数字（まとめ表）：<br>";
+  tableHtml += `<table border="1" cellspacing="0" cellpadding="4" style="border-collapse: collapse;">
+    <tr>
+      <th>順位</th>
+      <th>${posName[0]}の位</th>
+      <th>${posName[1]}の位</th>
+      <th>${posName[2]}の位</th>
+      <th>${posName[3]}の位</th>
+    </tr>`;
 
+  const sortedStats = positionStats.map(pos =>
+    Object.entries(pos).sort((a, b) => b[1] - a[1])
+  );
+  const maxRows = Math.max(...sortedStats.map(stats => stats.length));
 
+  for (let i = 0; i < maxRows; i++) {
+    tableHtml += `<tr><td>${i + 1}</td>`;
+    for (let j = 0; j < 4; j++) {
+      const item = sortedStats[j][i];
+      if (item) {
+        tableHtml += `<td>${item[0]} (${item[1]})</td>`;
+      } else {
+        tableHtml += "<td>-</td>";
+      }
+    }
+    tableHtml += "</tr>";
+  }
+  tableHtml += "</table><br>";
 
-   const posName = ["千", "百", "十", "一"];
+  // ========== 💡 ここで表示を更新 ==========
+  details.innerHTML = detailText.replace(/\n/g, "<br>") + slideText + tableHtml;
+};
 
-   detailText += "\n各桁ごとの出やすい数字：\n";
+reader.readAsText(file, "UTF-8");
 
-   for (let i = 0; i < 4; i++) {
-
-    detailText += `【${posName[i]}の位】\n`;
-
-    const sortedPos = Object.entries(positionStats[i]).sort((a, b) => b[1] - a[1]);
-
-    sortedPos.forEach(([digit, count]) => {
-
-     detailText += `・${digit}：${count} 回\n`;
-
-    });
-
-    detailText += "\n";
 
    }
 
