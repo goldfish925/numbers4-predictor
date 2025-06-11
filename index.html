@@ -194,6 +194,35 @@ for (let i = 0; i < maxRows; i++) {
 }
 
 detailText += "</table>\n";
+      // --- 出現頻度による予測 ---
+const topN = 2;  // 上位何件を使うか（例：上位2個）
+const topDigitsByPos = positionStats.map(posStat => {
+  return Object.entries(posStat)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, topN)
+    .map(entry => entry[0]);
+});
+
+// 全組み合わせ（4桁）を作成
+const freqBasedPredictions = [];
+for (const d0 of topDigitsByPos[0]) {
+  for (const d1 of topDigitsByPos[1]) {
+    for (const d2 of topDigitsByPos[2]) {
+      for (const d3 of topDigitsByPos[3]) {
+        freqBasedPredictions.push(`${d0}${d1}${d2}${d3}`);
+      }
+    }
+  }
+}
+
+detailText += `\n📊 出現頻度による予測（各桁の上位${topN}で構成）:\n`;
+freqBasedPredictions.slice(0, 10).forEach((num, idx) => {
+  detailText += `#${idx + 1}：${num}\n`;
+});
+if (freqBasedPredictions.length > 10) {
+  detailText += `...全${freqBasedPredictions.length}通りの候補があります\n`;
+}
+
 
       // スライド差分表示
 if (mode === "recent") {
