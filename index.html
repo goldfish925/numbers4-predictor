@@ -80,9 +80,10 @@
 
     function parseCSV(csvText) {
       const lines = csvText.trim().split('\n');
+      lines.shift(); 
       return lines
         .map(line => {
-          const columns = line.split('\t');
+          const columns = line.split(',');
           if (columns.length < 3) return null;
           const date = columns[1];
           const number = columns[2];
@@ -107,6 +108,7 @@
     }
 
     function predict() {
+      document.getElementById('result').innerText = 'ボタン押されたよ！';
       const fileInput = document.getElementById('csvFile');
       const mode = document.querySelector('input[name="mode"]:checked').value;
 
