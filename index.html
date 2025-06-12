@@ -68,15 +68,17 @@
     document.getElementById('predictButton').addEventListener('click', predict);
 
     function parseCSV(csvText) {
-      const lines = csvText.trim().split('\n');
-      return lines.slice(1).map(line => {
-        const columns = line.split('\t');
-        if (columns.length < 3) return null;
-        const date = columns[1];
-        const number = columns[2];
-        return { date, number };
-      }).filter(entry => entry);
-    }
+  const lines = csvText.trim().split('\n');
+  return lines.slice(1).map(line => {
+    // カンマ区切りを想定
+    const columns = line.split(',');
+    if (columns.length < 3) return null;
+    const date = columns[1].trim();
+    const number = columns[2].trim();
+    return { date, number };
+  }).filter(entry => entry);
+}
+
 
     function getMostFrequentDigits(data, digitCount = 4) {
       const digitFrequency = Array(10).fill(0);
