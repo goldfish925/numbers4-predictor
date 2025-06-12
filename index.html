@@ -79,6 +79,41 @@
 
 
   <script>
+    function createAllTables(data) {
+  const container = document.getElementById('table-container');
+  container.innerHTML = '';
+
+  if (data.length < 2) {
+    alert('有効なデータが足りません！（2件以上必要）');
+    return;
+  }
+
+  const table = document.createElement('table');
+  const header = document.createElement('tr');
+  header.innerHTML = `
+    <th>当選番号</th>
+    <th>千</th>
+    <th>百</th>
+    <th>十</th>
+    <th>一</th>
+  `;
+  table.appendChild(header);
+
+  const firstRow = document.createElement('tr');
+  firstRow.innerHTML = `<td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
+  table.appendChild(firstRow);
+
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i - 1] || !data[i]) continue;
+    const { curr, diffs } = getWheelDifferences(data[i - 1].number, data[i].number);
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${curr}</td>` + diffs.map(d => `<td>${d}</td>`).join('');
+    table.appendChild(row);
+  }
+
+  container.appendChild(table);
+}
+
     document.getElementById('predictButton').addEventListener('click', predict);
 
     function parseCSV(csvText) {
