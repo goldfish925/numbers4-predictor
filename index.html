@@ -88,7 +88,17 @@
   
  <script>
   document.getElementById('predictButton').addEventListener('click', predict);
+function parseDate(str) {
+  // 例： "1994/10/7" → "1994-10-07" に変換してからDate化
+  const parts = str.split('/');
+  if (parts.length !== 3) return new Date(str); // 念のため
 
+  const year = parts[0];
+  const month = parts[1].padStart(2, '0'); // 2桁化
+  const day = parts[2].padStart(2, '0');   // 2桁化
+
+  return new Date(`${year}-${month}-${day}`);
+}
   function parseCSV(csvText) {
     const lines = csvText.trim().split('\n');
     return lines.map(line => {
@@ -135,14 +145,16 @@
       
       let data;
       if (mode === 'recent') {
-        data = allData.slice(-20);
-        console.log("最新20件:", data);
-      } else if (mode === 'month') {
-        const oneMonthAgo = new Date();
-        console.log(`→ ${entry.date} = ${d.toString()}`);
-        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-        data = allData.filter(entry => new Date(entry.date) >= oneMonthAgo);
-      }
+  data = allData.slice(-20);
+} else if (mode === 'month') {
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+  data = allData.filter(entry => {
+    const d = parseDate(entry.date);
+    return d >= oneMonthAgo;
+  });
+}
+console.log(`フィルター日付: ${entry.date} -> ${d.toISOString()}`);
 
       const prediction = getMostFrequentDigits(data);
       document.getElementById('result').innerText = `予想数字: ${prediction}`;
@@ -195,11 +207,6 @@ function createTable(data) {
 
   container.appendChild(table);
 }
-
-// 実行（サンプル）
-const result = getWheelDifferences("5084", "3142");
-createTable(result);
-
 
     reader.readAsText(fileInput.files[0]);
   }
