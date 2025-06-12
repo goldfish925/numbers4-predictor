@@ -199,24 +199,22 @@ function collectDiffPatternFrequency(data) {
 
     console.log('予測一覧:', predictions);
 
-    // 必要なら画面表示の処理もここに書く
-  };
+    // テーブル表示の初期化
     document.getElementById('details').innerText = '';
-      // テーブル作成
-      const container = document.getElementById('table-container');
-      container.innerHTML = '';
+    const container = document.getElementById('table-container');
+    container.innerHTML = '';
 
-      const table = document.createElement('table');
+     const table = document.createElement('table');
     const header = document.createElement('tr');
     header.innerHTML = `<th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
     table.appendChild(header);
-    
-      // 最初の行（差分なし）
+
+    // 最初の行（差分なし）
     const firstRow = document.createElement('tr');
     firstRow.innerHTML = `<td>${data[0].date}</td><td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
-    table.appendChild(firstRow);
+    table.appendChild(firstRow);　　
 
-     // 差分付きの行
+    // 差分付きの行
     for (let i = 1; i < data.length; i++) {
       const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
       const row = document.createElement('tr');
@@ -225,10 +223,21 @@ function collectDiffPatternFrequency(data) {
         diffData.diffs.map(d => `<td>${d}</td>`).join('');
       table.appendChild(row);
     }
-      container.appendChild(table);
+
+    container.appendChild(table);
   };
+
   reader.readAsText(fileInput.files[0]);
-　}　
+}
+
+    // 必要なら画面表示の処理もここに書く
+  };
+    document.getElementById('details').innerText = '';
+      // テーブル作成
+      const container = document.getElementById('table-container');
+      container.innerHTML = '';
+      
+                          
     // 例：過去差分の集計を取る
 const freqMap = collectDiffPatternFrequency(allData);
 
@@ -245,9 +254,9 @@ const predictions = topPatterns.map(item => {
 });
 
 console.log('予測一覧:', predictions);
-    reader.readAsText(fileInput.files[0]);
-  
+      
+         
+    
     </script>
-
 </body>
 </html>
