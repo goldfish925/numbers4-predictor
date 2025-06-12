@@ -74,146 +74,93 @@
   <div id="table-container"></div>
   
     <script>
-   document.getElementById('predictButton').addEventListener('click', predict);
+  document.getElementById('predictButton').addEventListener('click', predict);
 
-    function parseCSV(csvText) {
-  const lines = csvText.trim().split('\n');
-  const data = lines.slice(1).map(line => {
-    const columns = line.split(',');
-    if (columns.length < 3) return null;
-    const date = columns[1].trim(); // 例: 2024/05/01
-    const number = columns[2].trim();
-    return { date, number };
-  }).filter(entry => entry);
+  function parseCSV(csvText) {
+    const lines = csvText.trim().split('\n');
+    const data = lines.slice(1).map(line => {
+      const columns = line.split(',');
+      if (columns.length < 3) return null;
+      const date = columns[1].trim();
+      const number = columns[2].trim();
+      return { date, number };
+    }).filter(entry => entry);
+    data.sort((a, b) => new Date(b.date) - new Date(a.date));
+    return data;
+  }
 
-  // 🔁 最新が上に来るように日付でソート（降順）
-  data.sort((a, b) => new Date(b.date) - new Date(a.date));
+  function getWheelDifferences(prevNumber, currentNumber) {
+    const wheels = {
+      千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
+      百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+      十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
+      一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+    };
 
-  return data;
-}
-    function getMostFrequentDigits(data, digitCount = 4) {
-      const digitFrequency = Array(10).fill(0);
-      data.forEach(entry => {
-        if (!entry || !entry.number) return;
-        entry.number.split('').forEach(digit => {
-          const num = parseInt(digit);
-          if (!isNaN(num)) digitFrequency[num]++;
-        });
-      });
-      const rankedDigits = digitFrequency
-        .map((count, digit) => ({ digit, count }))
-        .sort((a, b) => b.count - a.count);
-      return rankedDigits.slice(0, digitCount).map(item => item.digit).join('');
+    const positions = ['千', '百', '十', '一'];
+    const prevDigits = prevNumber.padStart(4, '0').split('').map(Number);
+    const currDigits = currentNumber.padStart(4, '0').split('').map(Number);
+
+    const diffs = positions.map((pos, i) => {
+      const wheel = wheels[pos];
+      const prevIdx = wheel.indexOf(prevDigits[i]);
+      const currIdx = wheel.indexOf(currDigits[i]);
+      const leftSteps = (prevIdx - currIdx + 10) % 10;
+      const rightSteps = (currIdx - prevIdx + 10) % 10;
+      const direction = leftSteps <= rightSteps ? '左' : '右';
+      const steps = Math.min(leftSteps, rightSteps);
+      return `${direction}${steps}`;
+    });
+
+    return { prev: prevNumber, curr: currentNumber, diffs };
+  }
+
+  function predict() {
+    document.getElementById('result').innerText = '風車差分分析を表示したよ！';
+    const fileInput = document.getElementById('csvFile');
+
+    if (!fileInput.files.length) {
+      alert('CSVファイルを選んでね！');
+      return;
     }
 
-    function getWheelDifferences(prevNumber, currentNumber) {
-      const wheels = {
-        千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
-        百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
-        一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1],
-      };
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const csvText = e.target.result;
+      const allData = parseCSV(csvText);
+      const data = allData.slice(0, 20);
 
-      const positions = ['千', '百', '十', '一'];
-      const prevDigits = prevNumber.padStart(4, '0').split('').map(Number);
-      const currDigits = currentNumber.padStart(4, '0').split('').map(Number);
+      document.getElementById('details').innerText = '';
 
-      const diffs = positions.map((pos, i) => {
-        const wheel = wheels[pos];
-        const prevIdx = wheel.indexOf(prevDigits[i]);
-        const currIdx = wheel.indexOf(currDigits[i]);
-        const leftSteps = (prevIdx - currIdx + 10) % 10;
-        const rightSteps = (currIdx - prevIdx + 10) % 10;
-        const direction = leftSteps <= rightSteps ? '左' : '右';
-        const steps = Math.min(leftSteps, rightSteps);
-        return `${direction}${steps}`;
-      });
+      // テーブル作成
+      const container = document.getElementById('table-container');
+      container.innerHTML = '';
 
-      return { prev: prevNumber, curr: currentNumber, diffs };
-    }
+      const table = document.createElement('table');
+      const header = document.createElement('tr');
+      header.innerHTML = `<th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
+      table.appendChild(header);
 
-    function predict() {
-  document.getElementById('result').innerText = '風車差分分析を表示したよ！';
-  const fileInput = document.getElementById('csvFile');
+      // 最初の行（差分なし）
+      const firstRow = document.createElement('tr');
+      firstRow.innerHTML = `<td>${data[0].date}</td><td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
+      table.appendChild(firstRow);
 
-  if (!fileInput.files.length) {
-    alert('CSVファイルを選んでね！');
-    return;
+      // 差分付き行
+      for (let i = 1; i < data.length; i++) {
+        const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
+        const row = document.createElement('tr');
+        row.innerHTML =
+          `<td>${data[i].date}</td><td>${diffData.curr}</td>` +
+          diffData.diffs.map(d => `<td>${d}</td>`).join('');
+        table.appendChild(row);
+      }
+
+      container.appendChild(table);
+    };
+    reader.readAsText(fileInput.files[0]);
   }
+</script>
 
-      const reader = new FileReader();
-  reader.onload = function (e) {
-    const csvText = e.target.result;
-    const allData = parseCSV(csvText);
-    console.log(allData);
-    allData.sort((a, b) => new Date(b.date) - new Date(a.date));
-    const data = allData.slice(0, 20);
-
-    document.getElementById('details').innerText = '';
-        
-        // 🔧 風車差分分析テーブル
-const container = document.getElementById('table-container');
-container.innerHTML = '';
-
-const table = document.createElement('table');
-const header = document.createElement('tr');
-header.innerHTML = `<th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
-table.appendChild(header);
-
-// 最初の当選番号（差分なし）
-const firstRow = document.createElement('tr');
-firstRow.innerHTML = `<td>${data[0].date}</td><td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
-table.appendChild(firstRow);
-
-// 2行目以降：差分付きで表示（1つ前の番号との比較）
-for (let i = 1; i < data.length; i++) {
-  const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
-  const row = document.createElement('tr');
-  row.innerHTML =
-    `<td>${data[i].date}</td><td>${diffData.curr}</td>` +
-    diffData.diffs.map(d => `<td>${d}</td>`).join('');
-  table.appendChild(row);
-}
-
-container.appendChild(table);
-};
-
-reader.readAsText(fileInput.files[0]);
-}
-
-// 🔧 createAllTables の関数もしっかり閉じる
-function createAllTables(data) {
-  const container = document.getElementById('table-container');
-  container.innerHTML = '';
-
-  if (data.length === 0) {
-    container.innerText = 'データがありません';
-    return;
-  }
-
-  // テーブル作成
-  const table = document.createElement('table');
-
-  // ヘッダー行
-  const header = document.createElement('tr');
-  header.innerHTML = `<th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
-  table.appendChild(header);
-
-  // 最初の行は当選番号だけ、差分なし
-  const firstRow = document.createElement('tr');
-  firstRow.innerHTML = `<td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
-  table.appendChild(firstRow);
-
-  // 2行目以降は差分付き
-  for (let i = 1; i < data.length; i++) {
-    const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${diffData.curr}</td>` + diffData.diffs.map(d => `<td>${d}</td>`).join('');
-    table.appendChild(row);
-  }
-
-  container.appendChild(table);
-}
-  </script>
 </body>
 </html>
