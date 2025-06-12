@@ -98,14 +98,13 @@ function getTopDiffPatterns(freqMap, topN = 3) {
 }
 
 // 差分パターンを使って次の数字を予測
-// currentNumber: 最新の数字文字列, pattern: 差分パターン配列（例: ['左3','右1','左0','右2']）
-function predictNextNumber(currentNumber, pattern) {
-  const wheels = {
-    千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
-    百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
-    一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1],
-  };
+  function predictNextNumber(currentNumber, pattern) {
+    const wheels = {
+      千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
+      百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+      十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
+      一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+    };
 
   const positions = ['千', '百', '十', '一'];
   const currDigits = currentNumber.padStart(4, '0').split('').map(Number);
@@ -117,34 +116,32 @@ function predictNextNumber(currentNumber, pattern) {
     const currIdx = wheel.indexOf(currDigit);
 
     const direction = diff[0]; // '左' or '右'
-    const steps = parseInt(diff.slice(1));
+      const steps = parseInt(diff.slice(1));
 
     let nextIdx;
-    if (direction === '左') {
-      nextIdx = (currIdx - steps + 10) % 10;
-    } else {
-      nextIdx = (currIdx + steps) % 10;
-    }
-    nextDigits.push(wheel[nextIdx]);
-  });
+      if (direction === '左') {
+        nextIdx = (currIdx - steps + 10) % 10;
+      } else {
+        nextIdx = (currIdx + steps) % 10;
+      }
+      nextDigits.push(wheel[nextIdx]);
+    });
 
-  return nextDigits.join('');
-}
-
-      
-      
-// 過去データから差分パターンの出現頻度を集計
-function collectDiffPatternFrequency(data) {
-  const freqMap = {}; // { '左3,右1,左0,右2': count, ... }
-
-  for (let i = 1; i < data.length; i++) {
-    const diffObj = getWheelDifferences(data[i - 1].number, data[i].number);
-    const key = diffObj.diffs.join(','); // 文字列化してkeyに
-    freqMap[key] = (freqMap[key] || 0) + 1;
+    return nextDigits.join('');
   }
 
-  return freqMap;
-}
+      
+      
+// 差分頻度集計
+  function collectDiffPatternFrequency(data) {
+    const freqMap = {};
+    for (let i = 1; i < data.length; i++) {
+      const diffObj = getWheelDifferences(data[i - 1].number, data[i].number);
+      const key = diffObj.diffs.join(',');
+      freqMap[key] = (freqMap[key] || 0) + 1;
+    }
+    return freqMap;
+  }
       
   function getWheelDifferences(prevNumber, currentNumber) {
     const wheels = {
@@ -171,7 +168,6 @@ function collectDiffPatternFrequency(data) {
 
     return { prev: prevNumber, curr: currentNumber, diffs };
   }
-
   function predict() {
     document.getElementById('result').innerText = '風車差分分析を表示したよ！';
     const fileInput = document.getElementById('csvFile');
@@ -183,80 +179,54 @@ function collectDiffPatternFrequency(data) {
 
     const reader = new FileReader();
 
-  reader.onload = function (e) {
-    const csvText = e.target.result;
-    const allData = parseCSV(csvText);
-    const data = allData.slice(0, 20);
-
-    // 過去差分の集計
-    const freqMap = collectDiffPatternFrequency(allData);
-    const topPatterns = getTopDiffPatterns(freqMap, 3);
-    const latestNumber = allData[0].number;
-    const predictions = topPatterns.map(item => {
-      const predictedNum = predictNextNumber(latestNumber, item.pattern);
-      return { predictedNum, pattern: item.pattern, count: item.count };
-    });
+    reader.onload = function (e) {
+      const csvText = e.target.result;
+      const allData = parseCSV(csvText);
+      const data = allData.slice(0, 20);
+    
+      // 過去差分の集計
+      const freqMap = collectDiffPatternFrequency(allData);
+      const topPatterns = getTopDiffPatterns(freqMap, 3);
+      const latestNumber = allData[0].number;
+      const predictions = topPatterns.map(item => {
+        const predictedNum = predictNextNumber(latestNumber, item.pattern);
+        return { predictedNum, pattern: item.pattern, count: item.count };
+      });
 
     console.log('予測一覧:', predictions);
 
-    // テーブル表示の初期化
-    document.getElementById('details').innerText = '';
-    const container = document.getElementById('table-container');
-    container.innerHTML = '';
-
-     const table = document.createElement('table');
-    const header = document.createElement('tr');
-    header.innerHTML = `<th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
-    table.appendChild(header);
-
-    // 最初の行（差分なし）
-    const firstRow = document.createElement('tr');
-    firstRow.innerHTML = `<td>${data[0].date}</td><td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
-    table.appendChild(firstRow);　　
-
-    // 差分付きの行
-    for (let i = 1; i < data.length; i++) {
-      const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
-      const row = document.createElement('tr');
-      row.innerHTML =
-        `<td>${data[i].date}</td><td>${diffData.curr}</td>` +
-        diffData.diffs.map(d => `<td>${d}</td>`).join('');
-      table.appendChild(row);
-    }
-
-    container.appendChild(table);
-  };
-
-  reader.readAsText(fileInput.files[0]);
-}
-
-    // 必要なら画面表示の処理もここに書く
-  };
-    document.getElementById('details').innerText = '';
-      // テーブル作成
+    // テーブル初期化
+      document.getElementById('details').innerText = '';
       const container = document.getElementById('table-container');
       container.innerHTML = '';
-      
-                          
-    // 例：過去差分の集計を取る
-const freqMap = collectDiffPatternFrequency(allData);
 
-// 上位3パターンを取得
-const topPatterns = getTopDiffPatterns(freqMap, 3);
+     const table = document.createElement('table');
+      const header = document.createElement('tr');
+      header.innerHTML = `<th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
+      table.appendChild(header);
 
-// 最新の数字
-const latestNumber = allData[0].number;
+        // 最初の行
+      const firstRow = document.createElement('tr');
+      firstRow.innerHTML = `<td>${data[0].date}</td><td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
+      table.appendChild(firstRow);
 
-// それぞれのパターンで予測を作る
-const predictions = topPatterns.map(item => {
-  const predictedNum = predictNextNumber(latestNumber, item.pattern);
-  return { predictedNum, pattern: item.pattern, count: item.count };
-});
+      // 差分付きの行
+      for (let i = 1; i < data.length; i++) {
+        const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
+        const row = document.createElement('tr');
+        row.innerHTML =
+          `<td>${data[i].date}</td><td>${diffData.curr}</td>` +
+          diffData.diffs.map(d => `<td>${d}</td>`).join('');
+        table.appendChild(row);
+      }
 
-console.log('予測一覧:', predictions);
-      
-         
+    ccontainer.appendChild(table);
+    };
+
+    reader.readAsText(fileInput.files[0]);
+  }
+</script>
+
     
-    </script>
 </body>
 </html>
