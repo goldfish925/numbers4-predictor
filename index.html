@@ -131,8 +131,8 @@
     }
 
     function predict() {
-      document.getElementById('result').innerText = 'ボタン押されたよ！';
-      const fileInput = document.getElementById('csvFile');
+  document.getElementById('result').innerText = '風車差分分析を表示したよ！';
+  const fileInput = document.getElementById('csvFile');
 
       if (!fileInput.files.length) {
         alert('CSVファイルを選んでね！');
@@ -146,32 +146,31 @@
 
         const data = allData.slice(-20); // ⭐直近20件に限定
 
-        const prediction = getMostFrequentDigits(data);
-        document.getElementById('result').innerText = `予想数字: ${prediction}`;
-        document.getElementById('details').innerText = '（頻出数字から作られた予想だよ）';
+        document.getElementById('details').innerText = '';
 
+        
         // 🔧 風車差分分析テーブル
         const container = document.getElementById('table-container');
-        container.innerHTML = '';
+    container.innerHTML = '';
 
         const table = document.createElement('table');
-        const header = document.createElement('tr');
-        header.innerHTML = `<th>前回</th><th>今回</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
-        table.appendChild(header);
+    const header = document.createElement('tr');
+    header.innerHTML = `<th>前回</th><th>今回</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
+    table.appendChild(header);
 
-        for (let i = 1; i < data.length; i++) {
-          const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
-          const row = document.createElement('tr');
-          row.innerHTML = `<td>${diffData.prev}</td><td>${diffData.curr}</td>` +
-            diffData.diffs.map(d => `<td>${d}</td>`).join('');
-          table.appendChild(row);
-        }
-
-        container.appendChild(table);
-      };
-
-      reader.readAsText(fileInput.files[0]);
+    for (let i = 1; i < data.length; i++) {
+      const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${diffData.prev}</td><td>${diffData.curr}</td>` +
+        diffData.diffs.map(d => `<td>${d}</td>`).join('');
+      table.appendChild(row);
     }
+
+    container.appendChild(table);
+  };
+
+  reader.readAsText(fileInput.files[0]);
+}
     function createAllTables(data) {
   const container = document.getElementById('table-container');
   container.innerHTML = '';
