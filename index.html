@@ -3,178 +3,139 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>NUMBERS4予想</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ナンバーズ4予測ツール</title>
   <style>
-    body {
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-      background-color: #ffffff;
-      color: #c1a57b;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 {
-      font-size: 28px;
-    }
-    button {
-      background-color: #c1a57b;
-      color: #5a4635;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    #result, #details {
-      margin-top: 20px;
-    }
-    #details {
-      font-size: 14px;
-      white-space: pre-line;
-      color: #7c6240;
-    }
-    img {
-      max-width: 150px;
-      margin-top: 20px;
-    }
     table {
       border-collapse: collapse;
-      margin: 1em auto;
-      width: auto;
+      margin-top: 1em;
+      width: 100%;
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 0.4em 0.8em;
+      padding: 4px 8px;
       text-align: center;
-    }
-    th {
-      background-color: #f0f8ff;
     }
   </style>
 </head>
 <body>
-  <h1>NUMBERS4予想</h1>
-  <input type="file" id="csvFile" accept=".csv" /><br />
-  <button id="predictButton">予測してみるね</button>
-  <div id="result">ここに予測が表示されるよ</div>
+  <h1>ナンバーズ4予測ツール</h1>
+  <input type="file" id="csvFile" accept=".csv,.txt" />
+  <button id="predictButton">予想する！</button>
   <div id="result"></div>
   <div id="details"></div>
-  <img src="neco.png" alt="にゃんこ" />
-
-  <h2>風車差分分析</h2>
   <div id="table-container"></div>
 
   <script>
-  document.getElementById('predictButton').addEventListener('click', predict);
+    document.getElementById('predictButton').addEventListener('click', predict);
 
-  function parseCSV(csvText) {
-    const lines = csvText.trim().split('\n');
-    return lines.slice(1).map(line => {
-      const columns = line.split('\t');
-      const date = columns[1]?.trim();
-      const number = columns[2]?.trim();
-      if (!date || !/^\d{4}$/.test(number)) return null;
-      return { date, number };
-    }).filter(entry => entry !== null);
-  }
+    function parseCSV(csvText) {
+      const lines = csvText.trim().split('\n');
+      return lines.slice(1).map(line => {
+        const columns = line.split('\t');
+        const date = columns[1]?.trim();
+        const number = columns[2]?.trim();
+        if (!date || !/^\d{4}$/.test(number)) return null;
+        return { date, number };
+      }).filter(entry => entry !== null);
+    }
 
-  function getMostFrequentDigits(data, digitCount = 4) {
-    const digitFrequency = Array(10).fill(0);
-    data.forEach(entry => {
-      if (!entry || !entry.number) return;
-      entry.number.split('').forEach(digit => {
-        const num = parseInt(digit);
-        if (!isNaN(num)) digitFrequency[num]++;
+    function getMostFrequentDigits(data, digitCount = 4) {
+      const digitFrequency = Array(10).fill(0);
+      data.forEach(entry => {
+        if (!entry || !entry.number) return;
+        entry.number.split('').forEach(digit => {
+          const num = parseInt(digit);
+          if (!isNaN(num)) digitFrequency[num]++;
+        });
       });
-    });
-    const rankedDigits = digitFrequency
-      .map((count, digit) => ({ digit, count }))
-      .sort((a, b) => b.count - a.count);
-    return rankedDigits.slice(0, digitCount).map(item => item.digit).join('');
-  }
-
-  function getWheelDifferences(prevNumber, currentNumber) {
-    const wheels = {
-      千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
-      百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-      十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
-      一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1],
-    };
-
-    const positions = ['千', '百', '十', '一'];
-    const prevDigits = prevNumber.padStart(4, '0').split('').map(Number);
-    const currDigits = currentNumber.padStart(4, '0').split('').map(Number);
-
-    const diffs = positions.map((pos, i) => {
-      const wheel = wheels[pos];
-      const prevIdx = wheel.indexOf(prevDigits[i]);
-      const currIdx = wheel.indexOf(currDigits[i]);
-
-      const leftSteps = (prevIdx - currIdx + 10) % 10;
-      const rightSteps = (currIdx - prevIdx + 10) % 10;
-      const direction = leftSteps <= rightSteps ? '左' : '右';
-      const steps = Math.min(leftSteps, rightSteps);
-
-      return `${direction}${steps}`;
-    });
-
-    return { prev: prevNumber, curr: currentNumber, diffs };
-  }
-
-  function createAllTables(data) {
-    const container = document.getElementById('table-container');
-    container.innerHTML = '';
-
-    if (data.length < 2) {
-      alert('有効なデータが足りません！（2件以上必要）');
-      return;
+      const rankedDigits = digitFrequency
+        .map((count, digit) => ({ digit, count }))
+        .sort((a, b) => b.count - a.count);
+      return rankedDigits.slice(0, digitCount).map(item => item.digit).join('');
     }
 
-    const table = document.createElement('table');
-    const header = document.createElement('tr');
-    header.innerHTML = `<th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
-    table.appendChild(header);
+    function getWheelDifferences(prevNumber, currentNumber) {
+      const wheels = {
+        千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
+        百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
+        一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+      };
 
-    const firstRow = document.createElement('tr');
-    firstRow.innerHTML = `<td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
-    table.appendChild(firstRow);
+      const positions = ['千', '百', '十', '一'];
+      const prevDigits = prevNumber.padStart(4, '0').split('').map(Number);
+      const currDigits = currentNumber.padStart(4, '0').split('').map(Number);
 
-    for (let i = 1; i < data.length; i++) {
-      if (!data[i - 1] || !data[i]) continue;
-      const { curr, diffs } = getWheelDifferences(data[i - 1].number, data[i].number);
-      const row = document.createElement('tr');
-      row.innerHTML = `<td>${curr}</td>` + diffs.map(d => `<td>${d}</td>`).join('');
-      table.appendChild(row);
+      const diffs = positions.map((pos, i) => {
+        const wheel = wheels[pos];
+        const prevIdx = wheel.indexOf(prevDigits[i]);
+        const currIdx = wheel.indexOf(currDigits[i]);
+
+        const leftSteps = (prevIdx - currIdx + 10) % 10;
+        const rightSteps = (currIdx - prevIdx + 10) % 10;
+        const direction = leftSteps <= rightSteps ? '左' : '右';
+        const steps = Math.min(leftSteps, rightSteps);
+
+        return `${direction}${steps}`;
+      });
+
+      return { prev: prevNumber, curr: currentNumber, diffs };
     }
 
-    container.appendChild(table);
-  }
+    function createAllTables(data) {
+      const container = document.getElementById('table-container');
+      container.innerHTML = '';
 
-  function predict() {
-    document.getElementById('result').innerText = 'ボタン押されたよ！';
+      if (data.length < 2) {
+        alert('有効なデータが足りません！（2件以上必要）');
+        return;
+      }
 
-    const fileInput = document.getElementById('csvFile');
-    if (!fileInput.files.length) {
-      alert('CSVファイルを選んでね！');
-      return;
+      const table = document.createElement('table');
+      const header = document.createElement('tr');
+      header.innerHTML = `<th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
+      table.appendChild(header);
+
+      // 最初の行（番号のみ表示）
+      const firstRow = document.createElement('tr');
+      firstRow.innerHTML = `<td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
+      table.appendChild(firstRow);
+
+      for (let i = 1; i < data.length; i++) {
+        if (!data[i - 1] || !data[i]) continue;
+        const { curr, diffs } = getWheelDifferences(data[i - 1].number, data[i].number);
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${curr}</td>` + diffs.map(d => `<td>${d}</td>`).join('');
+        table.appendChild(row);
+      }
+
+      container.appendChild(table);
     }
 
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const csvText = e.target.result;
-      const allData = parseCSV(csvText);
-      const data = allData.slice(-20); // 直近20件
+    function predict() {
+      document.getElementById('result').innerText = 'ボタン押されたよ！';
 
-      const prediction = getMostFrequentDigits(data);
-      document.getElementById('result').innerText = `予想数字: ${prediction}`;
-      document.getElementById('details').innerText = '（頻出数字から作られた予想だよ）';
+      const fileInput = document.getElementById('csvFile');
+      if (!fileInput.files.length) {
+        alert('CSVファイルを選んでね！');
+        return;
+      }
 
-      createAllTables(data);
-    };
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const csvText = e.target.result;
+        const allData = parseCSV(csvText);
+        const data = allData.slice(-20); // 直近20件
 
-    reader.readAsText(fileInput.files[0]);
-  }
-</script>
+        const prediction = getMostFrequentDigits(data);
+        document.getElementById('result').innerText = `予想数字: ${prediction}`;
+        document.getElementById('details').innerText = '（頻出数字から作られた予想だよ）';
+
+        createAllTables(data);
+      };
+
+      reader.readAsText(fileInput.files[0]);
+    }
+  </script>
 </body>
 </html>
