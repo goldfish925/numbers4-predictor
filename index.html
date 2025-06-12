@@ -68,15 +68,15 @@
     document.getElementById('predictButton').addEventListener('click', predict);
 
     function parseCSV(csvText) {
-      const lines = csvText.trim().split('\n');
-      return lines.slice(1).map(line => {
-        const columns = line.split('\t');
-        if (columns.length < 3) return null;
-        const date = columns[1];
-        const number = columns[2];
-        return { date, number };
-      }).filter(entry => entry);
-    }
+  const lines = csvText.trim().split('\n');
+  return lines.slice(1).map(line => {
+    const columns = line.split('\t');
+    const date = columns[1]?.trim();
+    const number = columns[2]?.trim();
+    if (!date || !/^\d{4}$/.test(number)) return null;
+    return { date, number };
+  }).filter(entry => entry !== null);
+}
 
     function getMostFrequentDigits(data, digitCount = 4) {
       const digitFrequency = Array(10).fill(0);
@@ -122,8 +122,15 @@
     }
 
     function createAllTables(data) {
-      const container = document.getElementById('table-container');
-      container.innerHTML = '';
+  const container = document.getElementById('table-container');
+  container.innerHTML = '';
+
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i - 1] || !data[i]) continue; // 安全チェック
+    const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
+    appendTable(diffData);
+  }
+}
 
       const table = document.createElement('table');
       const header = document.createElement('tr');
@@ -136,12 +143,19 @@
       table.appendChild(firstRow);
 
       for (let i = 1; i < data.length; i++) {
+        if (!data[i - 1] || !data[i]) continue;
         const { curr, diffs } = getWheelDifferences(data[i - 1].number, data[i].number);
         const row = document.createElement('tr');
         row.innerHTML = `<td>${curr}</td>` + diffs.map(d => `<td>${d}</td>`).join('');
         table.appendChild(row);
       }
 
+if (data.length < 2) {
+  alert('有効なデータが足りません！（2件以上必要）');
+  return;
+}
+
+    
       container.appendChild(table);
     }
 
