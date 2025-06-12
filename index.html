@@ -139,28 +139,35 @@ function parseDate(str) {
 
     const reader = new FileReader();
     reader.onload = function (e) {
-      const csvText = e.target.result;
-      const allData = parseCSV(csvText);
-　　console.log("読み込んだデータ:", allData);
-      
-      let data;
-      if (mode === 'recent') {
-  data = allData.slice(-20);
-} else if (mode === 'month') {
-  const oneMonthAgo = new Date();
-  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-  data = allData.filter(entry => {
-  const d = parseDate(entry.date);
-  console.log(`フィルター日付: ${entry.date} -> ${d.toISOString()}`);
-  return d >= oneMonthAgo;
-});
-}
+  const csvText = e.target.result;
+  const allData = parseCSV(csvText);
 
+  let data;
+  if (mode === 'recent') {
+    data = allData.slice(-20);
+  } else if (mode === 'month') {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    data = allData.filter(entry => {
+      const d = parseDate(entry.date);
+      return d >= oneMonthAgo;
+    });
+  }
 
-      const prediction = getMostFrequentDigits(data);
-      document.getElementById('result').innerText = `予想数字: ${prediction}`;
-      document.getElementById('details').innerText = '（頻出数字から作られた予想だよ）';
-    };
+  const prediction = getMostFrequentDigits(data);
+  document.getElementById('result').innerText = `予想数字: ${prediction}`;
+  document.getElementById('details').innerText = '（頻出数字から作られた予想だよ）';
+
+  // 風車差分分析テーブル表示
+  const container = document.getElementById('table-container');
+  container.innerHTML = ''; // 前のテーブルクリア
+
+  for(let i = 1; i < data.length; i++) {
+    const diffData = getWheelDifferences(data[i-1].number, data[i].number);
+    createTable(diffData);
+  }
+};
+
 
     function getWheelDifferences(prevNumber, currentNumber) {
   const wheels = {
