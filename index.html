@@ -184,8 +184,9 @@ function collectDiffPatternFrequency(data) {
     const reader = new FileReader();
     reader.onload = function (e) {
       const csvText = e.target.result;
-      const allData = parseCSV(csvText);
-      const data = allData.slice(0, 20);
+    const allData = parseCSV(csvText);
+    const data = allData.slice(0, 20);
+
 
       document.getElementById('details').innerText = '';
 
