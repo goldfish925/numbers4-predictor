@@ -200,13 +200,12 @@ resultArea.innerHTML = '<h3>予測結果</h3>';
 predictions.forEach(item => {
   resultArea.innerHTML += `
     <div>
-      <strong>予測番号:</strong> ${item.predictedNum}<br>
-      <strong>パターン:</strong> ${item.pattern.join(', ')}<br>
-      <strong>出現回数:</strong> ${item.count}
+      ✅ <strong>予測番号:</strong> ${item.predictedNum}<br>
+      📌 <strong>差分パターン:</strong> ${item.pattern.join(', ')}<br>
+      🔢 <strong>出現回数:</strong> ${item.count}
     </div><hr>
   `;
 });
-
 
     // テーブル初期化
       document.getElementById('details').innerText = '';
