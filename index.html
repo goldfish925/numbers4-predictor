@@ -2,184 +2,165 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>NUMBERS4予想</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-     body {
-   font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-   background-color: #ffffff;
-   color: #c1a57b;
-   text-align: center;
-   padding: 20px;
-  }
-  h1 {
-   font-size: 28px;
-  }
-  button {
-  background-color: #c1a57b;
-  color: #5a4635;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  margin-top: 10px;
-  }
-  #result, #details {
-   margin-top: 20px;
-  }
-  #details {
-   font-size: 14px;
-   white-space: pre-line;
-   color: #7c6240;
-  }
-  img {
-   max-width: 150px;
-   margin-top: 20px;
-  }
-   table {
-  border-collapse: collapse;
-  margin: 1em auto;
-  width: auto;
- }
- th, td {
-  border: 1px solid #ccc;
-  padding: 0.4em 0.8em;
-  text-align: center;
- }
- th {
-  background-color: #f0f8ff;
- }
-    
-  <meta charset="UTF-8">
-  <title>風車差分分析</title>
-  <style>
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+      background-color: #ffffff;
+      color: #c1a57b;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 28px;
+    }
+    button {
+      background-color: #c1a57b;
+      color: #5a4635;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #result, #details {
+      margin-top: 20px;
+    }
+    #details {
+      font-size: 14px;
+      white-space: pre-line;
+      color: #7c6240;
+    }
+    img {
+      max-width: 150px;
+      margin-top: 20px;
+    }
     table {
       border-collapse: collapse;
-      margin-top: 20px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 1em auto;
+      width: auto;
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 0.5em 1em;
+      padding: 0.4em 0.8em;
       text-align: center;
     }
     th {
-      background-color: #f8f8f8;
+      background-color: #f0f8ff;
     }
-
   </style>
 </head>
 <body>
- <h1>NUMBERS4予想</h1>
- <input type="file" id="csvFile" accept=".csv"><br>
- <label><input type="radio" name="mode" value="recent" checked> 最新20件</label>
- <label><input type="radio" name="mode" value="month"> 直近1か月</label>
+  <h1>NUMBERS4予想</h1>
+  <input type="file" id="csvFile" accept=".csv" /><br />
+  <label><input type="radio" name="mode" value="recent" checked /> 最新20件</label>
+  <label><input type="radio" name="mode" value="month" /> 直近1か月</label>
 
- <button id="predictButton">予測してみるね</button>
- <div id="result">ここに予測が表示されるよ</div>
- <div id="details"></div>
- <img src="neco.png" alt="にゃんこ">
+  <button id="predictButton">予測してみるね</button>
+  <div id="result">ここに予測が表示されるよ</div>
+  <div id="details"></div>
+  <img src="neco.png" alt="にゃんこ" />
 
   <h2>風車差分分析</h2>
-<div id="table-container"></div>
-  
- <script>
-  document.getElementById('predictButton').addEventListener('click', predict);
-function parseDate(str) {
-  // 例： "1994/10/7" → "1994-10-07" に変換してからDate化
-  const parts = str.split('/');
-  if (parts.length !== 3) return new Date(str); // 念のため
+  <div id="table-container"></div>
 
-  const year = parts[0];
-  const month = parts[1].padStart(2, '0'); // 2桁化
-  const day = parts[2].padStart(2, '0');   // 2桁化
-
-  return new Date(`${year}-${month}-${day}`);
-}
-  function parseCSV(csvText) {
-    const lines = csvText.trim().split('\n');
-    return lines.map(line => {
-      const columns = line.split('\t');
-      if (columns.length < 3) return null;
-      const date = columns[1];
-      const number = columns[2];
-      return { date, number };
-    }).filter(entry => entry);
-  }
-
-  function getMostFrequentDigits(data, digitCount = 4) {
-    const digitFrequency = Array(10).fill(0);
-
-    data.forEach(entry => {
-      if (!entry || !entry.number) return;
-      entry.number.split('').forEach(digit => {
-        const num = parseInt(digit);
-        if (!isNaN(num)) digitFrequency[num]++;
-      });
-    });
-
-    const rankedDigits = digitFrequency
-      .map((count, digit) => ({ digit, count }))
-      .sort((a, b) => b.count - a.count);
-
-    return rankedDigits.slice(0, digitCount).map(item => item.digit).join('');
-  }
-
-  function predict() {
-    const fileInput = document.getElementById('csvFile');
-    const mode = document.querySelector('input[name="mode"]:checked').value;
-
-    if (!fileInput.files.length) {
-      alert("CSVファイルを選んでね！");
-      return;
+  <script>
+    document.getElementById('predictButton').addEventListener('click', predict);
+    function parseDate(str) {
+      const parts = str.split('/');
+      if (parts.length !== 3) return new Date(str);
+      const year = parts[0];
+      const month = parts[1].padStart(2, '0');
+      const day = parts[2].padStart(2, '0');
+      return new Date(`${year}-${month}-${day}`);
     }
 
-    const reader = new FileReader();
-    reader.onload = function (e) {
-  const csvText = e.target.result;
-  const allData = parseCSV(csvText);
+    function parseCSV(csvText) {
+      const lines = csvText.trim().split('\n');
+      return lines
+        .map(line => {
+          const columns = line.split('\t');
+          if (columns.length < 3) return null;
+          const date = columns[1];
+          const number = columns[2];
+          return { date, number };
+        })
+        .filter(entry => entry);
+    }
 
-  let data;
-  if (mode === 'recent') {
-    data = allData.slice(-20);
-  } else if (mode === 'month') {
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-    data = allData.filter(entry => {
-      const d = parseDate(entry.date);
-      return d >= oneMonthAgo;
-    });
-  }
+    function getMostFrequentDigits(data, digitCount = 4) {
+      const digitFrequency = Array(10).fill(0);
+      data.forEach(entry => {
+        if (!entry || !entry.number) return;
+        entry.number.split('').forEach(digit => {
+          const num = parseInt(digit);
+          if (!isNaN(num)) digitFrequency[num]++;
+        });
+      });
+      const rankedDigits = digitFrequency
+        .map((count, digit) => ({ digit, count }))
+        .sort((a, b) => b.count - a.count);
+      return rankedDigits.slice(0, digitCount).map(item => item.digit).join('');
+    }
 
-  const prediction = getMostFrequentDigits(data);
-  document.getElementById('result').innerText = `予想数字: ${prediction}`;
-  document.getElementById('details').innerText = '（頻出数字から作られた予想だよ）';
+    function predict() {
+      const fileInput = document.getElementById('csvFile');
+      const mode = document.querySelector('input[name="mode"]:checked').value;
 
-  // 風車差分分析テーブル表示
-  const container = document.getElementById('table-container');
-  container.innerHTML = ''; // 前のテーブルクリア
+      if (!fileInput.files.length) {
+        alert('CSVファイルを選んでね！');
+        return;
+      }
 
-  for(let i = 1; i < data.length; i++) {
-    const diffData = getWheelDifferences(data[i-1].number, data[i].number);
-    createTable(diffData);
-  }
-};
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const csvText = e.target.result;
+        const allData = parseCSV(csvText);
 
+        let data;
+        if (mode === 'recent') {
+          data = allData.slice(-20);
+        } else if (mode === 'month') {
+          const oneMonthAgo = new Date();
+          oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+          data = allData.filter(entry => {
+            const d = parseDate(entry.date);
+            return d >= oneMonthAgo;
+          });
+        }
+
+        const prediction = getMostFrequentDigits(data);
+        document.getElementById('result').innerText = `予想数字: ${prediction}`;
+        document.getElementById('details').innerText = '（頻出数字から作られた予想だよ）';
+
+        // 風車差分分析テーブル表示
+        const container = document.getElementById('table-container');
+        container.innerHTML = '';
+
+        for (let i = 1; i < data.length; i++) {
+          const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
+          createTable(diffData);
+        }
+      };
+
+      reader.readAsText(fileInput.files[0]);
+    }
 
     function getWheelDifferences(prevNumber, currentNumber) {
-  const wheels = {
-    千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
-    百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
-    一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1]
-  };
+      const wheels = {
+        千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
+        百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
+        一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+      };
 
-  const positions = ['千', '百', '十', '一'];
-  const prevDigits = prevNumber.padStart(4, '0').split('').map(Number);
-  const currDigits = currentNumber.padStart(4, '0').split('').map(Number);
+      const positions = ['千', '百', '十', '一'];
+      const prevDigits = prevNumber.padStart(4, '0').split('').map(Number);
+      const currDigits = currentNumber.padStart(4, '0').split('').map(Number);
+
 
   const diffs = positions.map((pos, i) => {
     const wheel = wheels[pos];
