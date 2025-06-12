@@ -198,7 +198,7 @@ function getTopDiffPatterns(freqMap, topN = 3) {
     // テーブル初期化
       document.getElementById('details').innerText = '';
       const container = document.getElementById('table-container');
-      container.innerHTML = '';
+container.innerHTML = '';  // ← 変数名を正しく統一
 
      const table = document.createElement('table');
       const header = document.createElement('tr');
