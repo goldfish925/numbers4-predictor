@@ -150,11 +150,12 @@ function parseDate(str) {
   const oneMonthAgo = new Date();
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
   data = allData.filter(entry => {
-    const d = parseDate(entry.date);
-    return d >= oneMonthAgo;
-  });
+  const d = parseDate(entry.date);
+  console.log(`フィルター日付: ${entry.date} -> ${d.toISOString()}`);
+  return d >= oneMonthAgo;
+});
 }
-console.log(`フィルター日付: ${entry.date} -> ${d.toISOString()}`);
+
 
       const prediction = getMostFrequentDigits(data);
       document.getElementById('result').innerText = `予想数字: ${prediction}`;
