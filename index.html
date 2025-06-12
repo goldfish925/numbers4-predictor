@@ -131,12 +131,15 @@
     reader.onload = function (e) {
       const csvText = e.target.result;
       const allData = parseCSV(csvText);
-
+　　console.log("読み込んだデータ:", allData);
+      
       let data;
       if (mode === 'recent') {
         data = allData.slice(-20);
+        console.log("最新20件:", data);
       } else if (mode === 'month') {
         const oneMonthAgo = new Date();
+        console.log(`→ ${entry.date} = ${d.toString()}`);
         oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
         data = allData.filter(entry => new Date(entry.date) >= oneMonthAgo);
       }
