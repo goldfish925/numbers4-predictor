@@ -145,6 +145,7 @@
       reader.onload = function (e) {
         const csvText = e.target.result;
         const allData = parseCSV(csvText);
+        console.log(allData);  // 最新の日付が一番最初に来ているか確認
 　　　　allData.sort((a, b) => new Date(b.date) - new Date(a.date)); // 📅 日付で降順ソート
         const data = allData.slice(-20); // ⭐直近20件に限定
 
