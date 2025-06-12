@@ -142,23 +142,20 @@
   }
 
       const reader = new FileReader();
-      reader.onload = function (e) {
-        const csvText = e.target.result;
-        const allData = parseCSV(csvText);
-        console.log(allData);  // 最新の日付が一番最初に来ているか確認
-　　　　allData.sort((a, b) => new Date(b.date) - new Date(a.date)); // 📅 日付で降順ソート
-       
-        const data = allData.slice(0, 20); // ⭐直近20件に限定
+  reader.onload = function (e) {
+    const csvText = e.target.result;
+    const allData = parseCSV(csvText);
+    console.log(allData);
+    allData.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const data = allData.slice(0, 20);
 
-        document.getElementById('details').innerText = '';
-        }
+    document.getElementById('details').innerText = '';
         
         // 🔧 風車差分分析テーブル
 const container = document.getElementById('table-container');
 container.innerHTML = '';
 
 const table = document.createElement('table');
-
 const header = document.createElement('tr');
 header.innerHTML = `<th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
 table.appendChild(header);
