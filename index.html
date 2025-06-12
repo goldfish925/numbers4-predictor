@@ -207,6 +207,32 @@ predictions.forEach(item => {
   `;
 });
 
+       // 差分テーブルの描画もここに続く...
+  const container = document.getElementById('table-container');
+  container.innerHTML = '';
+
+  const table = document.createElement('table');
+  const header = document.createElement('tr');
+  header.innerHTML = `<th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
+  table.appendChild(header);
+
+  const firstRow = document.createElement('tr');
+  firstRow.innerHTML = `<td>${data[0].date}</td><td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
+  table.appendChild(firstRow);
+
+  for (let i = 1; i < data.length; i++) {
+    const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
+    const row = document.createElement('tr');
+    row.innerHTML =
+      `<td>${data[i].date}</td><td>${diffData.curr}</td>` +
+      diffData.diffs.map(d => `<td>${d}</td>`).join('');
+    table.appendChild(row);
+  }
+
+  container.appendChild(table);
+};
+      
+    
     // テーブル初期化
       document.getElementById('details').innerText = '';
       const container = document.getElementById('table-container');
