@@ -135,8 +135,7 @@
     function predict() {
   document.getElementById('result').innerText = '風車差分分析を表示したよ！';
   const fileInput = document.getElementById('csvFile');
-      }
-
+      
       if (!fileInput.files.length) {
         alert('CSVファイルを選んでね！');
         return;
@@ -148,7 +147,8 @@
         const allData = parseCSV(csvText);
         console.log(allData);  // 最新の日付が一番最初に来ているか確認
 　　　　allData.sort((a, b) => new Date(b.date) - new Date(a.date)); // 📅 日付で降順ソート
-        const data = slice(0, 20); // ⭐直近20件に限定
+       
+        const data = allData.slice(0, 20); // ⭐直近20件に限定
 
         document.getElementById('details').innerText = '';
         }
