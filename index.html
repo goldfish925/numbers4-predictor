@@ -173,48 +173,44 @@ for (let i = 1; i < data.length; i++) {
 
 container.appendChild(table);
   };
-<table>
-  <tr><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>
-  <tr><td>9565</td><td></td><td></td><td></td><td></td></tr>
-  <tr><td>1898</td><td>右4</td><td>右3</td><td>左1</td><td>左3</td></tr>
-  ...
-</table>
 
   reader.readAsText(fileInput.files[0]);
 }
-    function createAllTables(data) {
+  function createAllTables(data) {
   const container = document.getElementById('table-container');
   container.innerHTML = '';
 
-  if (data.length < 2) {
-    alert('有効なデータが足りません！（2件以上必要）');
+  if (data.length === 0) {
+    container.innerText = 'データがありません';
     return;
   }
 
+  // テーブル作成
   const table = document.createElement('table');
+
+  // ヘッダー行
   const header = document.createElement('tr');
-  header.innerHTML = `
-    <th>当選番号</th>
-    <th>千</th>
-    <th>百</th>
-    <th>十</th>
-    <th>一</th>
-  `;
+  header.innerHTML = `<th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
   table.appendChild(header);
 
+  // 最初の行は当選番号だけ、差分なし
   const firstRow = document.createElement('tr');
   firstRow.innerHTML = `<td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
   table.appendChild(firstRow);
 
+  // 2行目以降は差分付き
   for (let i = 1; i < data.length; i++) {
-    if (!data[i - 1] || !data[i]) continue;
-    const { curr, diffs } = getWheelDifferences(data[i - 1].number, data[i].number);
+    const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
     const row = document.createElement('tr');
-    row.innerHTML = `<td>${curr}</td>` + diffs.map(d => `<td>${d}</td>`).join('');
+    row.innerHTML =
+      `<td>${diffData.curr}</td>` +
+      diffData.diffs.map(d => `<td>${d}</td>`).join('');
     table.appendChild(row);
   }
 
   container.appendChild(table);
+}
+
 }
 
   </script>
