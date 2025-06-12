@@ -145,7 +145,7 @@
       reader.onload = function (e) {
         const csvText = e.target.result;
         const allData = parseCSV(csvText);
-
+　　　　allData.sort((a, b) => new Date(b.date) - new Date(a.date)); // 📅 日付で降順ソート
         const data = allData.slice(-20); // ⭐直近20件に限定
 
         document.getElementById('details').innerText = '';
@@ -162,7 +162,7 @@ header.innerHTML = `<th>日付</th><th>当選番号</th><th>千</th><th>百</th>
 table.appendChild(header);
 
 // 最初の当選番号（差分なし）
-onst firstRow = document.createElement('tr');
+const firstRow = document.createElement('tr');
 firstRow.innerHTML = `<td>${data[0].date}</td><td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
 table.appendChild(firstRow);
 
