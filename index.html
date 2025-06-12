@@ -78,17 +78,19 @@
 
     function parseCSV(csvText) {
   const lines = csvText.trim().split('\n');
-  return lines.slice(1).map(line => {
-    // カンマ区切りを想定
+  const data = lines.slice(1).map(line => {
     const columns = line.split(',');
     if (columns.length < 3) return null;
-    const date = columns[1].trim();
+    const date = columns[1].trim(); // 例: 2024/05/01
     const number = columns[2].trim();
     return { date, number };
   }).filter(entry => entry);
+
+  // 🔁 最新が上に来るように日付でソート（降順）
+  data.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  return data;
 }
-
-
     function getMostFrequentDigits(data, digitCount = 4) {
       const digitFrequency = Array(10).fill(0);
       data.forEach(entry => {
@@ -156,19 +158,21 @@ container.innerHTML = '';
 const table = document.createElement('table');
 
 const header = document.createElement('tr');
-header.innerHTML = `<th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
+header.innerHTML = `<th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
 table.appendChild(header);
 
 // 最初の当選番号（差分なし）
-const firstRow = document.createElement('tr');
-firstRow.innerHTML = `<td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
+onst firstRow = document.createElement('tr');
+firstRow.innerHTML = `<td>${data[0].date}</td><td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
 table.appendChild(firstRow);
 
 // 2行目以降：差分付きで表示（1つ前の番号との比較）
 for (let i = 1; i < data.length; i++) {
   const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
   const row = document.createElement('tr');
-  row.innerHTML = `<td>${diffData.curr}</td>` + diffData.diffs.map(d => `<td>${d}</td>`).join('');
+  row.innerHTML =
+    `<td>${data[i].date}</td><td>${diffData.curr}</td>` +
+    diffData.diffs.map(d => `<td>${d}</td>`).join('');
   table.appendChild(row);
 }
 
