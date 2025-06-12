@@ -161,44 +161,41 @@
       const prevDigits = prevNumber.padStart(4, '0').split('').map(Number);
       const currDigits = currentNumber.padStart(4, '0').split('').map(Number);
 
+      const diffs = positions.map((pos, i) => {
+        const wheel = wheels[pos];
+        const prevIdx = wheel.indexOf(prevDigits[i]);
+        const currIdx = wheel.indexOf(currDigits[i]);
 
-  const diffs = positions.map((pos, i) => {
-    const wheel = wheels[pos];
-    const prevIdx = wheel.indexOf(prevDigits[i]);
-    const currIdx = wheel.indexOf(currDigits[i]);
+        const leftSteps = (prevIdx - currIdx + 10) % 10;
+        const rightSteps = (currIdx - prevIdx + 10) % 10;
+        const direction = leftSteps <= rightSteps ? '左' : '右';
+        const steps = Math.min(leftSteps, rightSteps);
 
-    const leftSteps = (prevIdx - currIdx + 10) % 10;
-    const rightSteps = (currIdx - prevIdx + 10) % 10;
-    const direction = leftSteps <= rightSteps ? '左' : '右';
-    const steps = Math.min(leftSteps, rightSteps);
+        return `${direction}${steps}`;
+      });
 
-    return `${direction}${steps}`;
-  });
+      return { prev: prevNumber, curr: currentNumber, diffs };
+    }
 
-  return { prev: prevNumber, curr: currentNumber, diffs };
-}
+    function createTable(data) {
+      const container = document.getElementById('table-container');
+      const table = document.createElement('table');
 
-function createTable(data) {
-  const container = document.getElementById('table-container');
-  const table = document.createElement('table');
+      const header = document.createElement('tr');
+      header.innerHTML = `<th></th><th>千</th><th>百</th><th>十</th><th>一</th>`;
+      table.appendChild(header);
 
-  const header = document.createElement('tr');
-  header.innerHTML = `<th></th><th>千</th><th>百</th><th>十</th><th>一</th>`;
-  table.appendChild(header);
+      const row1 = document.createElement('tr');
+      row1.innerHTML = `<td>${data.prev}</td><td></td><td></td><td></td><td></td>`;
+      table.appendChild(row1);
 
-  const row1 = document.createElement('tr');
-  row1.innerHTML = `<td>${data.prev}</td><td></td><td></td><td></td><td></td>`;
-  table.appendChild(row1);
+      const row2 = document.createElement('tr');
+      row2.innerHTML =
+        `<td>${data.curr}</td>` + data.diffs.map(d => `<td>${d}</td>`).join('');
+      table.appendChild(row2);
 
-  const row2 = document.createElement('tr');
-  row2.innerHTML = `<td>${data.curr}</td>` + data.diffs.map(d => `<td>${d}</td>`).join('');
-  table.appendChild(row2);
-
-  container.appendChild(table);
-}
-
-    reader.readAsText(fileInput.files[0]);
-  }
- </script>
+      container.appendChild(table);
+    }
+  </script>
 </body>
 </html>
