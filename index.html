@@ -58,6 +58,33 @@
       gap: 10px;
       margin-bottom: 20px;
     }
+    <style>
+  #details {
+    font-family: 'Arial', sans-serif;
+    max-width: 400px;
+    margin: 20px auto;
+  }
+  #details h3 {
+    text-align: center;
+    color: #2a4d69;
+    margin-bottom: 20px;
+  }
+  .prediction-card {
+    background: #f0f8ff;
+    border: 2px solid #2a4d69;
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(42, 77, 105, 0.3);
+  }
+  .prediction-card strong {
+    color: #1e2a47;
+  }
+  .prediction-icon {
+    font-size: 1.2em;
+    margin-right: 8px;
+  }
+
   </style>
 </head>
 <body>
@@ -193,17 +220,16 @@ function getTopDiffPatterns(freqMap, topN = 3) {
         return { predictedNum, pattern: item.pattern, count: item.count };
       });
 
-    console.log('予測一覧:', predictions);
-      const resultArea = document.getElementById('details');
+    const resultArea = document.getElementById('details');
 resultArea.innerHTML = '<h3>予測結果</h3>';
 
 predictions.forEach(item => {
   resultArea.innerHTML += `
-    <div>
-      ✅ <strong>予測番号:</strong> ${item.predictedNum}<br>
-      📌 <strong>差分パターン:</strong> ${item.pattern.join(', ')}<br>
-      🔢 <strong>出現回数:</strong> ${item.count}
-    </div><hr>
+    <div class="prediction-card">
+      <div>✅ <strong>予測番号:</strong> ${item.predictedNum}</div>
+      <div>📌 <strong>差分パターン:</strong> ${item.pattern.join(', ')}</div>
+      <div>🔢 <strong>出現回数:</strong> ${item.count}</div>
+    </div>
   `;
 });
 
