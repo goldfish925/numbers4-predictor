@@ -56,7 +56,6 @@
 <body>
   <h1>NUMBERS4予想</h1>
   <input type="file" id="csvFile" accept=".csv" /><br />
-
   <button id="predictButton">予測してみるね</button>
   <div id="result">ここに予測が表示されるよ</div>
   <div id="details"></div>
@@ -67,15 +66,6 @@
 
   <script>
     document.getElementById('predictButton').addEventListener('click', predict);
-
-    function parseDate(str) {
-      const parts = str.split('/');
-      if (parts.length !== 3) return new Date(str);
-      const year = parts[0];
-      const month = parts[1].padStart(2, '0');
-      const day = parts[2].padStart(2, '0');
-      return new Date(`${year}-${month}-${day}`);
-    }
 
     function parseCSV(csvText) {
       const lines = csvText.trim().split('\n');
@@ -131,31 +121,33 @@
       return { prev: prevNumber, curr: currentNumber, diffs };
     }
 
-    function createTable(diffList) {
+    function createAllTables(data) {
       const container = document.getElementById('table-container');
       container.innerHTML = '';
 
       const table = document.createElement('table');
-
       const header = document.createElement('tr');
       header.innerHTML = `<th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
       table.appendChild(header);
 
-      diffList.forEach(item => {
-        const row1 = document.createElement('tr');
-        row1.innerHTML = `<td>${item.prev}</td><td></td><td></td><td></td><td></td>`;
-        table.appendChild(row1);
+      // 最初の行だけ番号表示、差分なし
+      const firstRow = document.createElement('tr');
+      firstRow.innerHTML = `<td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
+      table.appendChild(firstRow);
 
-        const row2 = document.createElement('tr');
-        row2.innerHTML =
-          `<td>${item.curr}</td>` + item.diffs.map(d => `<td>${d}</td>`).join('');
-        table.appendChild(row2);
-      });
+      for (let i = 1; i < data.length; i++) {
+        const { curr, diffs } = getWheelDifferences(data[i - 1].number, data[i].number);
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${curr}</td>` + diffs.map(d => `<td>${d}</td>`).join('');
+        table.appendChild(row);
+      }
 
       container.appendChild(table);
     }
 
     function predict() {
+      document.getElementById('result').innerText = 'ボタン押されたよ！';
+
       const fileInput = document.getElementById('csvFile');
       if (!fileInput.files.length) {
         alert('CSVファイルを選んでね！');
@@ -166,17 +158,13 @@
       reader.onload = function (e) {
         const csvText = e.target.result;
         const allData = parseCSV(csvText);
+        const data = allData.slice(-20); // 直近20件のみ
 
-        const data = allData.slice(-20);
         const prediction = getMostFrequentDigits(data);
         document.getElementById('result').innerText = `予想数字: ${prediction}`;
         document.getElementById('details').innerText = '（頻出数字から作られた予想だよ）';
 
-        const diffList = [];
-        for (let i = 1; i < data.length; i++) {
-          diffList.push(getWheelDifferences(data[i - 1].number, data[i].number));
-        }
-        createTable(diffList);
+        createAllTables(data);
       };
 
       reader.readAsText(fileInput.files[0]);
