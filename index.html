@@ -56,9 +56,6 @@
 <body>
   <h1>NUMBERS4予想</h1>
   <input type="file" id="csvFile" accept=".csv" /><br />
-  <p>※直近30日分のデータで予測するよ</p>
-
-
   <button id="predictButton">予測してみるね</button>
   <div id="result">ここに予測が表示されるよ</div>
   <div id="details"></div>
@@ -69,25 +66,17 @@
 
   <script>
     document.getElementById('predictButton').addEventListener('click', predict);
-    function parseDate(str) {
-      const parts = str.split('/');
-      if (parts.length !== 3) return new Date(str);
-      const year = parts[0];
-      const month = parts[1].padStart(2, '0');
-      const day = parts[2].padStart(2, '0');
-      return new Date(`${year}-${month}-${day}`);
-    }
 
-   function parseCSV(csvText) {
-  const lines = csvText.trim().split('\n');
-  return lines.slice(1).map(line => {
-    const columns = line.includes('\t') ? line.split('\t') : line.split(',');
-    if (columns.length < 3) return null;
-    const date = columns[1].trim();
-    const number = columns[2].trim();
-    return { date, number };
-  }).filter(entry => entry);
-}
+    function parseCSV(csvText) {
+      const lines = csvText.trim().split('\n');
+      return lines.slice(1).map(line => {
+        const columns = line.split('\t');
+        if (columns.length < 3) return null;
+        const date = columns[1];
+        const number = columns[2];
+        return { date, number };
+      }).filter(entry => entry);
+    }
 
     function getMostFrequentDigits(data, digitCount = 4) {
       const digitFrequency = Array(10).fill(0);
@@ -104,51 +93,74 @@
       return rankedDigits.slice(0, digitCount).map(item => item.digit).join('');
     }
 
-    function predict() {
-  document.getElementById('result').innerText = 'ボタン押されたよ！';
-  const fileInput = document.getElementById('csvFile');
+    function getWheelDifferences(prevNumber, currentNumber) {
+      const wheels = {
+        千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
+        百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
+        一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+      };
 
-  if (!fileInput.files.length) {
-    alert('CSVファイルを選んでね！');
-    return;
-  }
+      const positions = ['千', '百', '十', '一'];
+      const prevDigits = prevNumber.padStart(4, '0').split('').map(Number);
+      const currDigits = currentNumber.padStart(4, '0').split('').map(Number);
 
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    const csvText = e.target.result;
-    const allData = parseCSV(csvText);
+      const diffs = positions.map((pos, i) => {
+        const wheel = wheels[pos];
+        const prevIdx = wheel.indexOf(prevDigits[i]);
+        const currIdx = wheel.indexOf(currDigits[i]);
+        const leftSteps = (prevIdx - currIdx + 10) % 10;
+        const rightSteps = (currIdx - prevIdx + 10) % 10;
+        const direction = leftSteps <= rightSteps ? '左' : '右';
+        const steps = Math.min(leftSteps, rightSteps);
+        return `${direction}${steps}`;
+      });
 
-    // ⭐ 直近20件だけ使用
-    const data = allData.slice(-20);
-
-    const prediction = getMostFrequentDigits(data);
-    document.getElementById('result').innerText = `予想数字: ${prediction}`;
-    document.getElementById('details').innerText = '（頻出数字から作られた予想だよ）';
-
-    // 風車差分分析テーブル（まとめて表示）
-    const container = document.getElementById('table-container');
-    container.innerHTML = '';
-
-    const fullTable = document.createElement('table');
-    const header = document.createElement('tr');
-    header.innerHTML = `<th>前回</th><th>今回</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
-    fullTable.appendChild(header);
-
-    for (let i = 1; i < data.length; i++) {
-      const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
-      const row = document.createElement('tr');
-      row.innerHTML = `<td>${diffData.prev}</td><td>${diffData.curr}</td>` +
-        diffData.diffs.map(d => `<td>${d}</td>`).join('');
-      fullTable.appendChild(row);
+      return { prev: prevNumber, curr: currentNumber, diffs };
     }
 
-    container.appendChild(fullTable);
-  };
+    function predict() {
+      document.getElementById('result').innerText = 'ボタン押されたよ！';
+      const fileInput = document.getElementById('csvFile');
 
-  reader.readAsText(fileInput.files[0]);
-}
+      if (!fileInput.files.length) {
+        alert('CSVファイルを選んでね！');
+        return;
+      }
 
-  
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const csvText = e.target.result;
+        const allData = parseCSV(csvText);
+
+        const data = allData.slice(-20); // ⭐直近20件に限定
+
+        const prediction = getMostFrequentDigits(data);
+        document.getElementById('result').innerText = `予想数字: ${prediction}`;
+        document.getElementById('details').innerText = '（頻出数字から作られた予想だよ）';
+
+        // 🔧 風車差分分析テーブル
+        const container = document.getElementById('table-container');
+        container.innerHTML = '';
+
+        const table = document.createElement('table');
+        const header = document.createElement('tr');
+        header.innerHTML = `<th>前回</th><th>今回</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
+        table.appendChild(header);
+
+        for (let i = 1; i < data.length; i++) {
+          const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${diffData.prev}</td><td>${diffData.curr}</td>` +
+            diffData.diffs.map(d => `<td>${d}</td>`).join('');
+          table.appendChild(row);
+        }
+
+        container.appendChild(table);
+      };
+
+      reader.readAsText(fileInput.files[0]);
+    }
   </script>
 </body>
 </html>
