@@ -54,79 +54,78 @@
   </style>
 </head>
 <body>
-  <h1>NUMBERS4予想</h1>
-  <input type="file" id="csvFile" accept=".csv"><br>
-  <label><input type="radio" name="mode" value="recent" checked> 最新20件</label>
-  <label><input type="radio" name="mode" value="month"> 直近1か月</label>
+ <h1>NUMBERS4予想</h1>
+ <input type="file" id="csvFile" accept=".csv"><br>
+ <label><input type="radio" name="mode" value="recent" checked> 最新20件</label>
+ <label><input type="radio" name="mode" value="month"> 直近1か月</label>
 
-  <button onclick="predict()">予測してみるね</button>
-  <div id="result">ここに予測が表示されるよ</div>
-  <div id="details"></div>
-  <img src="neco.png" alt="にゃんこ">
+ <button id="predictButton">予測してみるね</button>
+ <div id="result">ここに予測が表示されるよ</div>
+ <div id="details"></div>
+ <img src="neco.png" alt="にゃんこ">
 
-  <script>
- 
-function parseCSV(csvText) {
-  const lines = csvText.trim().split('\n');
-  return lines.map(line => {
-    const columns = line.split('\t');
-    if (columns.length < 3) return null; // 不正な行スキップ
-    const date = columns[1];
-    const number = columns[2];
-    return { date, number };
-  }).filter(entry => entry); // null を除去
-}
+ <script>
+  document.getElementById('predictButton').addEventListener('click', predict);
 
-
-
-function getMostFrequentDigits(data, digitCount = 4) {
-  const digitFrequency = Array(10).fill(0);
-
-  data.forEach(entry => {
-    entry.number.split('').forEach(digit => {
-      digitFrequency[parseInt(digit)]++;
-    });
-  });
-
-  const rankedDigits = digitFrequency
-    .map((count, digit) => ({ digit, count }))
-    .sort((a, b) => b.count - a.count);
-
-  return rankedDigits.slice(0, digitCount).map(item => item.digit).join('');
-}
-
-function predict() {
-  const fileInput = document.getElementById('csvFile');
-  const mode = document.querySelector('input[name="mode"]:checked').value;
-
-  if (!fileInput.files.length) {
-    alert("CSVファイルを選んでね！");
-    return;
+  function parseCSV(csvText) {
+    const lines = csvText.trim().split('\n');
+    return lines.map(line => {
+      const columns = line.split('\t');
+      if (columns.length < 3) return null;
+      const date = columns[1];
+      const number = columns[2];
+      return { date, number };
+    }).filter(entry => entry);
   }
 
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    const csvText = e.target.result;
-    const allData = parseCSV(csvText);
+  function getMostFrequentDigits(data, digitCount = 4) {
+    const digitFrequency = Array(10).fill(0);
 
-    let data;
-    if (mode === 'recent') {
-      data = allData.slice(-20);
-    } else if (mode === 'month') {
-      const oneMonthAgo = new Date();
-      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-      data = allData.filter(entry => new Date(entry.date) >= oneMonthAgo);
+    data.forEach(entry => {
+      if (!entry || !entry.number) return;
+      entry.number.split('').forEach(digit => {
+        const num = parseInt(digit);
+        if (!isNaN(num)) digitFrequency[num]++;
+      });
+    });
+
+    const rankedDigits = digitFrequency
+      .map((count, digit) => ({ digit, count }))
+      .sort((a, b) => b.count - a.count);
+
+    return rankedDigits.slice(0, digitCount).map(item => item.digit).join('');
+  }
+
+  function predict() {
+    const fileInput = document.getElementById('csvFile');
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+
+    if (!fileInput.files.length) {
+      alert("CSVファイルを選んでね！");
+      return;
     }
 
-    const prediction = getMostFrequentDigits(data);
-    document.getElementById('result').innerText = `予想数字: ${prediction}`;
-    document.getElementById('details').innerText = '（頻出数字から作られた予想だよ）';
-  };
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const csvText = e.target.result;
+      const allData = parseCSV(csvText);
 
-  reader.readAsText(fileInput.files[0]);
-}
-</script>
+      let data;
+      if (mode === 'recent') {
+        data = allData.slice(-20);
+      } else if (mode === 'month') {
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        data = allData.filter(entry => new Date(entry.date) >= oneMonthAgo);
+      }
 
- 
+      const prediction = getMostFrequentDigits(data);
+      document.getElementById('result').innerText = `予想数字: ${prediction}`;
+      document.getElementById('details').innerText = '（頻出数字から作られた予想だよ）';
+    };
+
+    reader.readAsText(fileInput.files[0]);
+  }
+ </script>
 </body>
 </html>
