@@ -69,12 +69,14 @@
 function parseCSV(csvText) {
   const lines = csvText.trim().split('\n');
   return lines.map(line => {
-    const columns = line.split('\t'); // タブで分割
-    const date = columns[1];          // 2列目が日付
-    const number = columns[2];        // 3列目が当選番号（ゼロ埋め済み）
+    const columns = line.split('\t');
+    if (columns.length < 3) return null; // 不正な行スキップ
+    const date = columns[1];
+    const number = columns[2];
     return { date, number };
-  });
+  }).filter(entry => entry); // null を除去
 }
+
 
 
 function getMostFrequentDigits(data, digitCount = 4) {
