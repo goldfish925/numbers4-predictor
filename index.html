@@ -151,19 +151,20 @@
         
         // 🔧 風車差分分析テーブル
         const container = document.getElementById('table-container');
-    container.innerHTML = '';
-
-        const table = document.createElement('table');
-    const header = document.createElement('tr');
-    <th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>
-    table.appendChild(header);
+    　　container.innerHTML = '';
+        
+      　const table = document.createElement('table');
+        
+　　    const header = document.createElement('tr');
+   　　 header.innerHTML = `<th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
+    　　table.appendChild(header);
 
     // 最初の当選番号（差分なし）
 const firstRow = document.createElement('tr');
 firstRow.innerHTML = `<td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
 table.appendChild(firstRow);
 
-// 2行目以降：差分付きで表示
+// 2行目以降：差分付きで表示（1つ前の番号との比較）
 for (let i = 1; i < data.length; i++) {
   const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
   const row = document.createElement('tr');
