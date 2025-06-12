@@ -135,11 +135,11 @@
     function predict() {
   document.getElementById('result').innerText = '風車差分分析を表示したよ！';
   const fileInput = document.getElementById('csvFile');
-      
-      if (!fileInput.files.length) {
-        alert('CSVファイルを選んでね！');
-        return;
-      }
+
+  if (!fileInput.files.length) {
+    alert('CSVファイルを選んでね！');
+    return;
+  }
 
       const reader = new FileReader();
       reader.onload = function (e) {
