@@ -56,8 +56,7 @@
 <body>
   <h1>NUMBERS4予想</h1>
   <input type="file" id="csvFile" accept=".csv" /><br />
-  <label><input type="radio" name="mode" value="recent" checked /> 最新20件</label>
-<label><input type="radio" name="mode" value="month" /> 直近30日</label>
+  <p>※直近30日分のデータで予測するよ</p>
 
 
   <button id="predictButton">予測してみるね</button>
@@ -108,7 +107,6 @@
     function predict() {
   document.getElementById('result').innerText = 'ボタン押されたよ！';
   const fileInput = document.getElementById('csvFile');
-  const mode = document.querySelector('input[name="mode"]:checked').value;
 
   if (!fileInput.files.length) {
     alert('CSVファイルを選んでね！');
@@ -120,77 +118,41 @@
     const csvText = e.target.result;
     const allData = parseCSV(csvText);
 
-    let data;
-    if (mode === 'recent') {
-  data = allData.slice(-20);
-} else if (mode === 'month') {
-  const today = new Date();
-  const thirtyDaysAgo = new Date(today);
-  thirtyDaysAgo.setDate(today.getDate() - 30);
-  data = allData.filter(entry => {
-    const d = parseDate(entry.date);
-    return d >= thirtyDaysAgo;
-  });
-}
-
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    const data = allData.filter(entry => {
+      const d = parseDate(entry.date);
+      return d >= thirtyDaysAgo;
+    });
 
     const prediction = getMostFrequentDigits(data);
     document.getElementById('result').innerText = `予想数字: ${prediction}`;
     document.getElementById('details').innerText = '（頻出数字から作られた予想だよ）';
 
-    // 差分テーブル（統合表示）
+    // 風車差分分析テーブル表示
     const container = document.getElementById('table-container');
     container.innerHTML = '';
-    createUnifiedTable(data);
+
+    const table = document.createElement('table');
+    const header = document.createElement('tr');
+    header.innerHTML = `<th>前回</th><th>今回</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
+    table.appendChild(header);
+
+    for (let i = 1; i < data.length; i++) {
+      const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${diffData.prev}</td><td>${diffData.curr}</td>` +
+        diffData.diffs.map(d => `<td>${d}</td>`).join('');
+      table.appendChild(row);
+    }
+
+    container.appendChild(table);
   };
 
   reader.readAsText(fileInput.files[0]);
 }
 
-function getWheelDifferences(prevNumber, currentNumber) {
-  const wheels = {
-    千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
-    百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
-    一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1],
-  };
-
-  const positions = ['千', '百', '十', '一'];
-  const prevDigits = prevNumber.padStart(4, '0').split('').map(Number);
-  const currDigits = currentNumber.padStart(4, '0').split('').map(Number);
-
-  const diffs = positions.map((pos, i) => {
-    const wheel = wheels[pos];
-    const prevIdx = wheel.indexOf(prevDigits[i]);
-    const currIdx = wheel.indexOf(currDigits[i]);
-
-    const leftSteps = (prevIdx - currIdx + 10) % 10;
-    const rightSteps = (currIdx - prevIdx + 10) % 10;
-    const direction = leftSteps <= rightSteps ? '左' : '右';
-    const steps = Math.min(leftSteps, rightSteps);
-
-    return `${direction}${steps}`;
-  });
-
-  return { prev: prevNumber, curr: currentNumber, diffs };
-}
-
-function createUnifiedTable(data) {
-  const container = document.getElementById('table-container');
-  const table = document.createElement('table');
-
-  const header = document.createElement('tr');
-  header.innerHTML = `<th>前回数字</th><th>今回数字</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
-  table.appendChild(header);
-
-  for (let i = 1; i < data.length; i++) {
-    const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
-    const row = document.createElement('tr');
-    row.innerHTML =
-      `<td>${diffData.prev}</td><td>${diffData.curr}</td>` +
-      diffData.diffs.map(d => `<td>${d}</td>`).join('');
-    table.appendChild(row);
-  }
 
   container.appendChild(table);
     }
