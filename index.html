@@ -103,17 +103,24 @@
   document.getElementById('predictButton').addEventListener('click', predict);
 
   function parseCSV(csvText) {
-    const lines = csvText.trim().split('\n');
-    const data = lines.slice(1).map(line => {
-      const columns = line.split(',');
-      if (columns.length < 3) return null;
-      const date = columns[1].trim();
-      const number = columns[2].trim();
-      return { date, number };
-    }).filter(entry => entry);
-    data.sort((a, b) => new Date(b.date) - new Date(a.date));
-    return data;
-  }
+  const lines = csvText.trim().split('\n');
+  const data = lines.slice(1).map(line => {
+    const columns = line.split(',');
+    if (columns.length < 3) return null;
+    const date = columns[1].trim();
+
+    // "抽選数字" を綺麗に整形
+    let number = columns[2].trim();
+    number = number.replace(/^="?/, '').replace(/"?$/, '').replace(/[^\d]/g, '');
+
+
+    return { date, number };
+  }).filter(entry => entry);
+
+  data.sort((a, b) => new Date(b.date) - new Date(a.date));
+  return data;
+}
+
 
 // 出現頻度が高い差分パターントップNを返す
 function getTopDiffPatterns(freqMap, topN = 3) {
