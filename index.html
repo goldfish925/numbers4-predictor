@@ -162,7 +162,7 @@ function getTopDiffPatterns(freqMap, topN = 3) {
   function collectDiffPatternFrequency(data) {
   const freqMap = {};
   for (let i = 1; i < data.length; i++) {
-    const diffObj = getWheelIndexDifferences(data[i - 1].number, data[i].number);
+    const diffObj = getWheelDifferences(data[i - 1].number, data[i].number);
     const key = diffObj.diffs.join(',');
     freqMap[key] = (freqMap[key] || 0) + 1;
   }
