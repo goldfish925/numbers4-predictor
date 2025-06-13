@@ -170,7 +170,7 @@ function getTopDiffPatterns(freqMap, topN = 3) {
 }
 
       
-  function getWheelIndexDifferences(prevNumber, currentNumber) {
+  function getWheelDifferences(prevNumber, currentNumber) {
   const wheels = {
     千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
     百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
@@ -186,12 +186,16 @@ function getTopDiffPatterns(freqMap, topN = 3) {
     const wheel = wheels[pos];
     const prevIdx = wheel.indexOf(prevDigits[i]);
     const currIdx = wheel.indexOf(currDigits[i]);
-    const diff = currIdx - prevIdx;
-    return diff >= 0 ? `+${diff}` : `${diff}`;
+    const leftSteps = (prevIdx - currIdx + 10) % 10;
+    const rightSteps = (currIdx - prevIdx + 10) % 10;
+    const direction = leftSteps <= rightSteps ? '左' : '右';
+    const steps = Math.min(leftSteps, rightSteps);
+    return `${direction}${steps}`;
   });
 
   return { prev: prevNumber, curr: currentNumber, diffs };
 }
+
 
       
   function predict() {
