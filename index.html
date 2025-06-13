@@ -256,14 +256,20 @@ predictions.forEach(item => {
   firstRow.innerHTML = `<td>${data[0].date}</td><td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
   table.appendChild(firstRow);
 
-  for (let i = 1; i < data.length; i++) {
-    const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
-    const row = document.createElement('tr');
-    row.innerHTML =
-      `<td>${data[i].date}</td><td>${diffData.curr}</td>` +
-      diffData.diffs.map(d => `<td>${d}</td>`).join('');
-    table.appendChild(row);
-  }
+ // 差分テーブル描画（色付き）
+for (let i = 1; i < data.length; i++) {
+  const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
+  const row = document.createElement('tr');
+
+  const diffCells = diffData.diffs.map(d => {
+    const color = d.startsWith('右') ? 'red' : 'green';
+    return `<td style="color:${color}">${d}</td>`;
+  });
+
+  row.innerHTML =
+    `<td>${data[i].date}</td><td>${diffData.curr}</td>` + diffCells.join('');
+  table.appendChild(row);
+}
 
   container.appendChild(table);
 };
