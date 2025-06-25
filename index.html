@@ -158,6 +158,31 @@
     }
     return freqMap;
   }
+function getWheelDifferences(prevNumber, currentNumber) {
+  const wheels = {
+    千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
+    百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+    十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
+    一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+  };
+
+  const positions = ['千', '百', '十', '一'];
+  const prevDigits = prevNumber.padStart(4, '0').split('').map(Number);
+  const currDigits = currentNumber.padStart(4, '0').split('').map(Number);
+
+  const diffs = positions.map((pos, i) => {
+    const wheel = wheels[pos];
+    const prevIdx = wheel.indexOf(prevDigits[i]);
+    const currIdx = wheel.indexOf(currDigits[i]);
+    const leftSteps = (prevIdx - currIdx + 10) % 10;
+    const rightSteps = (currIdx - prevIdx + 10) % 10;
+    const direction = leftSteps <= rightSteps ? '左' : '右';
+    const steps = Math.min(leftSteps, rightSteps);
+    return `${direction}${steps}`;
+  });
+
+  return { prev: prevNumber, curr: currentNumber, diffs };
+}
 
   function applyErrorCorrection(predictedNum, errorStr) {
     const wheels = {
