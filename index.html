@@ -219,16 +219,30 @@ function getTopDiffPatterns(freqMap, topN = 3) {
     reader.onload = function (e) {
       const csvText = e.target.result;
       const allData = parseCSV(csvText);
-      const data = allData.slice(0, 20);
-    
-      // 過去差分の集計
-      const freqMap = collectDiffPatternFrequency(allData);
-      const topPatterns = getTopDiffPatterns(freqMap, 3);
-      const latestNumber = allData[0].number;
-      const predictions = topPatterns.map(item => {
-        const predictedNum = predictNextNumber(latestNumber, item.pattern);
-        return { predictedNum, pattern: item.pattern, count: item.count };
-      });
+      const data = allData.slice(0, 11); // ← 直近11件に絞る
+
+// 差分頻度集計（直近データで）
+const freqMap = collectDiffPatternFrequency(data);
+let topPatterns = getTopDiffPatterns(freqMap, 5); // ← 候補を多めに取得
+
+const latestNumber = allData[0].number;
+const previousNumber = allData[1]?.number ?? ''; // 一応保険
+
+// 「前々回と同じ数字」になる予測を除外
+topPatterns = topPatterns.filter(item => {
+  const predictedNum = predictNextNumber(latestNumber, item.pattern);
+  return predictedNum !== previousNumber;
+});
+
+// 3つだけ表示
+topPatterns = topPatterns.slice(0, 3);
+
+// 予測を作成
+const predictions = topPatterns.map(item => {
+  const predictedNum = predictNextNumber(latestNumber, item.pattern);
+  return { predictedNum, pattern: item.pattern, count: item.count };
+});
+
 
     const resultArea = document.getElementById('details');
 resultArea.innerHTML = '<h3>予測結果</h3>';
