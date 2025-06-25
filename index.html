@@ -208,63 +208,11 @@ function applyErrorCorrection(predictedNum, errorStr) {
   return correctedDigits.join('');
 }
 
+   container.appendChild(table);
+  };
 
-predictions.forEach(item => {
-  const predictedDigits = item.predictedNum.padStart(4, '0').split('').map(Number);
-  const error = predictedDigits.map((digit, idx) => {
-    const diff = digit - errorDigits[idx];
-    const sign = diff > 0 ? '+' : (diff === 0 ? '±0' : '');
-    return `${sign}${diff}`;
-  }).join(' ');
-
-  const correctedNum = applyErrorCorrection(item.predictedNum, error);
-
-  resultArea.innerHTML += `
-    <div class="prediction-card">
-      <div>🔮 <strong>予測番号:</strong> ${item.predictedNum}</div>
-      <div>🔧 <strong>補正後予測番号:</strong> ${correctedNum}</div>
-      <div>🦉 <strong>差分パターン:</strong> ${item.pattern.join(', ')}</div>
-      <div>🌀 <strong>出現回数:</strong> ${item.count}</div>
-      <div>📏 <strong>誤差:</strong> ${error}</div>
-    </div>
-  `;
-});
-
-
-
-   // テーブル描画
-  const container = document.getElementById('table-container');
-  container.innerHTML = '';
-
-  const table = document.createElement('table');
-  const header = document.createElement('tr');
-  header.innerHTML = `<th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
-  table.appendChild(header);
-
-  const firstRow = document.createElement('tr');
-  firstRow.innerHTML = `<td>${data[0].date}</td><td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
-  table.appendChild(firstRow);
-
- // 差分テーブル描画（色付き）
-for (let i = 1; i < data.length; i++) {
-  const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
-  const row = document.createElement('tr');
-
-  const diffCells = diffData.diffs.map(d => {
-    const color = d.startsWith('右') ? 'red' : 'green';
-    return `<td style="color:${color}">${d}</td>`;
-  });
-
-  row.innerHTML =
-    `<td>${data[i].date}</td><td>${diffData.curr}</td>` + diffCells.join('');
-  table.appendChild(row);
+  reader.readAsText(fileInput.files[0]);
 }
-
-  container.appendChild(table);
-};
-
-    reader.readAsText(fileInput.files[0]);
-  }
 </script>
 
     
