@@ -103,34 +103,26 @@
   document.getElementById('predictButton').addEventListener('click', predict);
 
   function parseCSV(csvText) {
-  const lines = csvText.trim().split('\n');
-  const data = lines.slice(1).map(line => {
-    const columns = line.split(',');
-    if (columns.length < 3) return null;
-    const date = columns[1].trim();
+    const lines = csvText.trim().split('\n');
+    const data = lines.slice(1).map(line => {
+      const columns = line.split(',');
+      if (columns.length < 3) return null;
+      const date = columns[1].trim();
+      let number = columns[2].trim();
+      number = number.replace(/^="?/, '').replace(/"?$/, '').replace(/[^\d]/g, '');
+      return { date, number };
+    }).filter(entry => entry);
+    data.sort((a, b) => new Date(b.date) - new Date(a.date));
+    return data;
+  }
 
-    // "抽選数字" を綺麗に整形
-    let number = columns[2].trim();
-    number = number.replace(/^="?/, '').replace(/"?$/, '').replace(/[^\d]/g, '');
+  function getTopDiffPatterns(freqMap, topN = 3) {
+    const sorted = Object.entries(freqMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, topN);
+    return sorted.map(item => ({ pattern: item[0].split(','), count: item[1] }));
+  }
 
-
-    return { date, number };
-  }).filter(entry => entry);
-
-  data.sort((a, b) => new Date(b.date) - new Date(a.date));
-  return data;
-}
-
-
-// 出現頻度が高い差分パターントップNを返す
-function getTopDiffPatterns(freqMap, topN = 3) {
-  const sorted = Object.entries(freqMap)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, topN);
-  return sorted.map(item => ({ pattern: item[0].split(','), count: item[1] }));
-}
-
-// 差分パターンを使って次の数字を予測
   function predictNextNumber(currentNumber, pattern) {
     const wheels = {
       千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
@@ -138,82 +130,141 @@ function getTopDiffPatterns(freqMap, topN = 3) {
       十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
       一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1],
     };
+    const positions = ['千', '百', '十', '一'];
+    const currDigits = currentNumber.padStart(4, '0').split('').map(Number);
+    const nextDigits = [];
 
-  const positions = ['千', '百', '十', '一'];
-  const currDigits = currentNumber.padStart(4, '0').split('').map(Number);
-  const nextDigits = [];
-
-  pattern.forEach((diff, i) => {
-    const wheel = wheels[positions[i]];
-    const currDigit = currDigits[i];
-    const currIdx = wheel.indexOf(currDigit);
-
-    const direction = diff[0]; // '左' or '右'
+    pattern.forEach((diff, i) => {
+      const wheel = wheels[positions[i]];
+      const currDigit = currDigits[i];
+      const currIdx = wheel.indexOf(currDigit);
+      const direction = diff[0]; // '左' or '右'
       const steps = parseInt(diff.slice(1));
-
-    let nextIdx;
-      if (direction === '左') {
-        nextIdx = (currIdx - steps + 10) % 10;
-      } else {
-        nextIdx = (currIdx + steps) % 10;
-      }
+      const nextIdx = direction === '左'
+        ? (currIdx - steps + 10) % 10
+        : (currIdx + steps) % 10;
       nextDigits.push(wheel[nextIdx]);
     });
 
     return nextDigits.join('');
   }
 
-      
-      
-// 差分頻度集計
   function collectDiffPatternFrequency(data) {
-  const freqMap = {};
-  for (let i = 1; i < data.length; i++) {
-    const diffObj = getWheelDifferences(data[i - 1].number, data[i].number);
-    const key = diffObj.diffs.join(',');
-    freqMap[key] = (freqMap[key] || 0) + 1;
+    const freqMap = {};
+    for (let i = 1; i < data.length; i++) {
+      const diffObj = getWheelDifferences(data[i - 1].number, data[i].number);
+      const key = diffObj.diffs.join(',');
+      freqMap[key] = (freqMap[key] || 0) + 1;
+    }
+    return freqMap;
   }
-  return freqMap;
-}
 
-      
-  // 補正関数（ズレ分を引いて補正）
-function applyErrorCorrection(predictedNum, errorStr) {
-  const wheels = {
-    千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
-    百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
-    一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1],
-  };
-  const positions = ['千', '百', '十', '一'];
-  const digits = predictedNum.padStart(4, '0').split('').map(Number);
+  function applyErrorCorrection(predictedNum, errorStr) {
+    const wheels = {
+      千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
+      百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+      十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
+      一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+    };
+    const positions = ['千', '百', '十', '一'];
+    const digits = predictedNum.padStart(4, '0').split('').map(Number);
+    const errorNums = errorStr.split(' ').map(s => {
+      if (s.startsWith('+')) return Number(s.slice(1));
+      if (s.startsWith('±')) return 0;
+      return Number(s);
+    });
 
-  // errorStr例: "+3 +3 ±0 +8" を数字の配列に
-  const errorNums = errorStr.split(' ').map(s => {
-    if (s.startsWith('+')) return Number(s.slice(1));
-    if (s.startsWith('±')) return 0;
-    return Number(s);
-  });
+    const correctedDigits = digits.map((d, i) => {
+      const pos = positions[i];
+      const wheel = wheels[pos];
+      const idx = wheel.indexOf(d);
+      const correctedIdx = (idx - errorNums[i] + 10) % 10;
+      return wheel[correctedIdx];
+    });
 
-  const correctedDigits = digits.map((d, i) => {
-    const pos = positions[i];
-    const wheel = wheels[pos];
-    const idx = wheel.indexOf(d);
+    return correctedDigits.join('');
+  }
 
-    // 補正後インデックス
-    const correctedIdx = (idx - errorNums[i] + 10) % 10;
-    return wheel[correctedIdx];
-  });
+  function predict() {
+    const fileInput = document.getElementById('csvFile');
+    if (!fileInput.files.length) {
+      alert('CSVファイルを選んでね！');
+      return;
+    }
 
-  return correctedDigits.join('');
-}
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const csvText = e.target.result;
+      const allData = parseCSV(csvText);
+      const data = allData.slice(0, 11);
 
-   container.appendChild(table);
-  };
+      const freqMap = collectDiffPatternFrequency(data);
+      let topPatterns = getTopDiffPatterns(freqMap, 5);
+      const latestNumber = allData[0].number;
+      const previousNumber = allData[1]?.number ?? '';
+      topPatterns = topPatterns.filter(item => predictNextNumber(latestNumber, item.pattern) !== previousNumber);
+      topPatterns = topPatterns.slice(0, 3);
 
-  reader.readAsText(fileInput.files[0]);
-}
-</script>
+      const predictions = topPatterns.map(item => {
+        const predictedNum = predictNextNumber(latestNumber, item.pattern);
+        return { predictedNum, pattern: item.pattern, count: item.count };
+      });
+
+      const resultArea = document.getElementById('details');
+      resultArea.innerHTML = '<h3>予測結果</h3>';
+      const actualNumber = data[0].number;
+      const errorDigits = actualNumber.padStart(4, '0').split('').map(Number);
+
+      predictions.forEach(item => {
+        const predictedDigits = item.predictedNum.padStart(4, '0').split('').map(Number);
+        const error = predictedDigits.map((digit, idx) => {
+          const diff = digit - errorDigits[idx];
+          const sign = diff > 0 ? '+' : (diff === 0 ? '±0' : '');
+          return `${sign}${diff}`;
+        }).join(' ');
+
+        const correctedNum = applyErrorCorrection(item.predictedNum, error);
+
+        resultArea.innerHTML += `
+          <div class="prediction-card">
+            <div>🔮 <strong>予測番号:</strong> ${item.predictedNum}</div>
+            <div>🔧 <strong>補正後予測番号:</strong> ${correctedNum}</div>
+            <div>🦉 <strong>差分パターン:</strong> ${item.pattern.join(', ')}</div>
+            <div>🌀 <strong>出現回数:</strong> ${item.count}</div>
+            <div>📏 <strong>誤差:</strong> ${error}</div>
+          </div>
+        `;
+      });
+
+      // 差分テーブル描画
+      const container = document.getElementById('table-container');
+      container.innerHTML = '';
+      const table = document.createElement('table');
+      const header = document.createElement('tr');
+      header.innerHTML = `<th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
+      table.appendChild(header);
+
+      const firstRow = document.createElement('tr');
+      firstRow.innerHTML = `<td>${data[0].date}</td><td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
+      table.appendChild(firstRow);
+
+      for (let i = 1; i < data.length; i++) {
+        const diffData = getWheelDifferences(data[i - 1].number, data[i].number);
+        const row = document.createElement('tr');
+        const diffCells = diffData.diffs.map(d => {
+          const color = d.startsWith('右') ? 'red' : 'green';
+          return `<td style="color:${color}">${d}</td>`;
+        });
+        row.innerHTML = `<td>${data[i].date}</td><td>${diffData.curr}</td>` + diffCells.join('');
+        table.appendChild(row);
+      }
+
+      container.appendChild(table);
+    };
+
+    reader.readAsText(fileInput.files[0]);
+  }
+
 
     
 </body>
