@@ -247,15 +247,27 @@ const predictions = topPatterns.map(item => {
     const resultArea = document.getElementById('details');
 resultArea.innerHTML = '<h3>予測結果</h3>';
 
+const actualNumber = data[0].number;  // 最新の当選番号
+const errorDigits = actualNumber.padStart(4, '0').split('').map(Number);
+
 predictions.forEach(item => {
+  const predictedDigits = item.predictedNum.padStart(4, '0').split('').map(Number);
+  const error = predictedDigits.map((digit, idx) => {
+    const diff = digit - errorDigits[idx];
+    const sign = diff > 0 ? '+' : (diff === 0 ? '±0' : '');
+    return `${sign}${diff}`;
+  }).join(' ');
+
   resultArea.innerHTML += `
     <div class="prediction-card">
       <div>🔮 <strong>予測番号:</strong> ${item.predictedNum}</div>
       <div>🦉 <strong>差分パターン:</strong> ${item.pattern.join(', ')}</div>
       <div>🌀 <strong>出現回数:</strong> ${item.count}</div>
+      <div>📏 <strong>誤差:</strong> ${error}</div>
     </div>
   `;
 });
+
 
    // テーブル描画
   const container = document.getElementById('table-container');
