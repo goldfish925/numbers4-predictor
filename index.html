@@ -240,32 +240,33 @@ function getWheelDifferences(prevNumber, currentNumber) {
       const actualNumber = data[0].number;
       const errorDigits = actualNumber.padStart(4, '0').split('').map(Number);
 
-      predictions.forEach(item => {
+     predictions.forEach(item => {
   const predictedDigits = item.predictedNum.padStart(4, '0').split('').map(Number);
   const error = predictedDigits.map((digit, idx) => {
     const diff = digit - errorDigits[idx];
     const sign = diff > 0 ? '+' : (diff === 0 ? '±0' : '');
     return `${sign}${diff}`;
-    const mirrorMap = { 0: 5, 1: 6, 2: 7, 3: 8, 4: 9, 5: 0, 6: 1, 7: 2, 8: 3, 9: 4 };
-
-const mirror = num => num.split('').map(d => mirrorMap[d] ?? d).join('');
-
-const mirrorOriginal = mirror(item.predictedNum.padStart(4, '0'));
-const mirrorCorrected = mirror(correctedNum.padStart(4, '0'));
-
   }).join(' ');
 
   const correctedNum = applyErrorCorrection(item.predictedNum, error);
 
-  // ✅ここで逆順とヒットを定義
+  // 🔁 逆順チェック
   const reversed = correctedNum.split('').reverse().join('');
   const hit = allData.some(entry => entry.number === reversed);
 
-  // 予測結果カードに逆順とヒットを追加
+  // 🪞 ミラー処理
+  const mirrorMap = { 0: 5, 1: 6, 2: 7, 3: 8, 4: 9, 5: 0, 6: 1, 7: 2, 8: 3, 9: 4 };
+  const mirror = num => num.split('').map(d => mirrorMap[d] ?? d).join('');
+  const mirrorOriginal = mirror(item.predictedNum.padStart(4, '0'));
+  const mirrorCorrected = mirror(correctedNum.padStart(4, '0'));
+
+  // 🎁 表示部分
   resultArea.innerHTML += `
     <div class="prediction-card">
       <div>🔮 <strong>予測番号:</strong> ${item.predictedNum}</div>
       <div>🔧 <strong>補正後予測番号:</strong> ${correctedNum}</div>
+      <div>🪞 <strong>ミラー番号:</strong> ${mirrorOriginal}</div>
+      <div>🪞 <strong>補正後ミラー:</strong> ${mirrorCorrected}</div>
       <div>🔁 <strong>逆順番号:</strong> ${reversed}</div>
       <div>🎯 <strong>ヒット:</strong> ${hit ? '✅ 出現あり！' : '❌ 未出現'}</div>
       <div>🦉 <strong>差分パターン:</strong> ${item.pattern.join(', ')}</div>
