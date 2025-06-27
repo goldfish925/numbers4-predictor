@@ -126,7 +126,10 @@
         const top = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0, 5).map(e => ({ pattern: e[0].split(','), count: e[1] }));
         const latest = base[0].number;
         const previous = base[1]?.number;
-        const results = top.filter(p => predictNextNumber(latest, p.pattern) !== previous).slice(0, 3);
+        const results = top
+  .filter(p => predictNextNumber(latest, p.pattern) !== previous)
+  .slice(0, 3); // ここで3件に絞ってるはずなので、
+
 
         const mirrorMap = { 0:5, 1:6, 2:7, 3:8, 4:9, 5:0, 6:1, 7:2, 8:3, 9:4 };
         const reverse = s => s.split('').reverse().join('');
