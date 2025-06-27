@@ -264,8 +264,8 @@ resultArea.innerHTML += `
     <div>📏 <strong>誤差:</strong> ${error}</div>
   </div>
 `;
-
-                // 逆順チェックの追加
+         });
+              // 逆順チェックの追加
         const reversed = correctedNum.split('').reverse().join('');
         const hit = allData.some(entry => entry.number === reversed);
         resultArea.innerHTML += `
