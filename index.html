@@ -262,18 +262,18 @@ function getWheelDifferences(prevNumber, currentNumber) {
 
   // 🎁 表示部分
   resultArea.innerHTML += `
-    <div class="prediction-card">
-      <div>🔮 <strong>予測番号:</strong> ${item.predictedNum}</div>
-      <div>🔧 <strong>補正後予測番号:</strong> ${correctedNum}</div>
-      <div>🪞 <strong>ミラー番号:</strong> ${mirrorOriginal}</div>
-      <div>🪞 <strong>補正後ミラー:</strong> ${mirrorCorrected}</div>
-      <div>🔁 <strong>逆順番号:</strong> ${reversed}</div>
-      <div>🎯 <strong>ヒット:</strong> ${hit ? '✅ 出現あり！' : '❌ 未出現'}</div>
-      <div>🦉 <strong>差分パターン:</strong> ${item.pattern.join(', ')}</div>
-      <div>🌀 <strong>出現回数:</strong> ${item.count}</div>
-      <div>📏 <strong>誤差:</strong> ${error}</div>
-    </div>
-  `;
+  <div class="prediction-card">
+    <div>🔮 <strong>予測番号:</strong> ${item.predictedNum}</div>
+    <div>🔧 <strong>補正後予測番号:</strong> ${correctedNum}</div>
+    <div>🪞 <strong>ミラー番号:</strong> ${mirrorOriginal}</div>
+    <div>🪞 <strong>補正後ミラー:</strong> ${mirrorCorrected}</div>
+    <div>🔁 <strong>逆順番号:</strong> ${reversed}</div>
+    <div>🎯 <strong>ヒット:</strong> ${hit ? '✅ 出現あり！' : '❌ 未出現'}</div>
+    <div>🦉 <strong>差分パターン:</strong> ${item.pattern.join(', ')}</div>
+    <div>🌀 <strong>出現回数:</strong> ${item.count}</div>
+    <div>📏 <strong>誤差:</strong> ${error}</div>
+  </div>
+`;
 });
 
 
