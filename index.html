@@ -246,6 +246,13 @@ function getWheelDifferences(prevNumber, currentNumber) {
     const diff = digit - errorDigits[idx];
     const sign = diff > 0 ? '+' : (diff === 0 ? '±0' : '');
     return `${sign}${diff}`;
+    const mirrorMap = { 0: 5, 1: 6, 2: 7, 3: 8, 4: 9, 5: 0, 6: 1, 7: 2, 8: 3, 9: 4 };
+
+const mirror = num => num.split('').map(d => mirrorMap[d] ?? d).join('');
+
+const mirrorOriginal = mirror(item.predictedNum.padStart(4, '0'));
+const mirrorCorrected = mirror(correctedNum.padStart(4, '0'));
+
   }).join(' ');
 
   const correctedNum = applyErrorCorrection(item.predictedNum, error);
@@ -272,6 +279,9 @@ function getWheelDifferences(prevNumber, currentNumber) {
       // 差分テーブル描画
       const container = document.getElementById('table-container');
       container.innerHTML = '';
+      <div>🪞 <strong>ミラー番号:</strong> ${mirrorOriginal}</div>
+<div>🪞 <strong>補正後ミラー:</strong> ${mirrorCorrected}</div>
+
       const table = document.createElement('table');
       const header = document.createElement('tr');
       header.innerHTML = `<th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
