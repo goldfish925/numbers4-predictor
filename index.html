@@ -259,6 +259,16 @@ function getWheelDifferences(prevNumber, currentNumber) {
             <div>📏 <strong>誤差:</strong> ${error}</div>
           </div>
         `;
+                // 逆順チェックの追加
+        const reversed = correctedNum.split('').reverse().join('');
+        const hit = allData.some(entry => entry.number === reversed);
+        resultArea.innerHTML += `
+          <div style="margin-bottom: 10px; font-size: 14px; color: #1e2a47;">
+            🔁 <strong>逆順番号:</strong> ${reversed}<br>
+            🎯 <strong>ヒット:</strong> ${hit ? '✅ 出現あり！' : '❌ 未出現'}
+          </div>
+        `;
+
       });
 
       // 差分テーブル描画
