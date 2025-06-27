@@ -241,41 +241,33 @@ function getWheelDifferences(prevNumber, currentNumber) {
       const errorDigits = actualNumber.padStart(4, '0').split('').map(Number);
 
       predictions.forEach(item => {
-        const predictedDigits = item.predictedNum.padStart(4, '0').split('').map(Number);
-        const error = predictedDigits.map((digit, idx) => {
-          const diff = digit - errorDigits[idx];
-          const sign = diff > 0 ? '+' : (diff === 0 ? '±0' : '');
-          return `${sign}${diff}`;
-        }).join(' ');
+  const predictedDigits = item.predictedNum.padStart(4, '0').split('').map(Number);
+  const error = predictedDigits.map((digit, idx) => {
+    const diff = digit - errorDigits[idx];
+    const sign = diff > 0 ? '+' : (diff === 0 ? '±0' : '');
+    return `${sign}${diff}`;
+  }).join(' ');
 
-        const correctedNum = applyErrorCorrection(item.predictedNum, error);
+  const correctedNum = applyErrorCorrection(item.predictedNum, error);
 
-        const reversed = correctedNum.split('').reverse().join('');
-const hit = allData.some(entry => entry.number === reversed);
+  // ✅ここで逆順とヒットを定義
+  const reversed = correctedNum.split('').reverse().join('');
+  const hit = allData.some(entry => entry.number === reversed);
 
-resultArea.innerHTML += `
-  <div class="prediction-card">
-    <div>🔮 <strong>予測番号:</strong> ${item.predictedNum}</div>
-    <div>🔧 <strong>補正後予測番号:</strong> ${correctedNum}</div>
-    <div>🔁 <strong>逆順番号:</strong> ${reversed}</div>
-    <div>🎯 <strong>ヒット:</strong> ${hit ? '✅ 出現あり！' : '❌ 未出現'}</div>
-    <div>🦉 <strong>差分パターン:</strong> ${item.pattern.join(', ')}</div>
-    <div>🌀 <strong>出現回数:</strong> ${item.count}</div>
-    <div>📏 <strong>誤差:</strong> ${error}</div>
-  </div>
-`;
-         });
-              // 逆順チェックの追加
-        const reversed = correctedNum.split('').reverse().join('');
-        const hit = allData.some(entry => entry.number === reversed);
-        resultArea.innerHTML += `
-          <div style="margin-bottom: 10px; font-size: 14px; color: #1e2a47;">
-            🔁 <strong>逆順番号:</strong> ${reversed}<br>
-            🎯 <strong>ヒット:</strong> ${hit ? '✅ 出現あり！' : '❌ 未出現'}
-          </div>
-        `;
+  // 予測結果カードに逆順とヒットを追加
+  resultArea.innerHTML += `
+    <div class="prediction-card">
+      <div>🔮 <strong>予測番号:</strong> ${item.predictedNum}</div>
+      <div>🔧 <strong>補正後予測番号:</strong> ${correctedNum}</div>
+      <div>🔁 <strong>逆順番号:</strong> ${reversed}</div>
+      <div>🎯 <strong>ヒット:</strong> ${hit ? '✅ 出現あり！' : '❌ 未出現'}</div>
+      <div>🦉 <strong>差分パターン:</strong> ${item.pattern.join(', ')}</div>
+      <div>🌀 <strong>出現回数:</strong> ${item.count}</div>
+      <div>📏 <strong>誤差:</strong> ${error}</div>
+    </div>
+  `;
+});
 
-      });
 
       // 差分テーブル描画
       const container = document.getElementById('table-container');
