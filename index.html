@@ -223,7 +223,8 @@
         }
 
         // 直近11件で解析（適宜調整可）
-        const data = allData.slice(0, 11);
+        const data = allData.sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 11);
+
 
         // 差分パターン頻度解析
         const freqMap = collectDiffPatternFrequency(data);
