@@ -141,6 +141,71 @@
           const mirrorPred = mirror(pred);
           const mirrorCorr = mirror(corrected);
           const hit = data.some(entry => entry.number === reversed);
+          function calculateAverageError(data) {
+  // 直近10件くらいの予測→当選番号の誤差を平均で出すイメージ
+  const count = Math.min(10, data.length - 1);
+  const wheels = {
+    '千': [0,3,6,9,2,5,8,1,4,7],
+    '百': [0,1,2,3,4,5,6,7,8,9],
+    '十': [0,7,4,1,8,5,2,9,6,3],
+    '一': [0,9,8,7,6,5,4,3,2,1],
+  };
+  const pos = ['千','百','十','一'];
+
+  // 予測番号リスト（仮に過去予測がdataの中にあるとする）
+  // 今はdataの当選番号同士の差で代用（予測番号が無い場合の例）
+
+  let totalError = [0,0,0,0];
+  for(let i=0; i<count; i++) {
+    const prevNum = data[i].number;
+    const nextNum = data[i+1].number;
+    const pDigits = prevNum.split('').map(Number);
+    const nDigits = nextNum.split('').map(Number);
+
+    pos.forEach((key, idx) => {
+      const wheel = wheels[key];
+      const pi = wheel.indexOf(pDigits[idx]);
+      const ni = wheel.indexOf(nDigits[idx]);
+      // 差を取る（例：次の数字-今の数字）
+      let diff = (ni - pi + 10) % 10;
+      if(diff > 5) diff -= 10; // 左回りのズレに変換
+      totalError[idx] += diff;
+    });
+  }
+
+  // 平均誤差計算
+  return totalError.map(e => Math.round(e/count));
+}
+
+function applyCorrection(num, error) {
+  const wheels = {
+    '千': [0,3,6,9,2,5,8,1,4,7],
+    '百': [0,1,2,3,4,5,6,7,8,9],
+    '十': [0,7,4,1,8,5,2,9,6,3],
+    '一': [0,9,8,7,6,5,4,3,2,1],
+  };
+  const pos = ['千','百','十','一'];
+
+  const digits = num.split('').map(Number);
+  const correctedDigits = digits.map((d, i) => {
+    const wheel = wheels[pos[i]];
+    const idx = wheel.indexOf(d);
+    let correctedIdx = (idx + error[i] + 10) % 10;
+    return wheel[correctedIdx];
+  });
+
+  return correctedDigits.join('');
+}
+
+// predict()の中での使い方例
+const averageError = calculateAverageError(data);
+results.forEach(r => {
+  const pred = predictNextNumber(latest, r.pattern);
+  const corrected = applyCorrection(pred, averageError);
+
+  // 以下省略
+});
+
 
           detail.innerHTML += `
             <div class="prediction-card">
