@@ -206,29 +206,23 @@ results.forEach(r => {
   const pred = predictNextNumber(latest, r.pattern);
   const corrected = applyCorrection(pred, averageError);
 
-  // 以下省略
-});
-results.forEach(r => {
-  const pred = predictNextNumber(latest, r.pattern);
-  const corrected = applyCorrection(pred, averageError);
-
-  const reversed = reverse(corrected);   // ← ここをpredからcorrectedへ変更
+  const reversed = reverse(corrected);
   const mirrorPred = mirror(pred);
   const mirrorCorr = mirror(corrected);
-  const hit = data.some(entry => entry.number === corrected);  // ← 判定もcorrectedに変更
+  const hit = data.some(entry => entry.number === corrected);
   const hitReverse = data.some(entry => entry.number === reversed);
 
   detail.innerHTML += `
     <div class="prediction-card">
       <div>🔮 <strong>予測番号:</strong> ${pred}</div>
-      <div>🔧 <strong>補正後予測:</strong> ${corrected}</div>
+      <div>🔧 <strong>補正後予測:</strong> ${corrected} ${hit ? '✅' : '❌'}</div>
       <div>🔁 <strong>逆順:</strong> ${reversed} ${hitReverse ? '✅' : '❌'}</div>
       <div>💿 <strong>ミラー:</strong> ${mirrorPred} ／ ${mirrorCorr}</div>
-      <div>🎯 <strong>補正後ヒット:</strong> ${hit ? '✅ 出現あり！' : '❌ 未出現'}</div>
       <div>🌀 <strong>出現回数:</strong> ${r.count}</div>
     </div>
   `;
 });
+
 
 
           detail.innerHTML += `
