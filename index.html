@@ -151,23 +151,18 @@
         const resultArea = document.getElementById('details');
         resultArea.innerHTML = '';
 
-        const pastNumbers = new Set(data.slice(0, 20).map(entry => entry.number));
-
         topPatterns.forEach(pattern => {
           const pred = predictNext(latest, pattern);
           const corrected = applyCorrection(pred, averageError);
           const reversed = corrected.split('').reverse().join('');
           const mirror = corrected.split('').map(d => mirrorMap[d]).join('');
 
-          const isHit = pastNumbers.has(corrected) ? '✅ 出現あり！' : '❌ 未出現';
-          const isMirrorHit = pastNumbers.has(mirror) ? '✅ 出現あり！' : '❌ 未出現';
-
           resultArea.innerHTML += `
             <div class="prediction-card">
               <div>🔮 予測番号: ${pred}</div>
-              <div>🔧 補正後予測番号: ${corrected} ${isHit}</div>
+              <div>🔧 補正後予測番号: ${corrected}</div>
               <div>🔁 逆順番号: ${reversed}</div>
-              <div>🔧 ミラー番号: ${mirror} ${isMirrorHit}</div>
+              <div>💿 補正後ミラー: ${mirror}</div>
             </div>
           `;
         });
