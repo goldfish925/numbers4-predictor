@@ -134,33 +134,72 @@
     }
 
     function predict() {
-      const file = document.getElementById('csvFile').files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => {
-        const data = parseCSV(e.target.result);
-        const latest = data[0].number;
-        const diffFreq = {};
-        for (let i = Math.min(10, data.length - 1); i >= 1; i--) {
-  const diff = getWheelDiffs(data[i].number, data[i - 1].number);
-  // 差分の表示コードをここに
-}
-const diffTable = document.createElement('table');
-diffTable.innerHTML = `<tr><th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>`;
+  const file = document.getElementById('csvFile').files[0];
+  if (!file) return;
 
-for (let i = 0; i < Math.min(10, data.length - 1); i++) {
-  const newer = data[i];
-  const older = data[i + 1];
-  const diffs = getWheelDiffs(newer.number, older.number);  // 新→旧の差分
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = parseCSV(e.target.result);
+    const latest = data[0].number;
+    const diffFreq = {};
 
-  const row = document.createElement('tr');
-  const diffCells = diffs.map(d => {
-    const color = d.startsWith('右') ? 'red' : 'green';
-    return `<td style="color:${color}">${d}</td>`;
-  });
+    // 差分パターン頻度集計（新→古）
+    for (let i = 1; i < Math.min(11, data.length); i++) {
+      const diffKey = getWheelDiffs(data[i - 1].number, data[i].number).join(',');
+      diffFreq[diffKey] = (diffFreq[diffKey] || 0) + 1;
+    }
 
-  row.innerHTML = `<td>${older.date}</td><td>${older.number}</td>` + diffCells.join('');
-  diffTable.appendChild(row);
+    const topPatterns = Object.entries(diffFreq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(e => e[0].split(','));
+
+    const averageError = calculateAverageError(data);
+    const resultArea = document.getElementById('details');
+    resultArea.innerHTML = '';
+
+    // 🔮 予測番号の表示
+    topPatterns.forEach(pattern => {
+      const pred = predictNext(latest, pattern);
+      const corrected = applyCorrection(pred, averageError);
+      const reversed = corrected.split('').reverse().join('');
+      const mirror = corrected.split('').map(d => mirrorMap[d]).join('');
+
+      resultArea.innerHTML += `
+        <div class="prediction-card">
+          <div>🔮 予測番号: ${pred}</div>
+          <div>🔧 補正後予測番号: ${corrected}</div>
+          <div>🔁 逆順番号: ${reversed}</div>
+          <div>💿 ミラー番号: ${mirror}</div>
+        </div>
+      `;
+    });
+
+    // 📊 差分テーブルの表示（新→古）
+    const diffTable = document.createElement('table');
+    diffTable.innerHTML = `
+      <tr><th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>
+    `;
+
+    for (let i = 0; i < Math.min(10, data.length - 1); i++) {
+      const newer = data[i];
+      const older = data[i + 1];
+      const diffs = getWheelDiffs(newer.number, older.number); // 新→旧の差分
+
+      const row = document.createElement('tr');
+      const diffCells = diffs.map(d => {
+        const color = d.startsWith('右') ? 'red' : 'green';
+        return `<td style="color:${color}">${d}</td>`;
+      });
+
+      row.innerHTML = `<td>${older.date}</td><td>${older.number}</td>` + diffCells.join('');
+      diffTable.appendChild(row);
+    }
+
+    resultArea.appendChild(diffTable);
+  };
+
+  reader.readAsText(file);
 }
 
 document.getElementById('details').appendChild(diffTable);
