@@ -142,24 +142,26 @@
 
   const reader = new FileReader();
   reader.onload = e => {
-    const originalData = parseCSV(e.target.result);
+    const originalData = parseCSV(e.target.result); // 古→新 順
+    if (originalData.length < 2) return;
 
-    // CSVは古→新順なので、最新を最後と仮定
-    const lastEntry = originalData[originalData.length - 1];
-    const lastDate = new Date(lastEntry.date);
+    // 最新の実データ（originalData の末尾）
+    const latestRealEntry = originalData[originalData.length - 1];
+    const latest = latestRealEntry.number;
+
+    // 翌日の日付（予測用）
+    const lastDate = new Date(latestRealEntry.date);
     lastDate.setDate(lastDate.getDate() + 1);
     const yyyy = lastDate.getFullYear();
     const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
     const dd = String(lastDate.getDate()).padStart(2, '0');
     const nextDateStr = `${yyyy}/${mm}/${dd}`;
 
-    // 新→古になるよう先頭に追加して反転
+    // 新→古 にするため reverse、先頭に「予測日」を追加（空番号）
     const data = [...originalData].reverse();
     data.unshift({ date: nextDateStr, number: '' });
 
-    const latest = data[1].number;  // 実データ最新
-
-    // 差分パターン頻度
+    // 差分パターン頻度集計
     const diffFreq = {};
     for (let i = 1; i < Math.min(21, data.length); i++) {
       const diffKey = getWheelDiffs(data[i - 1].number, data[i].number).join(',');
@@ -175,7 +177,10 @@
     const resultArea = document.getElementById('details');
     resultArea.innerHTML = '';
 
-    const pastNumbers = new Set(data.slice(1, Math.min(21, data.length)).map(entry => entry.number));
+    // 出現チェック対象（最新から20件 ※空行除外）
+    const pastNumbers = new Set(
+      data.filter(d => d.number).slice(0, 20).map(entry => entry.number)
+    );
 
     // ▼ 予測表示
     topPatterns.forEach(pattern => {
@@ -196,7 +201,7 @@
       `;
     });
 
-    // ▼ 差分テーブル（新→古、表の中身あり）
+    // ▼ 差分テーブル（新→古、最大11件）
     const diffTableWrapper = document.createElement('div');
     diffTableWrapper.style.textAlign = 'center';
 
