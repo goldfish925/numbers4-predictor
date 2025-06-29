@@ -174,20 +174,23 @@
 
         const diffTableWrapper = document.createElement('div');
         diffTableWrapper.style.textAlign = 'center';
-        const table = document.createElement('table');
-        table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
+       const table = document.createElement('table');
+table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
-        for (let i = Math.min(10, data.length - 1); i >= 1; i--) {
-  const date = data[i - 1].date;
-  const number = data[i - 1].number;
-  const diffs = getWheelDiffs(data[i].number, data[i - 1].number);
-          const row = document.createElement('tr');
-          row.innerHTML = `<td>${date}</td><td>${number}</td>` + diffs.map(d => {
-            const color = d.startsWith('右') ? 'red' : 'green';
-            return `<td style="color:${color}">${d}</td>`;
-          }).join('');
-          table.appendChild(row);
-        }
+for (let i = Math.min(11, data.length) - 1; i >= 0; i--) {
+  const current = data[i];
+  const prev = data[i + 1];  // 古い方
+
+  const diffs = prev ? getWheelDiffs(current.number, prev.number) : ['', '', '', ''];
+  const row = document.createElement('tr');
+  const diffCells = diffs.map(d => {
+    const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
+    return `<td style="color:${color}">${d}</td>`;
+  });
+
+  row.innerHTML = `<td>${current.date}</td><td>${current.number}</td>` + diffCells.join('');
+  table.appendChild(row);
+}
         diffTableWrapper.appendChild(table);
         resultArea.appendChild(diffTableWrapper);
       };
