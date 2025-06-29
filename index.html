@@ -2,104 +2,60 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>NUMBERS4予想</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       font-family: "Hiragino Kaku Gothic ProN", sans-serif;
       background-color: #ffffff;
-      color: #c1a57b;
+      color: #5a4635;
       text-align: center;
       padding: 20px;
     }
     h1 {
       font-size: 28px;
+      color: #c1a57b;
     }
     button {
       background-color: #c1a57b;
-      color: #5a4635;
+      color: #ffffff;
       padding: 10px 20px;
       border: none;
       border-radius: 8px;
       font-size: 16px;
       cursor: pointer;
-      margin-top: 10px;
     }
-    #result, #details {
-      margin-top: 20px;
-    }
-    #details {
-      font-size: 14px;
-      white-space: pre-line;
-      color: #7c6240;
-    }
-    img {
-      max-width: 150px;
-      margin-top: 20px;
+    .prediction-card {
+      background: #fff;
+      border: 2px solid #c1a57b;
+      border-radius: 12px;
+      padding: 15px;
+      margin: 20px auto;
+      max-width: 400px;
+      box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
     }
     table {
+      margin: 0 auto;
       border-collapse: collapse;
-      margin: 1em auto;
-      width: auto;
+      margin-top: 30px;
     }
     th, td {
-      border: 1px solid #ccc;
-      padding: 0.4em 0.8em;
-      text-align: center;
+      border: 1px solid #c1a57b;
+      padding: 6px 12px;
     }
     th {
-      background-color: #f0f8ff;
+      background-color: #f8f0e3;
     }
-    .input-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-  #details {
-    font-family: 'Arial', sans-serif;
-    max-width: 400px;
-    margin: 20px auto;
-  }
-  #details h3 {
-    text-align: center;
-    color: #2a4d69;
-    margin-bottom: 20px;
-  }
-  .prediction-card {
-    background: #fff;
-    border: 2px solid #2a4d69;
-    border-radius: 8px;
-    padding: 15px 20px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 6px rgba(42, 77, 105, 0.3);
-  }
-  .prediction-card strong {
-    color: #1e2a47;
-  }
-  .prediction-icon {
-    font-size: 1.2em;
-    margin-right: 8px;
-  }
-
   </style>
 </head>
 <body>
   <h1>NUMBERS4予想</h1>
-  <div class="center">
-    <img src="neco.png" alt="にゃんこ" />
-  </div>
-  <div class="input-row">
-    <input type="file" id="csvFile" accept=".csv,.txt" />
-    <button id="predictButton">予想</button>
-  </div>
-  <div id="result">ここに予測が表示されるよ</div>
+  <input type="file" id="csvFile" accept=".csv">
+  <button id="predictButton">予測する</button>
   <div id="details"></div>
-  <div id="table-container"></div>
-  
-    <script>
+  <div id="diffTable"></div>
+
+  <script>
     const wheels = {
       千: [0,3,6,9,2,5,8,1,4,7],
       百: [0,1,2,3,4,5,6,7,8,9],
@@ -188,48 +144,40 @@
 
         const averageError = calculateAverageError(data);
         const resultArea = document.getElementById('details');
-        resultArea.innerHTML = '<h3>予測結果</h3>';
+        resultArea.innerHTML = '';
 
         topPatterns.forEach(pattern => {
           const pred = predictNext(latest, pattern);
           const corrected = applyCorrection(pred, averageError);
           const reversed = corrected.split('').reverse().join('');
-          const mirrorCorrected = corrected.split('').map(d => mirrorMap[d]).join('');
+          const mirror = corrected.split('').map(d => mirrorMap[d]).join('');
 
-          const hitReversed = data.some(entry => entry.number === reversed);
-          const hitMirror = data.some(entry => entry.number === mirrorCorrected);
+          const hitRev = data.some(entry => entry.number === reversed);
+          const hitMir = data.some(entry => entry.number === mirror);
 
           resultArea.innerHTML += `
             <div class="prediction-card">
-              <div>🔮 <strong>予測番号:</strong> ${pred}</div>
-              <div>🔧 <strong>補正後予測番号:</strong> ${corrected}</div>
-              <div>🪐 <strong>補正後ミラー:</strong> ${mirrorCorrected} ${hitMirror ? '✅ 出現あり！' : '❌ 未出現'}</div>
-              <div>🔁 <strong>逆順番号:</strong> ${reversed} ${hitReversed ? '✅ 出現あり！' : '❌ 未出現'}</div>
-              <div>🎯 <strong>差分パターン:</strong> ${pattern.join(', ')}</div>
+              <div>🔮 予測番号: ${pred}</div>
+              <div>🔧 補正後予測番号: ${corrected}</div>
+              <div>🔁 逆順番号: ${reversed} ${hitRev ? '✅ 出現あり！' : '❌ 未出現'}</div>
+              <div>💿 ミラー番号: ${mirror} ${hitMir ? '✅ 出現あり！' : '❌ 未出現'}</div>
             </div>
           `;
         });
 
-        const movementDiv = document.getElementById('movements');
-        movementDiv.innerHTML = '<h3>直近の動き</h3>';
-        const table = document.createElement('table');
-        const header = document.createElement('tr');
-        header.innerHTML = '<th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th>';
-        table.appendChild(header);
-
+        // 差分テーブル表示
+        const tableArea = document.getElementById('diffTable');
+        let html = '<h2>📅 直近11回の風車差分</h2><table><tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
         for (let i = 1; i < Math.min(11, data.length); i++) {
-          const prev = data[i - 1];
-          const curr = data[i];
-          const diffs = getWheelDiffs(prev.number, curr.number);
-          const row = document.createElement('tr');
-          row.innerHTML = `<td>${curr.date}</td><td>${curr.number}</td>` + diffs.map(d => `<td>${d}</td>`).join('');
-          table.appendChild(row);
+          const diff = getWheelDiffs(data[i - 1].number, data[i].number);
+          html += `<tr><td>${data[i].date}</td><td>${data[i].number}</td>` +
+                  diff.map(d => `<td>${d}</td>`).join('') + '</tr>';
         }
-        movementDiv.appendChild(table);
+        html += '</table>';
+        tableArea.innerHTML = html;
       };
       reader.readAsText(file);
     }
   </script>
-
 </body>
 </html>
