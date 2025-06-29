@@ -3,19 +3,15 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>NUMBERS4予想</title>
+  <title>NUMBERS4予想ツール</title>
   <style>
     body {
       font-family: "Hiragino Kaku Gothic ProN", sans-serif;
       background-color: #ffffff;
-      color: #c1a57b;
+      color: #5a4635;
       text-align: center;
       padding: 20px;
     }
-    <div class="neco-wrapper">
-  <img src="neco.png" alt="ねこ" class="neco-image">
-</div>
-
     h1 {
       font-size: 28px;
       color: #c1a57b;
@@ -39,17 +35,9 @@
       box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
     }
   </style>
-  .neco-wrapper {
-  text-align: center;
-  margin-bottom: 10px;
-}
-.neco-image {
-  width: 120px;
-  height: auto;
-}
 </head>
 <body>
-  <h1>NUMBERS4予想</h1>
+  <h1>NUMBERS4予想ツール</h1>
   <input type="file" id="csvFile" accept=".csv">
   <button id="predictButton">予測する</button>
   <div id="details"></div>
@@ -168,7 +156,7 @@
               <div>🔮 予測番号: ${pred}</div>
               <div>🔧 補正後予測番号: ${corrected} ${isHit}</div>
               <div>🔁 逆順番号: ${reversed}</div>
-              <div>🔧 ミラー番号: ${mirror} ${isMirrorHit}</div>
+              <div>💿 ミラー番号: ${mirror} ${isMirrorHit}</div>
             </div>
           `;
         });
