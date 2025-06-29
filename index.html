@@ -142,14 +142,26 @@
 
   const reader = new FileReader();
   reader.onload = e => {
-    let data = parseCSV(e.target.result).reverse(); // 新→古順に並べ替え
-    if (data.length === 0) return;
+    const originalData = parseCSV(e.target.result);
 
-    const latest = data[0].number;
+    // CSVは古→新順なので、最新を最後と仮定
+    const lastEntry = originalData[originalData.length - 1];
+    const lastDate = new Date(lastEntry.date);
+    lastDate.setDate(lastDate.getDate() + 1);
+    const yyyy = lastDate.getFullYear();
+    const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(lastDate.getDate()).padStart(2, '0');
+    const nextDateStr = `${yyyy}/${mm}/${dd}`;
 
-    // 差分パターン頻度集計
+    // 新→古になるよう先頭に追加して反転
+    const data = [...originalData].reverse();
+    data.unshift({ date: nextDateStr, number: '' });
+
+    const latest = data[1].number;  // 実データ最新
+
+    // 差分パターン頻度
     const diffFreq = {};
-    for (let i = 1; i < Math.min(11, data.length); i++) {
+    for (let i = 1; i < Math.min(21, data.length); i++) {
       const diffKey = getWheelDiffs(data[i - 1].number, data[i].number).join(',');
       diffFreq[diffKey] = (diffFreq[diffKey] || 0) + 1;
     }
@@ -163,7 +175,7 @@
     const resultArea = document.getElementById('details');
     resultArea.innerHTML = '';
 
-    const pastNumbers = new Set(data.map(entry => entry.number));
+    const pastNumbers = new Set(data.slice(1, Math.min(21, data.length)).map(entry => entry.number));
 
     // ▼ 予測表示
     topPatterns.forEach(pattern => {
@@ -184,49 +196,31 @@
       `;
     });
 
-    // ▼ 差分テーブル：最新平日から11日分（新→古順）
-    const dateList = [];
-    const latestDate = new Date(data[0].date);
-    let cursor = new Date(latestDate);
-    while (dateList.length < 11) {
-      const dow = cursor.getDay();
-      if (dow !== 0 && dow !== 6) { // 平日のみ
-        const yyyy = cursor.getFullYear();
-        const mm = String(cursor.getMonth() + 1).padStart(2, '0');
-        const dd = String(cursor.getDate()).padStart(2, '0');
-        dateList.push(`${yyyy}/${mm}/${dd}`);
-      }
-      cursor.setDate(cursor.getDate() - 1);
-    }
-
-    const dataMap = new Map(data.map(d => [d.date, d.number]));
-
+    // ▼ 差分テーブル（新→古、表の中身あり）
     const diffTableWrapper = document.createElement('div');
     diffTableWrapper.style.textAlign = 'center';
+
     const table = document.createElement('table');
     table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
-    for (let i = 0; i < dateList.length; i++) {
-  const currentDate = dateList[i];
-  const nextDate = dateList[i + 1];  // 一つ前の日
+    for (let i = 0; i < Math.min(11, data.length); i++) {
+      const current = data[i];
+      const prev = data[i + 1];
 
-  const currentNum = dataMap.get(currentDate);
-  const nextNum = nextDate ? dataMap.get(nextDate) : null;
+      let diffs = ['','','',''];
+      if (current.number && prev && prev.number && current.number.length === 4 && prev.number.length === 4) {
+        diffs = getWheelDiffs(current.number, prev.number);
+      }
 
-  let diffs = ['','','',''];  // デフォルト空欄
-  if (currentNum && nextNum && currentNum.length === 4 && nextNum.length === 4) {
-    diffs = getWheelDiffs(currentNum, nextNum);
-  }
+      const row = document.createElement('tr');
+      const diffCells = diffs.map(d => {
+        const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
+        return `<td style="color:${color}">${d}</td>`;
+      });
 
-  const row = document.createElement('tr');
-  const diffCells = diffs.map(d => {
-    const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
-    return `<td style="color:${color}">${d}</td>`;
-  });
-
-  row.innerHTML = `<td>${currentDate}</td><td>${currentNum || ''}</td>` + diffCells.join('');
-  table.appendChild(row);
-}
+      row.innerHTML = `<td>${current.date}</td><td>${current.number}</td>` + diffCells.join('');
+      table.appendChild(row);
+    }
 
     diffTableWrapper.appendChild(table);
     resultArea.appendChild(diffTableWrapper);
