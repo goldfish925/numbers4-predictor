@@ -132,83 +132,90 @@
     }
 
     function predict() {
-      const file = document.getElementById('csvFile').files[0];
-      if (!file) return;
+  const file = document.getElementById('csvFile').files[0];
+  if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = e => {
-        const data = parseCSV(e.target.result);
-  const lastDate = new Date(data[0].date);
-lastDate.setDate(lastDate.getDate() + 1);
-const yyyy = lastDate.getFullYear();
-const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
-const dd = String(lastDate.getDate()).padStart(2, '0');
-const nextDateStr = `${yyyy}/${mm}/${dd}`;
-data.unshift({ date: nextDateStr, number: '' });
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = parseCSV(e.target.result);
 
-        const latest = data[0].number;
-        const diffFreq = {};
-        for (let i = 1; i < Math.min(11, data.length); i++) {
-          const diffKey = getWheelDiffs(data[i - 1].number, data[i].number).join(',');
-          diffFreq[diffKey] = (diffFreq[diffKey] || 0) + 1;
-        }
+    // ▼ 最新日付の翌日を追加（予測用）
+    const lastDate = new Date(data[0].date);
+    lastDate.setDate(lastDate.getDate() + 1);
+    const yyyy = lastDate.getFullYear();
+    const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(lastDate.getDate()).padStart(2, '0');
+    const nextDateStr = `${yyyy}/${mm}/${dd}`;
+    data.unshift({ date: nextDateStr, number: '' }); // 空番号を先頭に追加
 
-        const topPatterns = Object.entries(diffFreq)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 3)
-          .map(e => e[0].split(','));
+    const latest = data[1].number; // 予測に使うのは、実際の最新番号
 
-        const averageError = calculateAverageError(data);
-        const resultArea = document.getElementById('details');
-        resultArea.innerHTML = '';
-
-         const pastNumbers = new Set(data.slice(0, Math.min(20, data.length)).map(entry => entry.number));
-
-        topPatterns.forEach(pattern => {
-          const pred = predictNext(latest, pattern);
-          const corrected = applyCorrection(pred, averageError);
-          const reversed = corrected.split('').reverse().join('');
-          const mirror = corrected.split('').map(d => mirrorMap[d]).join('');
-　　　　　 const isHit = pastNumbers.has(corrected) ? '✅ 出現あり！' : '❌ 未出現';
-          const isMirrorHit = pastNumbers.has(mirror) ? '✅ 出現あり！' : '❌ 未出現';
-          
-          resultArea.innerHTML += `
-            <div class="prediction-card">
-              <div>🔮 予測番号: ${pred}</div>
-              <div>🔧 補正後予測番号: ${corrected} ${isHit}</div>
-              <div>🔁 逆順番号: ${reversed}</div>
-              <div>🔧 ミラー番号: ${mirror} ${isMirrorHit}</div>
-
-            </div>
-          `;
-        });
-
-        const diffTableWrapper = document.createElement('div');
-diffTableWrapper.style.textAlign = 'center';
-const table = document.createElement('table');
-table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
-
-
-for (let i = data.length - 1; i >= 1; i--) {
-  const current = data[i - 1];
-  const prev = data[i];
-
-  const diffs = getWheelDiffs(current.number, prev.number);
-  const row = document.createElement('tr');
-  const diffCells = diffs.map(d => {
-    const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
-    return `<td style="color:${color}">${d}</td>`;
-  });
-
-  row.innerHTML = `<td>${current.date}</td><td>${current.number}</td>` + diffCells.join('');
-  table.appendChild(row);
-}
-diffTableWrapper.appendChild(table);
-resultArea.appendChild(diffTableWrapper);
-      };
-
-      reader.readAsText(file);
+    // 差分パターン頻度集計
+    const diffFreq = {};
+    for (let i = 1; i < Math.min(11, data.length); i++) {
+      const diffKey = getWheelDiffs(data[i - 1].number, data[i].number).join(',');
+      diffFreq[diffKey] = (diffFreq[diffKey] || 0) + 1;
     }
+
+    const topPatterns = Object.entries(diffFreq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(e => e[0].split(','));
+
+    const averageError = calculateAverageError(data);
+    const resultArea = document.getElementById('details');
+    resultArea.innerHTML = '';
+
+    const pastNumbers = new Set(data.slice(0, Math.min(20, data.length)).map(entry => entry.number));
+
+    // ▼ 予測表示
+    topPatterns.forEach(pattern => {
+      const pred = predictNext(latest, pattern);
+      const corrected = applyCorrection(pred, averageError);
+      const reversed = corrected.split('').reverse().join('');
+      const mirror = corrected.split('').map(d => mirrorMap[d]).join('');
+      const isHit = pastNumbers.has(corrected) ? '✅ 出現あり！' : '❌ 未出現';
+      const isMirrorHit = pastNumbers.has(mirror) ? '✅ 出現あり！' : '❌ 未出現';
+
+      resultArea.innerHTML += `
+        <div class="prediction-card">
+          <div>🔮 予測番号: ${pred}</div>
+          <div>🔧 補正後予測番号: ${corrected} ${isHit}</div>
+          <div>🔁 逆順番号: ${reversed}</div>
+          <div>🔧 ミラー番号: ${mirror} ${isMirrorHit}</div>
+        </div>
+      `;
+    });
+
+    // ▼ 差分テーブル作成（新→古、11件）
+    const diffTableWrapper = document.createElement('div');
+    diffTableWrapper.style.textAlign = 'center';
+
+    const table = document.createElement('table');
+    table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
+
+    for (let i = 0; i < Math.min(11, data.length); i++) {
+      const current = data[i];
+      const prev = data[i + 1];  // 1つ前（古い）
+
+      const diffs = prev ? getWheelDiffs(current.number, prev.number) : ['', '', '', ''];
+      const row = document.createElement('tr');
+      const diffCells = diffs.map(d => {
+        const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
+        return `<td style="color:${color}">${d}</td>`;
+      });
+
+      row.innerHTML = `<td>${current.date}</td><td>${current.number}</td>` + diffCells.join('');
+      table.appendChild(row);
+    }
+
+    diffTableWrapper.appendChild(table);
+    resultArea.appendChild(diffTableWrapper);
+  };
+
+  reader.readAsText(file);
+}
+
   </script>
 </body>
 </html>
