@@ -100,213 +100,113 @@
   <div id="table-container"></div>
   
     <script>
-    document.getElementById('predictButton').addEventListener('click', predict);
-
-    // 風車順配列定義
     const wheels = {
-      千: [0, 3, 6, 9, 2, 5, 8, 1, 4, 7],
-      百: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-      十: [0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
-      一: [0, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+      千: [0,3,6,9,2,5,8,1,4,7],
+      百: [0,1,2,3,4,5,6,7,8,9],
+      十: [0,7,4,1,8,5,2,9,6,3],
+      一: [0,9,8,7,6,5,4,3,2,1],
     };
-    const positions = ['千', '百', '十', '一'];
-
-    // ミラー数字対応表
+    const positions = ['千','百','十','一'];
     const mirrorMap = { 0:5, 1:6, 2:7, 3:8, 4:9, 5:0, 6:1, 7:2, 8:3, 9:4 };
 
-    // CSVパース: 日付,番号列を抽出し、日付降順で並べる
-    function parseCSV(csvText) {
-      const lines = csvText.trim().split('\n');
-      const data = lines.slice(1).map(line => {
-        const columns = line.split(',');
-        if (columns.length < 3) return null;
-        const date = columns[1].trim();
-        let number = columns[2].trim();
-        number = number.replace(/^="?/, '').replace(/"?$/, '').replace(/[^\d]/g, '');
-        if(number.length !== 4) return null;
+    document.getElementById('predictButton').addEventListener('click', predict);
+
+    function parseCSV(text) {
+      return text.trim().split('\n').slice(1).map(line => {
+        const cols = line.split(',');
+        const date = cols[1].trim();
+        const number = cols[2].trim().replace(/[^\d]/g, '').padStart(4, '0');
         return { date, number };
-      }).filter(entry => entry);
-      data.sort((a,b) => new Date(b.date) - new Date(a.date));
-      return data;
+      });
     }
 
-    // 差分パターン抽出
-    function getWheelDifferences(prevNumber, currentNumber) {
-      const prevDigits = prevNumber.padStart(4,'0').split('').map(Number);
-      const currDigits = currentNumber.padStart(4,'0').split('').map(Number);
-      const diffs = positions.map((pos,i) => {
+    function getWheelDiffs(prev, curr) {
+      const p = prev.split('').map(Number);
+      const c = curr.split('').map(Number);
+      return positions.map((pos, i) => {
         const wheel = wheels[pos];
-        const prevIdx = wheel.indexOf(prevDigits[i]);
-        const currIdx = wheel.indexOf(currDigits[i]);
-        const leftSteps = (prevIdx - currIdx + 10) % 10;
-        const rightSteps = (currIdx - prevIdx + 10) % 10;
-        const direction = leftSteps <= rightSteps ? '左' : '右';
-        const steps = Math.min(leftSteps, rightSteps);
-        return `${direction}${steps}`;
+        const pi = wheel.indexOf(p[i]);
+        const ci = wheel.indexOf(c[i]);
+        const left = (pi - ci + 10) % 10;
+        const right = (ci - pi + 10) % 10;
+        return (left <= right ? '左' : '右') + Math.min(left, right);
       });
-      return { prev: prevNumber, curr: currentNumber, diffs };
     }
 
-    // 差分パターンの頻度集計
-    function collectDiffPatternFrequency(data) {
-      const freqMap = {};
-      for(let i=1; i<data.length; i++) {
-        const diffObj = getWheelDifferences(data[i-1].number, data[i].number);
-        const key = diffObj.diffs.join(',');
-        freqMap[key] = (freqMap[key] || 0) + 1;
-      }
-      return freqMap;
-    }
-
-    // 上位N件抽出
-    function getTopDiffPatterns(freqMap, topN=3) {
-      return Object.entries(freqMap)
-        .sort((a,b) => b[1] - a[1])
-        .slice(0, topN)
-        .map(([pattern, count]) => ({ pattern: pattern.split(','), count }));
-    }
-
-    // 予測数字算出：現在の数字＋差分パターンを風車順で次の数字に変換
-    function predictNextNumber(currentNumber, pattern) {
-      const currDigits = currentNumber.padStart(4,'0').split('').map(Number);
-      const nextDigits = [];
-      pattern.forEach((diff,i) => {
+    function predictNext(current, pattern) {
+      const digits = current.split('').map(Number);
+      return pattern.map((d, i) => {
         const wheel = wheels[positions[i]];
-        const currDigit = currDigits[i];
-        const currIdx = wheel.indexOf(currDigit);
-        const direction = diff[0];
-        const steps = parseInt(diff.slice(1));
-        const nextIdx = direction === '左'
-          ? (currIdx - steps + 10) % 10
-          : (currIdx + steps) % 10;
-        nextDigits.push(wheel[nextIdx]);
-      });
-      return nextDigits.join('');
+        const idx = wheel.indexOf(digits[i]);
+        const dir = d[0];
+        const steps = parseInt(d.slice(1));
+        const next = dir === '左' ? (idx - steps + 10) % 10 : (idx + steps) % 10;
+        return wheel[next];
+      }).join('');
     }
 
-    // 補正（誤差）適用
-    function applyErrorCorrection(predictedNum, errorStr) {
-      const digits = predictedNum.padStart(4,'0').split('').map(Number);
-      const errorNums = errorStr.split(' ').map(s => {
-        if(s.startsWith('+')) return Number(s.slice(1));
-        if(s.startsWith('±')) return 0;
-        return Number(s);
-      });
-      const correctedDigits = digits.map((d,i) => {
+    function calculateAverageError(data) {
+      const count = Math.min(5, data.length - 1);
+      const totalError = [0, 0, 0, 0];
+      for (let i = 0; i < count; i++) {
+        const prev = data[i + 1].number.split('').map(Number);
+        const curr = data[i].number.split('').map(Number);
+        positions.forEach((pos, idx) => {
+          const wheel = wheels[pos];
+          const pi = wheel.indexOf(prev[idx]);
+          const ci = wheel.indexOf(curr[idx]);
+          let diff = (ci - pi + 10) % 10;
+          if (diff > 5) diff -= 10;
+          totalError[idx] += diff;
+        });
+      }
+      return totalError.map(e => Math.round(e / count));
+    }
+
+    function applyCorrection(num, error) {
+      const digits = num.split('').map(Number);
+      return digits.map((d, i) => {
         const wheel = wheels[positions[i]];
         const idx = wheel.indexOf(d);
-        const correctedIdx = (idx - errorNums[i] + 10) % 10;
-        return wheel[correctedIdx];
-      });
-      return correctedDigits.join('');
+        return wheel[(idx + error[i] + 10) % 10];
+      }).join('');
     }
 
-    // ミラー数字変換
-    function mirror(num) {
-      return num.split('').map(d => mirrorMap[d] ?? d).join('');
-    }
-
-    // 予測処理のメイン
     function predict() {
-      const fileInput = document.getElementById('csvFile');
-      if(!fileInput.files.length) {
-        alert('CSVファイルを選んでね！');
-        return;
-      }
+      const file = document.getElementById('csvFile').files[0];
+      if (!file) return;
       const reader = new FileReader();
-      reader.onload = function(e) {
-        const csvText = e.target.result;
-        const allData = parseCSV(csvText);
-        if(allData.length < 2) {
-          alert('データ不足です。もっと過去のデータを入れてね。');
-          return;
+      reader.onload = e => {
+        const data = parseCSV(e.target.result);
+        const latest = data[0].number;
+        const diffFreq = {};
+        for (let i = 1; i < Math.min(11, data.length); i++) {
+          const diff = getWheelDiffs(data[i - 1].number, data[i].number).join(',');
+          diffFreq[diff] = (diffFreq[diff] || 0) + 1;
         }
+        const topPatterns = Object.entries(diffFreq).sort((a, b) => b[1] - a[1]).slice(0, 5).map(e => e[0].split(','));
 
-        // 直近11件で解析（適宜調整可）
-        const data = allData.slice(-11).reverse(); 
-
-        // 差分パターン頻度解析
-        const freqMap = collectDiffPatternFrequency(data);
-        let topPatterns = getTopDiffPatterns(freqMap, 5);
-
-        const latestNumber = allData[0].number;
-        const previousNumber = allData[1]?.number ?? '';
-
-        // 直近との予測重複排除＆上位3件に絞る
-        topPatterns = topPatterns.filter(item => predictNextNumber(latestNumber, item.pattern) !== previousNumber).slice(0,3);
-
+        const averageError = calculateAverageError(data);
         const resultArea = document.getElementById('details');
-        resultArea.innerHTML = '<h3>予測結果</h3>';
+        resultArea.innerHTML = '';
 
-        const actualNumber = data[0].number;
-        const errorDigits = actualNumber.padStart(4,'0').split('').map(Number);
-
-        topPatterns.forEach(item => {
-          const predictedNum = predictNextNumber(latestNumber, item.pattern);
-          const predictedDigits = predictedNum.padStart(4,'0').split('').map(Number);
-
-          // 誤差計算（予測数字 - 実際の当選数字）
-          const error = predictedDigits.map((digit,idx) => {
-            const diff = digit - errorDigits[idx];
-            const sign = diff > 0 ? '+' : (diff === 0 ? '±0' : '');
-            return `${sign}${diff}`;
-          }).join(' ');
-
-          const correctedNum = applyErrorCorrection(predictedNum, error);
-
-          // 逆順番号チェック
-          const reversed = correctedNum.split('').reverse().join('');
-          const hitReversed = allData.some(entry => entry.number === reversed);
-
-          // ミラー数字
-          const mirrorOriginal = mirror(predictedNum.padStart(4,'0'));
-          const mirrorCorrected = mirror(correctedNum.padStart(4,'0'));
-          const hitMirrorOriginal = allData.some(entry => entry.number === mirrorOriginal);
-          const hitMirrorCorrected = allData.some(entry => entry.number === mirrorCorrected);
+        topPatterns.forEach(pattern => {
+          const pred = predictNext(latest, pattern);
+          const corrected = applyCorrection(pred, averageError);
+          const reversed = corrected.split('').reverse().join('');
+          const mirror = corrected.split('').map(d => mirrorMap[d]).join('');
 
           resultArea.innerHTML += `
             <div class="prediction-card">
-              <div>🔮 <strong>予測番号:</strong> ${predictedNum}</div>
-              <div>🔧 <strong>補正後予測番号:</strong> ${correctedNum}</div>
-              <div>🎇 <strong>ミラー番号:</strong> ${mirrorOriginal} ${hitMirrorOriginal ? '✅ 出現あり！' : '❌ 未出現'}</div>
-              <div>🪐 <strong>補正後ミラー:</strong> ${mirrorCorrected} ${hitMirrorCorrected ? '✅ 出現あり！' : '❌ 未出現'}</div>
-              <div>🔁 <strong>逆順番号:</strong> ${reversed} ${hitReversed ? '✅ 出現あり！' : '❌ 未出現'}</div>
-              <div>🎯 <strong>差分パターン:</strong> ${item.pattern.join(', ')}</div>
-              <div>🌀 <strong>出現回数:</strong> ${item.count}</div>
-              <div>📏 <strong>誤差:</strong> ${error}</div>
+              <div>🔮 予測番号: ${pred}</div>
+              <div>🔧 補正後予測番号: ${corrected}</div>
+              <div>🔁 逆順番号: ${reversed}</div>
+              <div>💿 ミラー番号: ${mirror}</div>
             </div>
           `;
         });
-
-        // 差分テーブル表示
-        const container = document.getElementById('table-container');
-        container.innerHTML = '';
-        const table = document.createElement('table');
-        const header = document.createElement('tr');
-        header.innerHTML = `<th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th>`;
-        table.appendChild(header);
-
-        // 最新行（日付・番号のみ）
-        const firstRow = document.createElement('tr');
-        firstRow.innerHTML = `<td>${data[0].date}</td><td>${data[0].number}</td><td></td><td></td><td></td><td></td>`;
-        table.appendChild(firstRow);
-
-        // 差分行
-        for(let i=1; i<data.length; i++) {
-          const diffData = getWheelDifferences(data[i-1].number, data[i].number);
-          const row = document.createElement('tr');
-          const diffCells = diffData.diffs.map(d => {
-            const color = d.startsWith('右') ? 'red' : 'green';
-            return `<td style="color:${color}">${d}</td>`;
-          });
-          row.innerHTML = `<td>${data[i].date}</td><td>${diffData.curr}</td>` + diffCells.join('');
-          table.appendChild(row);
-        }
-
-        container.appendChild(table);
-
       };
-      reader.readAsText(fileInput.files[0]);
+      reader.readAsText(file);
     }
   </script> 
 </body>
