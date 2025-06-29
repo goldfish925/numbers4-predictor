@@ -142,10 +142,11 @@
 
   const reader = new FileReader();
   reader.onload = e => {
-    const originalData = parseCSV(e.target.result); // CSVは古→新順
-    if (originalData.length < 2) return;
+    let data = parseCSV(e.target.result); // CSVは古→新順
 
-    const latestEntry = originalData[originalData.length - 1]; // 一番新しい実データ
+    if (data.length < 2) return;
+
+    const latestEntry = data[data.length - 1]; // 最新日（新しい）
     const latestNumber = latestEntry.number;
 
     // 翌日（予測日）を生成
@@ -156,8 +157,10 @@
     const dd = String(lastDate.getDate()).padStart(2, '0');
     const nextDateStr = `${yyyy}/${mm}/${dd}`;
 
-    // 新→古に反転し、先頭に予測日（空番号）を追加
-    const data = [...originalData].reverse();
+    // 差分解析と表示のため、新→古に並び替え
+    data = data.reverse();
+
+    // 先頭（新しい側）に予測日（空）を追加
     data.unshift({ date: nextDateStr, number: '' });
 
     const diffFreq = {};
@@ -172,14 +175,15 @@
       .map(e => e[0].split(','));
 
     const averageError = calculateAverageError(data);
+
     const resultArea = document.getElementById('details');
     resultArea.innerHTML = '';
 
     const pastNumbers = new Set(
-      data.filter(d => d.number).slice(0, 20).map(d => d.number)
+      data.filter(d => d.number).slice(1, 21).map(d => d.number)
     );
 
-    // 予測は「実データの最新番号」から行う（空ではなく）
+    // 予測は実際の最新番号から行う
     topPatterns.forEach(pattern => {
       const pred = predictNext(latestNumber, pattern);
       const corrected = applyCorrection(pred, averageError);
@@ -198,7 +202,7 @@
       `;
     });
 
-    // 差分テーブル：新→古順に11件まで表示
+    // 差分テーブル表示（11件まで）
     const diffTableWrapper = document.createElement('div');
     diffTableWrapper.style.textAlign = 'center';
 
@@ -208,8 +212,10 @@
     for (let i = 0; i < Math.min(11, data.length); i++) {
       const current = data[i];
       const prev = data[i + 1];
+      const diffs = (prev && current.number && prev.number)
+        ? getWheelDiffs(current.number, prev.number)
+        : ['','','',''];
 
-      const diffs = (prev && current.number && prev.number) ? getWheelDiffs(current.number, prev.number) : ['','','',''];
       const row = document.createElement('tr');
       const diffCells = diffs.map(d => {
         const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
