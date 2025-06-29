@@ -172,10 +172,10 @@
         const table = document.createElement('table');
         table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
-        for (let i = 1; i < Math.min(11, data.length); i++) {
-          const date = data[i - 1].date;
-          const number = data[i - 1].number;
-          const diffs = getWheelDiffs(data[i].number, data[i - 1].number);
+        for (let i = Math.min(10, data.length - 1); i >= 1; i--) {
+  const date = data[i - 1].date;
+  const number = data[i - 1].number;
+  const diffs = getWheelDiffs(data[i].number, data[i - 1].number);
           const row = document.createElement('tr');
           row.innerHTML = `<td>${date}</td><td>${number}</td>` + diffs.map(d => {
             const color = d.startsWith('右') ? 'red' : 'green';
