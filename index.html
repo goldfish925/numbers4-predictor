@@ -3,7 +3,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>NUMBERS4予想ツール</title>
+  <title>NUMBERS4予想</title>
   <style>
     body {
       font-family: "Hiragino Kaku Gothic ProN", sans-serif;
@@ -12,24 +12,11 @@
       text-align: center;
       padding: 20px;
     }
-    <div class="neco-wrapper">
-  <img src="neco.png" alt="ねこ" class="neco-image">
-    neco-wrapper {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.neco-image {
-  width: 120px;
-  height: auto;
-}
-</div>
-
     h1 {
       font-size: 28px;
       color: #c1a57b;
     }
-    button {
+      button {
       background-color: #c1a57b;
       color: #ffffff;
       padding: 10px 20px;
@@ -48,9 +35,21 @@
       box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
     }
   </style>
+  .neco-wrapper {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.neco-image {
+  width: 120px;
+  height: auto;
+}
 </head>
 <body>
-  <h1>NUMBERS4予想ツール</h1>
+  <div class="neco-wrapper">
+  <img src="neco.png" alt="ねこ" class="neco-image">
+</div>
+  <h1>NUMBERS4予想</h1>
   <input type="file" id="csvFile" accept=".csv">
   <button id="predictButton">予測する</button>
   <div id="details"></div>
