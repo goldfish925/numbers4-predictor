@@ -38,22 +38,16 @@
       max-width: 400px;
       box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
     }
-    table {
-      margin: 0 auto;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #c1a57b;
-      padding: 6px 10px;
-    }
-    h3 {
-      margin-top: 30px;
-      color: #a08660;
-    }
   </style>
-  <div class="neco-wrapper">
-  <img src="neco.png" alt="ねこ" class="neco-image">
-</div>
+  .neco-wrapper {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.neco-image {
+  width: 120px;
+  height: auto;
+}
 </head>
 <body>
   <h1>NUMBERS4予想</h1>
@@ -159,39 +153,41 @@
         const resultArea = document.getElementById('details');
         resultArea.innerHTML = '';
 
+        const pastNumbers = new Set(data.slice(0, 20).map(entry => entry.number));
+
         topPatterns.forEach(pattern => {
           const pred = predictNext(latest, pattern);
           const corrected = applyCorrection(pred, averageError);
           const reversed = corrected.split('').reverse().join('');
           const mirror = corrected.split('').map(d => mirrorMap[d]).join('');
 
+          const isHit = pastNumbers.has(corrected) ? '✅ 出現あり！' : '❌ 未出現';
+          const isMirrorHit = pastNumbers.has(mirror) ? '✅ 出現あり！' : '❌ 未出現';
+
           resultArea.innerHTML += `
             <div class="prediction-card">
               <div>🔮 予測番号: ${pred}</div>
-              <div>🔧 補正後予測番号: ${corrected}</div>
+              <div>🔧 補正後予測番号: ${corrected} ${isHit}</div>
               <div>🔁 逆順番号: ${reversed}</div>
-              <div>🔧 補正後ミラー: ${mirror}</div>
+              <div>🔧 ミラー番号: ${mirror} ${isMirrorHit}</div>
             </div>
           `;
         });
 
-        const diffTableContainer = document.getElementById('diffTable');
-        diffTableContainer.innerHTML = '<h3>風車インデックス差分（新→古）</h3>';
+        const diffTableDiv = document.getElementById('diffTable');
+        diffTableDiv.innerHTML = '<h3>風車インデックス差分（新→古）</h3>';
         const table = document.createElement('table');
         table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
-        for (let i = 1; i < Math.min(11, data.length); i++) {
+        for (let i = Math.min(10, data.length - 1); i >= 1; i--) {
           const date = data[i - 1].date;
           const number = data[i - 1].number;
           const diffs = getWheelDiffs(data[i].number, data[i - 1].number);
           const row = document.createElement('tr');
-          row.innerHTML = `<td>${date}</td><td>${number}</td>` + diffs.map(d => {
-            const color = d.startsWith('右') ? 'red' : 'green';
-            return `<td style="color:${color}">${d}</td>`;
-          }).join('');
+          row.innerHTML = `<td>${date}</td><td>${number}</td>` + diffs.map(d => `<td style="color:${d.startsWith('右') ? 'red' : 'green'}">${d}</td>`).join('');
           table.appendChild(row);
         }
-        diffTableContainer.appendChild(table);
+        diffTableDiv.appendChild(table);
       };
 
       reader.readAsText(file);
