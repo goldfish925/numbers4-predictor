@@ -156,7 +156,15 @@
           const corrected = applyCorrection(pred, averageError);
           const reversed = corrected.split('').reverse().join('');
           const mirror = corrected.split('').map(d => mirrorMap[d]).join('');
-          const diffTable = document.createElement('table');
+          
+          resultArea.innerHTML += `
+            <div class="prediction-card">
+              <div>🔮 予測番号: ${pred}</div>
+              <div>🔧 補正後予測番号: ${corrected}</div>
+              <div>🔁 逆順番号: ${reversed}</div>
+              <div>🔧 補正後ミラー: ${mirror}</div>
+            </div>
+            const diffTable = document.createElement('table');
 diffTable.innerHTML = `<tr><th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>`;
 
 for (let i = 0; i < Math.min(10, data.length - 1); i++) {
@@ -175,15 +183,6 @@ for (let i = 0; i < Math.min(10, data.length - 1); i++) {
 }
 
 document.getElementById('details').appendChild(diffTable);
-
-
-          resultArea.innerHTML += `
-            <div class="prediction-card">
-              <div>🔮 予測番号: ${pred}</div>
-              <div>🔧 補正後予測番号: ${corrected}</div>
-              <div>🔁 逆順番号: ${reversed}</div>
-              <div>🔧 補正後ミラー: ${mirror}</div>
-            </div>
           `;
         });
 
