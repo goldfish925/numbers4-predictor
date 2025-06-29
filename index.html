@@ -141,9 +141,9 @@
   reader.onload = e => {
     const data = parseCSV(e.target.result);
     const latest = data[0].number;
-    const diffFreq = {};
 
-    // ➤ 差分パターンの集計（新→古）
+    // 差分パターン集計
+    const diffFreq = {};
     for (let i = 1; i < Math.min(11, data.length); i++) {
       const diffKey = getWheelDiffs(data[i - 1].number, data[i].number).join(',');
       diffFreq[diffKey] = (diffFreq[diffKey] || 0) + 1;
@@ -158,7 +158,7 @@
     const resultArea = document.getElementById('details');
     resultArea.innerHTML = '';
 
-    // ➤ 予測表示
+    // 予測結果の表示
     topPatterns.forEach(pattern => {
       const pred = predictNext(latest, pattern);
       const corrected = applyCorrection(pred, averageError);
@@ -175,7 +175,7 @@
       `;
     });
 
-    // ➤ 差分テーブル作成（新→古）
+    // 差分テーブル（風車順インデックス差分）を新→古の順に作成
     const diffTable = document.createElement('table');
     diffTable.innerHTML = `
       <tr><th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>
@@ -184,7 +184,7 @@
     for (let i = 0; i < Math.min(10, data.length - 1); i++) {
       const newer = data[i];
       const older = data[i + 1];
-      const diffs = getWheelDiffs(newer.number, older.number); // 新→旧
+      const diffs = getWheelDiffs(newer.number, older.number); // 新→旧の差分
 
       const row = document.createElement('tr');
       const diffCells = diffs.map(d => {
@@ -196,17 +196,13 @@
       diffTable.appendChild(row);
     }
 
+    // append table to resultArea
     resultArea.appendChild(diffTable);
   };
 
   reader.readAsText(file);
 }
 
-
-document.getElementById('details').appendChild(diffTable);
-
-          diffFreq[diff] = (diffFreq[diff] || 0) + 1;
-        }
         const topPatterns = Object.entries(diffFreq).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => e[0].split(','));
 
         const averageError = calculateAverageError(data);
