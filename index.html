@@ -138,17 +138,15 @@
       const reader = new FileReader();
       reader.onload = e => {
         const data = parseCSV(e.target.result);
-  // ▼ 最新日付に +1 日した日付を追加（差分は空欄として表示）
-const lastDate = new Date(data[0].date);
+  const lastDate = new Date(data[0].date);
 lastDate.setDate(lastDate.getDate() + 1);
-const yyyy = lastDate.();
-const mm = String(lastDate.getMonth() + 1).padStart(2, '
+const yyyy = lastDate.getFullYear();
+const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
 const dd = String(lastDate.getDate()).padStart(2, '0');
 const nextDateStr = `${yyyy}/${mm}/${dd}`;
-// 空の番号（比較不可）のため差分は空欄になる
 data.unshift({ date: nextDateStr, number: '' });
-        const latest = data[0].number;
 
+        const latest = data[0].number;
         const diffFreq = {};
         for (let i = 1; i < Math.min(11, data.length); i++) {
           const diffKey = getWheelDiffs(data[i - 1].number, data[i].number).join(',');
@@ -186,15 +184,16 @@ data.unshift({ date: nextDateStr, number: '' });
         });
 
         const diffTableWrapper = document.createElement('div');
-        diffTableWrapper.style.textAlign = 'center';
-       const table = document.createElement('table');
+diffTableWrapper.style.textAlign = 'center';
+const table = document.createElement('table');
 table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
-for (let i = Math.min(11, data.length) - 1; i >= 0; i--) {
-  const current = data[i];
-  const prev = data[i + 1];  // 古い方
 
-  const diffs = prev ? getWheelDiffs(current.number, prev.number) : ['', '', '', ''];
+for (let i = data.length - 1; i >= 1; i--) {
+  const current = data[i - 1];
+  const prev = data[i];
+
+  const diffs = getWheelDiffs(current.number, prev.number);
   const row = document.createElement('tr');
   const diffCells = diffs.map(d => {
     const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
@@ -204,8 +203,8 @@ for (let i = Math.min(11, data.length) - 1; i >= 0; i--) {
   row.innerHTML = `<td>${current.date}</td><td>${current.number}</td>` + diffCells.join('');
   table.appendChild(row);
 }
-        diffTableWrapper.appendChild(table);
-        resultArea.appendChild(diffTableWrapper);
+diffTableWrapper.appendChild(table);
+resultArea.appendChild(diffTableWrapper);
       };
 
       reader.readAsText(file);
