@@ -73,12 +73,13 @@
     .slice(1)
     .map(line => {
       const cols = line.split(',');
-      const date = cols[1].trim();
-      const number = cols[2].trim().replace(/[^\d]/g, '').padStart(4, '0');
+      const date = cols[1].trim(); // ← 「開催日」
+      const number = cols[2].trim().replace(/[^\d]/g, '').padStart(4, '0'); // ← 「抽選数字」
       return { date, number };
     })
-    .reverse(); // ← 新→古に並び替え
+    .reverse(); // ← 新→古順
 }
+
 
     function getWheelDiffs(prev, curr) {
        // 空文字がある場合は空文字配列を返す（差分テーブル空欄化用）
