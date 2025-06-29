@@ -177,8 +177,9 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = e => {
-        const data = parseCSV(e.target.result);
-        const latest = data[0].number;
+        const data = parseCSV(e.target.result).sort((a,b) => new Date(b.date) - new Date(a.date)); // 降順に並べる
+const latest = data[0].number; // これでOK
+
         const diffFreq = {};
         for (let i = 1; i < Math.min(11, data.length); i++) {
           const diff = getWheelDiffs(data[i - 1].number, data[i].number).join(',');
