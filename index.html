@@ -134,6 +134,16 @@
       const reader = new FileReader();
       reader.onload = e => {
         const data = parseCSV(e.target.result);
+        // ▼ 最新日付に +1 日した日付を追加（差分は空欄として表示）
+const lastDate = new Date(data[0].date);
+lastDate.setDate(lastDate.getDate() + 1);
+const yyyy = lastDate.getFullYear();
+const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
+const dd = String(lastDate.getDate()).padStart(2, '0');
+const nextDateStr = `${yyyy}/${mm}/${dd}`;
+
+// 空の番号（比較不可）のため差分は空欄になる
+data.unshift({ date: nextDateStr, number: '' });
         const latest = data[0].number;
 
         const diffFreq = {};
