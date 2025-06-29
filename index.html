@@ -91,18 +91,7 @@
     return (left <= right ? '左' : '右') + Math.min(left, right);
   });
 }
-      const p = prev.split('').map(Number);
-      const c = curr.split('').map(Number);
-      return positions.map((pos, i) => {
-        const wheel = wheels[pos];
-        const pi = wheel.indexOf(p[i]);
-        const ci = wheel.indexOf(c[i]);
-        const left = (pi - ci + 10) % 10;
-        const right = (ci - pi + 10) % 10;
-        return (left <= right ? '左' : '右') + Math.min(left, right);
-      });
-    }
-
+      
     function predictNext(current, pattern) {
       const digits = current.split('').map(Number);
       return pattern.map((d, i) => {
