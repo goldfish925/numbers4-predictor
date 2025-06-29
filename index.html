@@ -141,8 +141,30 @@
         const data = parseCSV(e.target.result);
         const latest = data[0].number;
         const diffFreq = {};
-        for (let i = 1; i < Math.min(11, data.length); i++) {
-          const diff = getWheelDiffs(data[i - 1].number, data[i].number).join(',');
+        for (let i = Math.min(10, data.length - 1); i >= 1; i--) {
+  const diff = getWheelDiffs(data[i].number, data[i - 1].number);
+  // 差分の表示コードをここに
+}
+const diffTable = document.createElement('table');
+diffTable.innerHTML = `<tr><th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>`;
+
+for (let i = 0; i < Math.min(10, data.length - 1); i++) {
+  const newer = data[i];
+  const older = data[i + 1];
+  const diffs = getWheelDiffs(newer.number, older.number);  // 新→旧の差分
+
+  const row = document.createElement('tr');
+  const diffCells = diffs.map(d => {
+    const color = d.startsWith('右') ? 'red' : 'green';
+    return `<td style="color:${color}">${d}</td>`;
+  });
+
+  row.innerHTML = `<td>${older.date}</td><td>${older.number}</td>` + diffCells.join('');
+  diffTable.appendChild(row);
+}
+
+document.getElementById('details').appendChild(diffTable);
+
           diffFreq[diff] = (diffFreq[diff] || 0) + 1;
         }
         const topPatterns = Object.entries(diffFreq).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => e[0].split(','));
@@ -164,25 +186,7 @@
               <div>🔁 逆順番号: ${reversed}</div>
               <div>🔧 補正後ミラー: ${mirror}</div>
             </div>
-            const diffTable = document.createElement('table');
-diffTable.innerHTML = `<tr><th>日付</th><th>当選番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>`;
-
-for (let i = 0; i < Math.min(10, data.length - 1); i++) {
-  const newer = data[i];
-  const older = data[i + 1];
-  const diffs = getWheelDiffs(newer.number, older.number);  // 新→旧の差分
-
-  const row = document.createElement('tr');
-  const diffCells = diffs.map(d => {
-    const color = d.startsWith('右') ? 'red' : 'green';
-    return `<td style="color:${color}">${d}</td>`;
-  });
-
-  row.innerHTML = `<td>${older.date}</td><td>${older.number}</td>` + diffCells.join('');
-  diffTable.appendChild(row);
-}
-
-document.getElementById('details').appendChild(diffTable);
+            
           `;
         });
 
