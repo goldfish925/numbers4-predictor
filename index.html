@@ -151,6 +151,8 @@
         const resultArea = document.getElementById('details');
         resultArea.innerHTML = '';
 
+         const pastNumbers = new Set(data.slice(0, 20).map(entry => entry.number));
+
         topPatterns.forEach(pattern => {
           const pred = predictNext(latest, pattern);
           const corrected = applyCorrection(pred, averageError);
