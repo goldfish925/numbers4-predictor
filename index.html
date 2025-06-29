@@ -67,13 +67,18 @@
     document.getElementById('predictButton').addEventListener('click', predict);
 
     function parseCSV(text) {
-      return text.trim().split('\n').slice(1).map(line => {
-        const cols = line.split(',');
-        const date = cols[1].trim();
-        const number = cols[2].trim().replace(/[^\d]/g, '').padStart(4, '0');
-        return { date, number };
-      });
-    }
+  return text
+    .trim()
+    .split('\n')
+    .slice(1)
+    .map(line => {
+      const cols = line.split(',');
+      const date = cols[1].trim();
+      const number = cols[2].trim().replace(/[^\d]/g, '').padStart(4, '0');
+      return { date, number };
+    })
+    .reverse(); // ← 新→古に並び替え
+}
 
     function getWheelDiffs(prev, curr) {
        // 空文字がある場合は空文字配列を返す（差分テーブル空欄化用）
