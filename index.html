@@ -3,7 +3,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>NUMBERS4予想</title>
+  <title>NUMBERS4予想ツール</title>
   <style>
     body {
       font-family: "Hiragino Kaku Gothic ProN", sans-serif;
@@ -34,26 +34,31 @@
       max-width: 400px;
       box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
     }
+    #neco {
+      width: 120px;
+      margin: 10px auto;
+    }
     table {
-      margin: 0 auto;
+      margin: 20px auto;
       border-collapse: collapse;
-      margin-top: 30px;
+      font-size: 14px;
     }
     th, td {
       border: 1px solid #c1a57b;
-      padding: 6px 12px;
+      padding: 4px 8px;
     }
     th {
-      background-color: #f8f0e3;
+      background-color: #f8f1e7;
     }
   </style>
 </head>
 <body>
-  <h1>NUMBERS4予想</h1>
+  <h1>NUMBERS4予想ツール</h1>
+  <img id="neco" src="neco.png" alt="neco">
   <input type="file" id="csvFile" accept=".csv">
   <button id="predictButton">予測する</button>
   <div id="details"></div>
-  <div id="diffTable"></div>
+  <div id="tableContainer"></div>
 
   <script>
     const wheels = {
@@ -152,32 +157,47 @@
           const reversed = corrected.split('').reverse().join('');
           const mirror = corrected.split('').map(d => mirrorMap[d]).join('');
 
-          const hitRev = data.some(entry => entry.number === reversed);
-          const hitMir = data.some(entry => entry.number === mirror);
-
           resultArea.innerHTML += `
             <div class="prediction-card">
               <div>🔮 予測番号: ${pred}</div>
               <div>🔧 補正後予測番号: ${corrected}</div>
-              <div>🔁 逆順番号: ${reversed} ${hitRev ? '✅ 出現あり！' : '❌ 未出現'}</div>
-              <div>💿 ミラー番号: ${mirror} ${hitMir ? '✅ 出現あり！' : '❌ 未出現'}</div>
+              <div>🔁 逆順番号: ${reversed}</div>
+              <div>💿 ミラー番号: ${mirror}</div>
             </div>
           `;
         });
 
-        // 差分テーブル表示
-        const tableArea = document.getElementById('diffTable');
-        let html = '<h2>📅 直近11回の風車差分</h2><table><tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
-        for (let i = 1; i < Math.min(11, data.length); i++) {
-          const diff = getWheelDiffs(data[i - 1].number, data[i].number);
-          html += `<tr><td>${data[i].date}</td><td>${data[i].number}</td>` +
-                  diff.map(d => `<td>${d}</td>`).join('') + '</tr>';
+        // 差分テーブル
+        const tableContainer = document.getElementById('tableContainer');
+        tableContainer.innerHTML = '<h3>📊 直近の風車差分テーブル</h3>';
+        const table = document.createElement('table');
+        const header = document.createElement('tr');
+        header.innerHTML = '<th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th>';
+        table.appendChild(header);
+
+        for (let i = Math.min(10, data.length - 1); i >= 0; i--) {
+          const prev = data[i + 1].number;
+          const curr = data[i].number;
+          const diffs = getWheelDiffs(prev, curr);
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${data[i].date}</td>
+            <td>${curr}</td>
+            <td>${diffs[0]}</td>
+            <td>${diffs[1]}</td>
+            <td>${diffs[2]}</td>
+            <td>${diffs[3]}</td>
+          `;
+          table.appendChild(row);
         }
-        html += '</table>';
-        tableArea.innerHTML = html;
+
+        tableContainer.appendChild(table);
       };
       reader.readAsText(file);
     }
   </script>
+</body>
+</html>
+
 </body>
 </html>
