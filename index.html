@@ -150,21 +150,25 @@ if (originalData.length < 2) return;
 const latestEntry = originalData[originalData.length - 1];
 const latestNumber = latestEntry.number;
 
-// 翌日を生成（CSVの最新日＋1日）
+// 翌営業日（予測用日付）生成
 const lastDate = new Date(latestEntry.date);
 lastDate.setDate(lastDate.getDate() + 1);
+while (lastDate.getDay() === 0 || lastDate.getDay() === 6) {
+  lastDate.setDate(lastDate.getDate() + 1);
+}
 const yyyy = lastDate.getFullYear();
 const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
 const dd = String(lastDate.getDate()).padStart(2, '0');
 const nextDateStr = `${yyyy}/${mm}/${dd}`;
 
-// 並び順：新→古にしてから、予測日を先頭に
-const data = [...originalData].reverse();
-data.unshift({ date: nextDateStr, number: '' }); // ← ここで予測日が先頭に！
-
-// あとはそのまま差分表示などへ
+    // ✅ 予測用空行を最後に追加（古→新）→ reverse後に先頭に来る
+   originalData.push({ date: nextDateStr, number: '' });
 
 
+   // 並び順：新→古にしてから、予測日を先頭に
+  const data = [...originalData].reverse();
+ data.unshift({ date: nextDateStr, number: '' }); // ← ここで予測日が先頭に！
+ 
     // 差分パターン頻度集計
     const diffFreq = {};
     for (let i = 1; i < Math.min(21, data.length); i++) {
