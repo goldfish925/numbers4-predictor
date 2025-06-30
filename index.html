@@ -138,6 +138,7 @@ function predict() {
     wrapper.style.textAlign = 'center';
 
     const table = document.createElement('table');
+table.className = 'table-bordered';
 table.style.margin = '0 auto';  // ←追加！中央寄せ
 table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
