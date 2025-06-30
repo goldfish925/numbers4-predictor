@@ -205,26 +205,26 @@ function predict() {
       `;
     });
 
-   // ▼ 差分テーブル（新→古順で表示）
+ // ▼ 差分テーブル（新→古順で表示）
 const diffTableWrapper = document.createElement('div');
 diffTableWrapper.style.textAlign = 'center';
 
 const table = document.createElement('table');
 table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
-// 差分表示：今→次へのズレ（上の行→下の行）
-for (let i = 0; i < Math.min(11, extendedData.length); i++) {
-  const current = extendedData[i];       // 6/26（最新）→6/25→…
-  const next = extendedData[i + 1];      // 一つ前の日付（6/25）
+// 差分表示：下の行から上の行へのズレ（未来行→最新→過去）
+const reversedData = [...extendedData].reverse();
 
-  // 予測行を先頭にしたい（＝空欄の行）
-  const isFutureRow = i === 0;
-  const diffs = (!isFutureRow && current.number && next?.number)
-    ? getWheelDiffs(next.number, current.number)  // ← 差分：下→上へのズレ（6/25→6/26）
+for (let i = 0; i < Math.min(11, reversedData.length); i++) {
+  const current = reversedData[i];       // 6/27（未来行）→6/26→6/25→…
+  const prev = reversedData[i + 1];      // 一つ下の行（たとえば6/26）
+
+  const diffs = (prev && prev.number && current.number)
+    ? getWheelDiffs(prev.number, current.number)
     : ['', '', '', ''];
 
   const row = document.createElement('tr');
-  if (isFutureRow) row.style.backgroundColor = '#eef';
+  if (!current.number) row.style.backgroundColor = '#eef'; // 空欄の行＝予測用
 
   const diffCells = diffs.map(d => {
     const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
