@@ -99,16 +99,16 @@ function predict() {
 
     // 最新日から翌営業日（土日スキップ）を計算して空行を先頭に追加
     const lastDate = new Date(data[data.length - 1].date);
-    lastDate.setDate(lastDate.getDate() + 1);
-    while (lastDate.getDay() === 0 || lastDate.getDay() === 6) {
-      lastDate.setDate(lastDate.getDate() + 1);
-    }
-    const yyyy = lastDate.getFullYear();
-    const mm = String(lastDate.getMonth() + 1).padStart(2,'0');
-    const dd = String(lastDate.getDate()).padStart(2,'0');
-    const nextDateStr = `${yyyy}/${mm}/${dd}`;
+lastDate.setDate(lastDate.getDate() + 1);
+while (lastDate.getDay() === 0 || lastDate.getDay() === 6) {
+  lastDate.setDate(lastDate.getDate() + 1);
+}
+const yyyy = lastDate.getFullYear();
+const mm = String(lastDate.getMonth() + 1).padStart(2,'0');
+const dd = String(lastDate.getDate()).padStart(2,'0');
+const nextDateStr = `${yyyy}/${mm}/${dd}`;
 
-    data.unshift({ date: nextDateStr, number: '' }); // 先頭に未来日追加
+data.unshift({ date: nextDateStr, number: '' }); // 先頭に未来日追加
 
     // 表示用に「未来日→最新→過去」順に逆転
     const reversedData = [...data].reverse();
