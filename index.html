@@ -15,7 +15,7 @@
     h1 {
       font-size: 28px;
       color: #c1a57b;
-      margin-top: 30px;
+      margin-bottom: 10px;
     }
     button {
       background-color: #c1a57b;
@@ -26,45 +26,63 @@
       font-size: 16px;
       cursor: pointer;
     }
-    table {
-      border-collapse: collapse;
-      margin: 20px auto;
-      width: 90%;
-    }
-    th, td {
-      border: 1px solid #c1a57b;
-      padding: 8px;
-    }
     .prediction-box {
-      background-color: #ffffff;
+      background: #ffffff;
       border: 2px solid #c1a57b;
-      border-radius: 10px;
-      padding: 20px;
+      border-radius: 12px;
+      padding: 15px;
       margin: 20px auto;
       max-width: 400px;
-      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
+    }
+    .prediction-box h3 {
+      margin-top: 0;
+      font-size: 20px;
     }
     #predictionList {
-      font-size: 1.8em;
+      font-size: 1.6em;
       list-style: none;
       padding: 0;
       margin: 0;
+    }
+    .tables-wrapper {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+    .tables-wrapper table {
+      border-collapse: collapse;
+      min-width: 320px;
+      font-size: 14px;
+      background-color: #fff;
+      color: #5a4635;
+    }
+    .tables-wrapper th,
+    .tables-wrapper td {
+      border: 1px solid #d8c8aa;
+      padding: 6px 10px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
   <img src="neco.png" alt="ねこ" class="neco-image">
-
   <h1>NUMBERS4予想</h1>
-  <input type="file" id="csvFile" accept=".csv" />
-  <button id="predictButton">予測開始</button>
 
   <div class="prediction-box">
     <h3>🔮予測数字🔮</h3>
     <ul id="predictionList"></ul>
   </div>
 
-  <div id="details"></div>
+  <input type="file" id="csvFile" accept=".csv" />
+  <button id="predictButton">予測開始</button>
+
+  <div class="tables-wrapper">
+    <div id="diffTable"></div>
+    <div id="matchTable"></div>
+  </div>
 
   <script>
     const wheels = {
@@ -80,13 +98,14 @@
     function parseCSV(text) {
       return text.trim().split('\n').slice(1).map(line => {
         const cols = line.split(',');
-        const date = cols[1].trim();
+        const date = cols[1]?.trim();
         const number = cols[2]?.trim().replace(/[^\d]/g, '').padStart(4,'0');
         return { date, number };
       });
     }
 
     function getWheelDiffs(prev, curr) {
+      if (!prev || !curr || prev.length < 4 || curr.length < 4) return ['','','',''];
       const p = prev.split('').map(Number);
       const c = curr.split('').map(Number);
       return positions.map((pos, i) => {
@@ -99,6 +118,16 @@
       });
     }
 
+    function countBoxMatch(pred, actual) {
+      const p = pred.split('').sort().join('');
+      const a = actual.split('').sort().join('');
+      let count = 0;
+      for (let i = 0; i < 4; i++) {
+        if (p[i] === a[i]) count++;
+      }
+      return count;
+    }
+
     function predict() {
       const file = document.getElementById('csvFile').files[0];
       if (!file) return alert('CSVファイルを選択してください');
@@ -107,128 +136,102 @@
       reader.onload = e => {
         let data = parseCSV(e.target.result);
 
-        // 翌営業日を追加
         const lastDate = new Date(data[data.length - 1].date);
         lastDate.setDate(lastDate.getDate() + 1);
-        while ([0,6].includes(lastDate.getDay())) {
+        while (lastDate.getDay() === 0 || lastDate.getDay() === 6) {
           lastDate.setDate(lastDate.getDate() + 1);
         }
-        const nextDateStr = `${lastDate.getFullYear()}/${String(lastDate.getMonth()+1).padStart(2,'0')}/${String(lastDate.getDate()).padStart(2,'0')}`;
+        const yyyy = lastDate.getFullYear();
+        const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(lastDate.getDate()).padStart(2, '0');
+        const nextDateStr = `${yyyy}/${mm}/${dd}`;
         data.push({ date: nextDateStr, number: '' });
 
         const reversedData = [...data].reverse();
 
-        // 差分テーブル描画
-        const resultArea = document.getElementById('details');
-        resultArea.innerHTML = '';
-        const wrapper = document.createElement('div');
-        const table = document.createElement('table');
-        table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th><th>一致</th></tr>';
-
-        const future = reversedData[0];
-        const futureTr = document.createElement('tr');
-        futureTr.style.backgroundColor = '#eef';
-        futureTr.innerHTML = `<td>${future.date}</td><td></td><td></td><td></td><td></td><td></td><td></td>`;
-        table.appendChild(futureTr);
-
-        for (let i = 1; i < reversedData.length; i++) {
-          const current = reversedData[i];
-          const prev = reversedData[i - 1];
-          const diffs = (current.number && prev?.number)
-            ? getWheelDiffs(current.number, prev.number)
-            : ['', '', '', ''];
+        // 差分テーブル生成
+        const diffTable = document.createElement('table');
+        diffTable.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
+        for (let i = 0; i < reversedData.length - 1; i++) {
+          const curr = reversedData[i];
+          const prev = reversedData[i + 1];
+          const diffs = (curr.number && prev?.number) ? getWheelDiffs(prev.number, curr.number) : ['', '', '', ''];
           const tr = document.createElement('tr');
           const diffTds = diffs.map(d => {
             const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
             return `<td style="color:${color}">${d}</td>`;
           });
-          tr.innerHTML = `<td>${current.date}</td><td>${current.number}</td>${diffTds.join('')}<td></td>`;
-          table.appendChild(tr);
+          tr.innerHTML = `<td>${curr.date}</td><td>${curr.number}</td>${diffTds.join('')}`;
+          diffTable.appendChild(tr);
+        }
+        document.getElementById('diffTable').innerHTML = '';
+        document.getElementById('diffTable').appendChild(diffTable);
+
+        // 予測生成（最頻ズレ1位）
+        function getTopDiffs(data) {
+          const stats = { 千:{}, 百:{}, 十:{}, 一:{} };
+          for (let i = 1; i < data.length; i++) {
+            const p = data[i-1].number;
+            const c = data[i].number;
+            if (!p || !c) continue;
+            positions.forEach((pos, j) => {
+              const wheel = wheels[pos];
+              const pi = wheel.indexOf(Number(p[j]));
+              const ci = wheel.indexOf(Number(c[j]));
+              const right = (ci - pi + 10) % 10;
+              const left = (pi - ci + 10) % 10;
+              const diff = left <= right ? -left : right;
+              stats[pos][diff] = (stats[pos][diff] || 0) + 1;
+            });
+          }
+          return stats;
         }
 
-        wrapper.appendChild(table);
-        resultArea.appendChild(wrapper);
+        function generatePrediction(latest, stats, rank = 0) {
+          return positions.map((pos, i) => {
+            const wheel = wheels[pos];
+            const digit = Number(latest[i]);
+            const idx = wheel.indexOf(digit);
+            const sorted = Object.entries(stats[pos]).sort((a,b) => b[1]-a[1]);
+            const diff = parseInt(sorted[rank]?.[0] ?? 0);
+            return wheel[(idx + diff + 10) % 10];
+          }).join('');
+        }
 
-        // ===== 予測ロジック =====
+        const stats = getTopDiffs(data.slice(1));
         const latestNumber = data[data.length - 2].number;
-        const diffStats = getIndexDiffStats(data.slice(1));
-        const predictions = generateTopPredictions(latestNumber, diffStats, 3);
+        const predictions = [
+          generatePrediction(latestNumber, stats, 0),
+          generatePrediction(latestNumber, stats, 1),
+          generatePrediction(latestNumber, stats, 2),
+        ];
 
-        // 最新当選番号と比較し、一致数判定
         const predictionList = document.getElementById('predictionList');
         predictionList.innerHTML = '';
-        const latestAnswer = latestNumber;
-
-        predictions.forEach((num, i) => {
+        predictions.forEach(num => {
           const li = document.createElement('li');
           li.textContent = `🔮 ${num}`;
           predictionList.appendChild(li);
+        });
 
+        // 一致判定テーブル作成
+        const matchTable = document.createElement('table');
+        matchTable.innerHTML = '<tr><th>日付</th><th>予測1</th><th>一致</th><th>予測2</th><th>一致</th><th>予測3</th><th>一致</th></tr>';
+        for (let i = 1; i < reversedData.length; i++) {
+          const current = reversedData[i];
+          if (!current.number) continue;
           const tr = document.createElement('tr');
-          const match = countMatchDigits(num, latestAnswer);
-          let result = '';
-          if (match === 4) result = '🎯 4個一致';
-          else if (match === 3) result = '⭕ 3個一致';
-          else if (match === 2) result = '△ 2個一致';
-          else result = '✖ 1個以下';
-
-          tr.innerHTML = `<td>予測${i+1}</td><td>${num}</td><td></td><td></td><td></td><td></td><td>${result}</td>`;
-          table.appendChild(tr);
-        });
+          const matches = predictions.map(p => countBoxMatch(p, current.number));
+          tr.innerHTML = `<td>${current.date}</td>` +
+            predictions.map((p, idx) => `<td>${p}</td><td>${matches[idx]}</td>`).join('');
+          matchTable.appendChild(tr);
+        }
+        document.getElementById('matchTable').innerHTML = '';
+        document.getElementById('matchTable').appendChild(matchTable);
       };
+
       reader.readAsText(file);
-    }
-
-    function getIndexDiffStats(data) {
-      const diffStats = { 千: {}, 百: {}, 十: {}, 一: {} };
-      for (let i = 1; i < data.length; i++) {
-        const prev = data[i - 1].number;
-        const curr = data[i].number;
-        if (!prev || !curr) continue;
-        positions.forEach((pos, j) => {
-          const wheel = wheels[pos];
-          const pi = wheel.indexOf(Number(prev[j]));
-          const ci = wheel.indexOf(Number(curr[j]));
-          const right = (ci - pi + 10) % 10;
-          const left = (pi - ci + 10) % 10;
-          const diff = (left <= right) ? -left : right;
-          diffStats[pos][diff] = (diffStats[pos][diff] || 0) + 1;
-        });
-      }
-      return diffStats;
-    }
-
-    function generateTopPredictions(latestNumber, diffStats, count = 3) {
-      const candidates = [];
-      for (let k = 0; k < count; k++) {
-        const digits = positions.map((pos, i) => {
-          const wheel = wheels[pos];
-          const digit = Number(latestNumber[i]);
-          const index = wheel.indexOf(digit);
-          const diffs = Object.entries(diffStats[pos])
-            .sort((a, b) => b[1] - a[1])
-            .map(([d]) => parseInt(d));
-          const diff = diffs[k] ?? 0;
-          return wheel[(index + diff + 10) % 10];
-        });
-        candidates.push(digits.join(''));
-      }
-      return [...new Set(candidates)];
-    }
-
-    function countMatchDigits(a, b) {
-      const aa = a.split('').sort();
-      const bb = b.split('').sort();
-      let count = 0, i = 0, j = 0;
-      while (i < aa.length && j < bb.length) {
-        if (aa[i] === bb[j]) {
-          count++; i++; j++;
-        } else if (aa[i] < bb[j]) i++;
-        else j++;
-      }
-      return count;
     }
   </script>
 </body>
 </html>
-
