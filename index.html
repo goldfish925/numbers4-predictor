@@ -15,7 +15,7 @@
     h1 {
       font-size: 28px;
       color: #c1a57b;
-      margin-top: 40px;
+      margin-top: 30px;
     }
     button {
       background-color: #c1a57b;
@@ -26,14 +26,23 @@
       font-size: 16px;
       cursor: pointer;
     }
+    table {
+      border-collapse: collapse;
+      margin: 20px auto;
+      width: 90%;
+    }
+    th, td {
+      border: 1px solid #c1a57b;
+      padding: 8px;
+    }
     .prediction-box {
       background-color: #ffffff;
       border: 2px solid #c1a57b;
       border-radius: 10px;
-      padding: 15px;
+      padding: 20px;
       margin: 20px auto;
       max-width: 400px;
-      box-shadow: 0 2px 6px rgba(193, 165, 123, 0.3);
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
     }
     #predictionList {
       font-size: 1.8em;
@@ -41,41 +50,30 @@
       padding: 0;
       margin: 0;
     }
-    table {
-      border-collapse: collapse;
-      margin: 0 auto;
-      width: 90%;
-    }
-    th, td {
-      border: 1px solid #d2b48c;
-      padding: 6px;
-    }
-    th {
-      background-color: #fdf6ec;
-    }
   </style>
 </head>
 <body>
   <img src="neco.png" alt="ねこ" class="neco-image">
 
+  <h1>NUMBERS4予想</h1>
+  <input type="file" id="csvFile" accept=".csv" />
+  <button id="predictButton">予測開始</button>
+
   <div class="prediction-box">
-    <h3>🔮予測数字</h3>
+    <h3>🔮予測数字🔮</h3>
     <ul id="predictionList"></ul>
   </div>
 
-  <h1>NUMBERS4予想</h1>
-  <input type="file" id="csvFile" accept=".csv">
-  <button id="predictButton">予測開始</button>
   <div id="details"></div>
 
   <script>
     const wheels = {
-      "千": [0,3,6,9,2,5,8,1,4,7],
-      "百": [0,1,2,3,4,5,6,7,8,9],
-      "十": [0,7,4,1,8,5,2,9,6,3],
-      "一": [0,9,8,7,6,5,4,3,2,1]
+      千: [0,3,6,9,2,5,8,1,4,7],
+      百: [0,1,2,3,4,5,6,7,8,9],
+      十: [0,7,4,1,8,5,2,9,6,3],
+      一: [0,9,8,7,6,5,4,3,2,1],
     };
-    const positions = ["千", "百", "十", "一"];
+    const positions = ['千','百','十','一'];
 
     document.getElementById('predictButton').addEventListener('click', predict);
 
@@ -83,13 +81,12 @@
       return text.trim().split('\n').slice(1).map(line => {
         const cols = line.split(',');
         const date = cols[1].trim();
-        const number = cols[2].trim().replace(/[^\d]/g, '').padStart(4, '0');
+        const number = cols[2]?.trim().replace(/[^\d]/g, '').padStart(4,'0');
         return { date, number };
       });
     }
 
     function getWheelDiffs(prev, curr) {
-      if (!prev || !curr || prev.length < 4 || curr.length < 4) return ["", "", "", ""];
       const p = prev.split('').map(Number);
       const c = curr.split('').map(Number);
       return positions.map((pos, i) => {
@@ -108,90 +105,130 @@
 
       const reader = new FileReader();
       reader.onload = e => {
-        let data = parseCSV(e.target.result); // 古→新
+        let data = parseCSV(e.target.result);
 
-        // 予測日追加
+        // 翌営業日を追加
         const lastDate = new Date(data[data.length - 1].date);
         lastDate.setDate(lastDate.getDate() + 1);
-        while (lastDate.getDay() === 0 || lastDate.getDay() === 6) {
+        while ([0,6].includes(lastDate.getDay())) {
           lastDate.setDate(lastDate.getDate() + 1);
         }
         const nextDateStr = `${lastDate.getFullYear()}/${String(lastDate.getMonth()+1).padStart(2,'0')}/${String(lastDate.getDate()).padStart(2,'0')}`;
         data.push({ date: nextDateStr, number: '' });
 
-        const reversedData = [...data].reverse(); // 新→古
+        const reversedData = [...data].reverse();
 
+        // 差分テーブル描画
         const resultArea = document.getElementById('details');
         resultArea.innerHTML = '';
-
         const wrapper = document.createElement('div');
-        wrapper.style.textAlign = 'center';
-
         const table = document.createElement('table');
-table.className = 'table-bordered';
-table.style.margin = '0 auto';
-table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th><th>一致</th></tr>';
-tr.innerHTML = `<td>${current.date}</td><td>${current.number}</td>${diffTds.join('')}<td></td>`;
+        table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th><th>一致</th></tr>';
 
-        // 一致判定（ボックス的：何個一致してるか）
-function countMatchDigits(pred, answer) {
-  const predCounts = {};
-  for (const d of pred) predCounts[d] = (predCounts[d] || 0) + 1;
+        const future = reversedData[0];
+        const futureTr = document.createElement('tr');
+        futureTr.style.backgroundColor = '#eef';
+        futureTr.innerHTML = `<td>${future.date}</td><td></td><td></td><td></td><td></td><td></td><td></td>`;
+        table.appendChild(futureTr);
 
-  let match = 0;
-  for (const d of answer) {
-    if (predCounts[d]) {
-      predCounts[d]--;
-      match++;
-    }
-  }
-  return match;
-}
-
-// 最新の当選番号（未来の前）
-const latestAnswer = data[data.length - 2].number;
-
-// 予測3件のテーブル行追加
-predictions.forEach((num, i) => {
-  const tr = document.createElement('tr');
-  const matchCount = countMatchDigits(num, latestAnswer);
-  let resultLabel = '';
-  if (matchCount === 4) resultLabel = '🎯 4個一致！';
-  else if (matchCount === 3) resultLabel = '⭕ 3個一致';
-  else if (matchCount === 2) resultLabel = '△ 2個一致';
-  else resultLabel = '✖ 1個以下';
-
-  tr.innerHTML = `<td>予測${i + 1}</td><td>${num}</td><td></td><td></td><td></td><td></td><td>${resultLabel}</td>`;
-  table.appendChild(tr);
-});
-
-
-        for (let i = 0; i < reversedData.length - 1; i++) {
+        for (let i = 1; i < reversedData.length; i++) {
           const current = reversedData[i];
-          const prev = reversedData[i + 1];
-
+          const prev = reversedData[i - 1];
           const diffs = (current.number && prev?.number)
-            ? getWheelDiffs(prev.number, current.number)
-            : ["", "", "", ""];
-
+            ? getWheelDiffs(current.number, prev.number)
+            : ['', '', '', ''];
           const tr = document.createElement('tr');
-          if (!current.number) tr.style.backgroundColor = '#eef';
-
           const diffTds = diffs.map(d => {
             const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
             return `<td style="color:${color}">${d}</td>`;
           });
-
-          tr.innerHTML = `<td>${current.date}</td><td>${current.number}</td>${diffTds.join('')}`;
+          tr.innerHTML = `<td>${current.date}</td><td>${current.number}</td>${diffTds.join('')}<td></td>`;
           table.appendChild(tr);
         }
 
         wrapper.appendChild(table);
         resultArea.appendChild(wrapper);
-      };
 
+        // ===== 予測ロジック =====
+        const latestNumber = data[data.length - 2].number;
+        const diffStats = getIndexDiffStats(data.slice(1));
+        const predictions = generateTopPredictions(latestNumber, diffStats, 3);
+
+        // 最新当選番号と比較し、一致数判定
+        const predictionList = document.getElementById('predictionList');
+        predictionList.innerHTML = '';
+        const latestAnswer = latestNumber;
+
+        predictions.forEach((num, i) => {
+          const li = document.createElement('li');
+          li.textContent = `🔮 ${num}`;
+          predictionList.appendChild(li);
+
+          const tr = document.createElement('tr');
+          const match = countMatchDigits(num, latestAnswer);
+          let result = '';
+          if (match === 4) result = '🎯 4個一致';
+          else if (match === 3) result = '⭕ 3個一致';
+          else if (match === 2) result = '△ 2個一致';
+          else result = '✖ 1個以下';
+
+          tr.innerHTML = `<td>予測${i+1}</td><td>${num}</td><td></td><td></td><td></td><td></td><td>${result}</td>`;
+          table.appendChild(tr);
+        });
+      };
       reader.readAsText(file);
+    }
+
+    function getIndexDiffStats(data) {
+      const diffStats = { 千: {}, 百: {}, 十: {}, 一: {} };
+      for (let i = 1; i < data.length; i++) {
+        const prev = data[i - 1].number;
+        const curr = data[i].number;
+        if (!prev || !curr) continue;
+        positions.forEach((pos, j) => {
+          const wheel = wheels[pos];
+          const pi = wheel.indexOf(Number(prev[j]));
+          const ci = wheel.indexOf(Number(curr[j]));
+          const right = (ci - pi + 10) % 10;
+          const left = (pi - ci + 10) % 10;
+          const diff = (left <= right) ? -left : right;
+          diffStats[pos][diff] = (diffStats[pos][diff] || 0) + 1;
+        });
+      }
+      return diffStats;
+    }
+
+    function generateTopPredictions(latestNumber, diffStats, count = 3) {
+      const candidates = [];
+      for (let k = 0; k < count; k++) {
+        const digits = positions.map((pos, i) => {
+          const wheel = wheels[pos];
+          const digit = Number(latestNumber[i]);
+          const index = wheel.indexOf(digit);
+          const diffs = Object.entries(diffStats[pos])
+            .sort((a, b) => b[1] - a[1])
+            .map(([d]) => parseInt(d));
+          const diff = diffs[k] ?? 0;
+          return wheel[(index + diff + 10) % 10];
+        });
+        candidates.push(digits.join(''));
+      }
+      return [...new Set(candidates)];
+    }
+
+    function countMatchDigits(a, b) {
+      const aa = a.split('').sort();
+      const bb = b.split('').sort();
+      let count = 0, i = 0, j = 0;
+      while (i < aa.length && j < bb.length) {
+        if (aa[i] === bb[j]) {
+          count++; i++; j++;
+        } else if (aa[i] < bb[j]) i++;
+        else j++;
+      }
+      return count;
     }
   </script>
 </body>
 </html>
+
