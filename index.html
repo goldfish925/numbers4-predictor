@@ -6,78 +6,70 @@
   <title>NUMBERS4予想</title>
   <style>
     body {
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-      background-color: #ffffff;
-      color: #c1a57b;
+      font-family: sans-serif;
       text-align: center;
-      padding: 20px;
+      background-color: #fdfaf5;
     }
+
+    .neco-image {
+      max-width: 200px;
+      display: block;
+      margin: 20px auto 10px;
+    }
+
     h1 {
-      font-size: 28px;
-      color: #c1a57b;
+      margin-top: 0;
+      font-size: 2em;
+      color: #333;
     }
-      button {
-      background-color: #c1a57b;
-      color: #ffffff;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .prediction-card {
-      background: #fff;
-      border: 2px solid #c1a57b;
-      border-radius: 12px;
-      padding: 15px;
+
+    .prediction-box {
+      border: 4px solid #8B4513;
+      background-color: #FFF8DC;
+      border-radius: 10px;
+      padding: 20px;
       margin: 20px auto;
-      max-width: 400px;
-      box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
+      max-width: 300px;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
     }
-    table {
-      border-collapse: collapse;
-      margin: 0 auto;
-    }
-    th, td {
-      border: 1px solid #c1a57b;
-      padding: 6px 12px;
-    }
-    <style>
-.prediction-box {
-  border: 4px solid #8B4513; /* チョコレートブラウン */
-  background-color: #FFF8DC; /* コーンシルク（柔らかいベージュ） */
-  border-radius: 10px;
-  padding: 20px;
-  margin: 20px auto;
-  max-width: 300px;
-  text-align: center;
-  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
-}
 
-#predictionList {
-  font-size: 1.8em;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-</style>
+    .prediction-box h3 {
+      margin-top: 0;
+      color: #5a3a1a;
+      font-size: 1.4em;
+    }
 
+    #predictionList {
+      font-size: 1.8em;
+      list-style: none;
+      padding: 0;
+      margin: 10px 0 0 0;
+    }
+
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 1em;
+    }
   </style>
-  
-<head>
+</head>
 <body>
+
   <img src="neco.png" alt="ねこ" class="neco-image">
 
-  <div class="prediction-box">
-  <h3>🔮予想数字🔮</h3>
-  <ul id="predictionList"></ul>
-</div>
-
   <h1>NUMBERS4予想</h1>
+
+  <div class="prediction-box">
+    <h3>🔮予測数字🔮</h3>
+    <ul id="predictionList"></ul>
+  </div>
+
   <input type="file" id="csvFile" accept=".csv" />
   <button id="predictButton">予測開始</button>
+
   <div id="details"></div>
 </body>
+
 
 <script>
 const wheels = {
