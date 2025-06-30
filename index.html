@@ -228,7 +228,7 @@
       });
 
       row.innerHTML = `<td>${current.date}</td><td>${current.number}</td>` + diffCells.join('');
-      table.insertBefore(row, table.rows[1]); // ← ここだけ変更！
+       table.appendChild(row);  // ← ★これだけに戻す！
 }
 
     diffTableWrapper.appendChild(table);
