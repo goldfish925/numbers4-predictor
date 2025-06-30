@@ -213,14 +213,11 @@
     const table = document.createElement('table');
     table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
-    for (let i = data.length - 1; i >= data.length - 11; i--) {
+    for (let i = data.length - 1; i >= 1 && i >= data.length - 11; i--) {
   const current = data[i];
   const prev = data[i - 1];
 
-  const diffs = (prev && current.number && prev.number)
-    ? getWheelDiffs(current.number, prev.number)
-    : ['','','',''];
-
+  const diffs = getWheelDiffs(current.number, prev.number);
   const row = document.createElement('tr');
   const diffCells = diffs.map(d => {
     const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
@@ -230,6 +227,7 @@
   row.innerHTML = `<td>${current.date}</td><td>${current.number}</td>` + diffCells.join('');
   table.appendChild(row);
 }
+
 
 
     diffTableWrapper.appendChild(table);
