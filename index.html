@@ -158,9 +158,9 @@ function predict() {
     table.style.margin = 'auto';
     table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
- for (let i = 0; i < reversedData.length - 1; i++) {
+ for (let i = reversedData.length - 1; i > 0; i--) {
   const current = reversedData[i];
-  const prev = reversedData[i + 1];
+  const prev = reversedData[i - 1];
 
   const diffs = (prev && prev.number && current.number)
     ? getWheelDiffs(prev.number, current.number)
@@ -177,6 +177,7 @@ function predict() {
   tr.innerHTML = `<td>${current.date}</td><td>${current.number}</td>${diffTds.join('')}`;
   table.appendChild(tr);
 }
+
 
 
     wrapper.appendChild(table);
