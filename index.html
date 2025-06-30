@@ -184,6 +184,12 @@
 
     // 予測表示
     topPatterns.forEach(pattern => {
+      topPatterns.forEach(pattern => {
+  if (pattern.every(p => p)) {  // 空が1つでもあればスキップ
+    const pred = predictNext(latestNumber, pattern);
+    ...
+  }
+});
       const pred = predictNext(latestNumber, pattern);
       const corrected = applyCorrection(pred, averageError);
       const reversed = corrected.split('').reverse().join('');
