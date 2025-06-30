@@ -158,12 +158,13 @@ function predict() {
     table.style.margin = 'auto';
     table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
- for (let i = 0; i < reversedData.length - 1; i++) {
-  const current = reversedData[i];         // 上の行（新しい日付）
-  const prev = reversedData[i + 1];        // 下の行（前日）
+for (let i = 0; i < reversedData.length; i++) {
+  const current = reversedData[i];           // 上の行（新しい日付）
+  const prev = reversedData[i + 1];          // 1つ前（1日前）
 
+  // 差分計算：前日 → 今日のズレ
   const diffs = (current.number && prev?.number)
-    ? getWheelDiffs(prev.number, current.number)  // 差分は「前回→今回」
+    ? getWheelDiffs(prev.number, current.number)
     : ['', '', '', ''];
 
   const tr = document.createElement('tr');
@@ -176,6 +177,10 @@ function predict() {
 
   tr.innerHTML = `<td>${current.date}</td><td>${current.number}</td>${diffTds.join('')}`;
   table.appendChild(tr);
+}
+
+// ↓もし 2025/6/27 が出てこない場合は、ここで reversedData をチェック
+console.log("最初の行（予測日）", reversedData[0]);
 }
 
    wrapper.appendChild(table);
