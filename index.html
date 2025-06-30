@@ -49,43 +49,34 @@
     <img src="neco.png" alt="ねこ" class="neco-image">
 </div>
   <h1>NUMBERS4予想</h1>
-  <input type="file" id="csvFile" accept=".csv">
-  <button id="predictButton">予測する</button>
-  <div id="details"></div>
-  <div id="diffTable"></div>
+  <input type="file" id="csvFile" accept=".csv" />
+<button id="predictButton">予測開始</button>
+<div id="details"></div>
 
-  <script>
-    const wheels = {
-      千: [0,3,6,9,2,5,8,1,4,7],
-      百: [0,1,2,3,4,5,6,7,8,9],
-      十: [0,7,4,1,8,5,2,9,6,3],
-      一: [0,9,8,7,6,5,4,3,2,1],
-    };
-    const positions = ['千','百','十','一'];
-    const mirrorMap = { 0:5, 1:6, 2:7, 3:8, 4:9, 5:0, 6:1, 7:2, 8:3, 9:4 };
+<script>
+const wheels = {
+  千: [0,3,6,9,2,5,8,1,4,7],
+  百: [0,1,2,3,4,5,6,7,8,9],
+  十: [0,7,4,1,8,5,2,9,6,3],
+  一: [0,9,8,7,6,5,4,3,2,1],
+};
+const positions = ['千','百','十','一'];
 
-    document.getElementById('predictButton').addEventListener('click', predict);
+document.getElementById('predictButton').addEventListener('click', predict);
 
-    function parseCSV(text) {
-  return text
-    .trim()
-    .split('\n')
-    .slice(1)
-    .map(line => {
-      const cols = line.split(',');
-      const date = cols[1].trim(); // ← 「開催日」
-      const number = cols[2].trim().replace(/[^\d]/g, '').padStart(4, '0'); // ← 「抽選数字」
-      return { date, number };
-    })
-    .reverse(); // ← 新→古順
+function parseCSV(text) {
+  // ヘッダー除いて各行から日付と番号を抽出、古→新順（反転しない）
+  return text.trim().split('\n').slice(1).map(line => {
+    const cols = line.split(',');
+    const date = cols[1].trim();
+    const number = cols[2].trim().replace(/[^\d]/g, '').padStart(4,'0');
+    return { date, number };
+  });
 }
 
-
-    function getWheelDiffs(prev, curr) {
-       // 空文字がある場合は空文字配列を返す（差分テーブル空欄化用）
-  if (!prev || !curr || prev.length < 4 || curr.length < 4) {
-    return ['','','',''];
-  }
+// 差分計算：prev→currのズレ（左 or 右 + 数）
+function getWheelDiffs(prev, curr) {
+  if (!prev || !curr || prev.length < 4 || curr.length < 4) return ['','','',''];
   const p = prev.split('').map(Number);
   const c = curr.split('').map(Number);
   return positions.map((pos, i) => {
@@ -97,150 +88,68 @@
     return (left <= right ? '左' : '右') + Math.min(left, right);
   });
 }
-      
-    function predictNext(current, pattern) {
-      const digits = current.split('').map(Number);
-      return pattern.map((d, i) => {
-        const wheel = wheels[positions[i]];
-        const idx = wheel.indexOf(digits[i]);
-        const dir = d[0];
-        const steps = parseInt(d.slice(1));
-        const next = dir === '左' ? (idx - steps + 10) % 10 : (idx + steps) % 10;
-        return wheel[next];
-      }).join('');
-    }
-
-    function calculateAverageError(data) {
-      const count = Math.min(5, data.length - 1);
-      const totalError = [0, 0, 0, 0];
-      for (let i = 0; i < count; i++) {
-        const prev = data[i + 1].number.split('').map(Number);
-        const curr = data[i].number.split('').map(Number);
-        positions.forEach((pos, idx) => {
-          const wheel = wheels[pos];
-          const pi = wheel.indexOf(prev[idx]);
-          const ci = wheel.indexOf(curr[idx]);
-          let diff = (ci - pi + 10) % 10;
-          if (diff > 5) diff -= 10;
-          totalError[idx] += diff;
-        });
-      }
-      return totalError.map(e => Math.round(e / count));
-    }
-
-    function applyCorrection(num, error) {
-      const digits = num.split('').map(Number);
-      return digits.map((d, i) => {
-        const wheel = wheels[positions[i]];
-        const idx = wheel.indexOf(d);
-        return wheel[(idx + error[i] + 10) % 10];
-      }).join('');
-    }
 
 function predict() {
   const file = document.getElementById('csvFile').files[0];
-  if (!file) return;
+  if (!file) return alert('CSVファイルを選択してください');
 
   const reader = new FileReader();
   reader.onload = e => {
-    const originalData = parseCSV(e.target.result); // 古→新
-    if (originalData.length < 2) return;
+    let data = parseCSV(e.target.result); // 古→新順
 
-    const latestEntry = originalData[originalData.length - 1]; // 最新日
-    const latestNumber = latestEntry.number;
-
-    // ▼ 翌営業日を生成（土日スキップ）
-    const lastDate = new Date(latestEntry.date);
+    // 最新日から翌営業日（土日スキップ）を計算して空行を先頭に追加
+    const lastDate = new Date(data[data.length - 1].date);
     lastDate.setDate(lastDate.getDate() + 1);
     while (lastDate.getDay() === 0 || lastDate.getDay() === 6) {
       lastDate.setDate(lastDate.getDate() + 1);
     }
     const yyyy = lastDate.getFullYear();
-    const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
-    const dd = String(lastDate.getDate()).padStart(2, '0');
+    const mm = String(lastDate.getMonth() + 1).padStart(2,'0');
+    const dd = String(lastDate.getDate()).padStart(2,'0');
     const nextDateStr = `${yyyy}/${mm}/${dd}`;
 
-    // ▼ 予測行を「末尾に」追加（古→新）
-    const extendedData = [...originalData, { date: nextDateStr, number: '' }];
+    data.unshift({ date: nextDateStr, number: '' }); // 先頭に未来日追加
 
-    // ▼ 表示・処理用に新→古にする
-    const data = extendedData.reverse();
+    // 表示用に「未来日→最新→過去」順に逆転
+    const reversedData = [...data].reverse();
 
-    // ▼ 差分パターン抽出
-    const diffFreq = {};
-    for (let i = 1; i < Math.min(21, data.length); i++) {
-      const key = getWheelDiffs(data[i - 1].number, data[i].number).join(',');
-      diffFreq[key] = (diffFreq[key] || 0) + 1;
-    }
-
-    const topPatterns = Object.entries(diffFreq)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(e => e[0].split(','));
-
-    const averageError = calculateAverageError(data);
+    // 差分テーブル生成
     const resultArea = document.getElementById('details');
     resultArea.innerHTML = '';
 
-    const pastNumbers = new Set(
-      data.filter(d => d.number).slice(0, 20).map(d => d.number)
-    );
+    const wrapper = document.createElement('div');
+    wrapper.style.textAlign = 'center';
 
-    // ▼ 予測番号（最新実データから）
-    topPatterns.forEach(pattern => {
-      const pred = predictNext(latestNumber, pattern);
-      const corrected = applyCorrection(pred, averageError);
-      const reversed = corrected.split('').reverse().join('');
-      const mirror = corrected.split('').map(d => mirrorMap[d]).join('');
-      const isHit = pastNumbers.has(corrected) ? '✅ 出現あり！' : '❌ 未出現';
-      const isMirrorHit = pastNumbers.has(mirror) ? '✅ 出現あり！' : '❌ 未出現';
+    const table = document.createElement('table');
+    table.border = 1;
+    table.style.margin = 'auto';
+    table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
-      resultArea.innerHTML += `
-        <div class="prediction-card">
-          <div>🔮 予測番号: ${pred}</div>
-          <div>🔧 補正後予測番号: ${corrected} ${isHit}</div>
-          <div>🔁 逆順番号: ${reversed}</div>
-          <div>🔧 ミラー番号: ${mirror} ${isMirrorHit}</div>
-        </div>
-      `;
-    });
+    for (let i = 0; i < reversedData.length; i++) {
+      const current = reversedData[i];
+      const prev = reversedData[i+1];
 
- // ▼ 差分テーブル（新→古順で表示）
-const diffTableWrapper = document.createElement('div');
-diffTableWrapper.style.textAlign = 'center';
+      // 差分は下の行(prev)から今の行(current)へ
+      const diffs = (prev && prev.number && current.number)
+        ? getWheelDiffs(prev.number, current.number)
+        : ['', '', '', ''];
 
-const table = document.createElement('table');
-table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
+      const tr = document.createElement('tr');
+      if (!current.number) tr.style.backgroundColor = '#eef'; // 未来日行を薄青
 
-// 差分表示：下の行から上の行へのズレ（未来行→最新→過去）
-const reversedData = [...extendedData].reverse();
+      const diffTds = diffs.map(d => {
+        const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
+        return `<td style="color:${color}">${d}</td>`;
+      });
 
-for (let i = 0; i < Math.min(11, reversedData.length); i++) {
-  const current = reversedData[i];       // 6/27（未来行）→6/26→6/25→…
-  const prev = reversedData[i + 1];      // 一つ下の行（たとえば6/26）
+      tr.innerHTML = `<td>${current.date}</td><td>${current.number}</td>${diffTds.join('')}`;
+      table.appendChild(tr);
+    }
 
-  const diffs = (prev && prev.number && current.number)
-    ? getWheelDiffs(prev.number, current.number)
-    : ['', '', '', ''];
+    wrapper.appendChild(table);
+    resultArea.appendChild(wrapper);
+  };
 
-  const row = document.createElement('tr');
-  if (!current.number) row.style.backgroundColor = '#eef'; // 空欄の行＝予測用
-
-  const diffCells = diffs.map(d => {
-    const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
-    return `<td style="color:${color}">${d}</td>`;
-  });
-
-  row.innerHTML = `<td>${current.date}</td><td>${current.number}</td>` + diffCells.join('');
-  table.appendChild(row);
-}
-
-diffTableWrapper.appendChild(table);
-resultArea.appendChild(diffTableWrapper);
-  }; 
   reader.readAsText(file);
 }
-
 </script>
-</body>
-</html>
