@@ -52,9 +52,20 @@
   padding: 0;
   margin: 0;
 }
-    .table-bordered th,
+   .table-bordered {
+  border-collapse: collapse;
+  margin: 20px auto;
+  width: auto;
+  font-size: 14px;
+}
+
+.table-bordered th,
 .table-bordered td {
-  border: 2px solid #333;
+  border: 1px solid #c1a57b; /* ミルクティーっぽい色 */
+  padding: 6px 10px;
+  color: #5a4635; /* 文字も落ち着いた茶色 */
+}
+
 }
 
 </style>
@@ -143,7 +154,7 @@ function predict() {
     wrapper.style.textAlign = 'center';
 
     const table = document.createElement('table');
-table.className = 'table-bordered';
+table.className = 'table-bordered';  // ← クラスを付けてCSSを適用
 table.style.margin = '0 auto';  // ←追加！中央寄せ
 table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
