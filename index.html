@@ -65,7 +65,6 @@ const positions = ['千','百','十','一'];
 document.getElementById('predictButton').addEventListener('click', predict);
 
 function parseCSV(text) {
-  // ヘッダー除いて各行から日付と番号を抽出、古→新順（反転しない）
   return text.trim().split('\n').slice(1).map(line => {
     const cols = line.split(',');
     const date = cols[1].trim();
@@ -74,7 +73,6 @@ function parseCSV(text) {
   });
 }
 
-// 差分計算：prev→currのズレ（左 or 右 + 数）
 function getWheelDiffs(prev, curr) {
   if (!prev || !curr || prev.length < 4 || curr.length < 4) return ['','','',''];
   const p = prev.split('').map(Number);
@@ -90,61 +88,68 @@ function getWheelDiffs(prev, curr) {
 }
 
 function predict() {
-  // ----------------------
-// 予測数字を3つ生成
-// ----------------------
-const lastDraw = data[1].number;  // 最新の当選番号（未来行の次）
-const prevDraw = data[2].number;  // その1つ前
-const predictionSet = [];
-
-if (lastDraw && prevDraw) {
-  const lastDigits = lastDraw.split('').map(Number);
-  const prevDigits = prevDraw.split('').map(Number);
-
-  for (let n = 0; n < 3; n++) {
-    let prediction = '';
-    for (let i = 0; i < 4; i++) {
-      const pos = positions[i];
-      const wheel = wheels[pos];
-      const lastIndex = wheel.indexOf(lastDigits[i]);
-      const prevIndex = wheel.indexOf(prevDigits[i]);
-
-      // インデックス差をズレ継承（ランダム微調整つき）
-      const diff = (lastIndex - prevIndex + 10) % 10;
-      const predictedIndex = (lastIndex + diff + n) % 10;
-      prediction += wheel[predictedIndex];
-    }
-    predictionSet.push(prediction);
-  }
-}
-
   const file = document.getElementById('csvFile').files[0];
   if (!file) return alert('CSVファイルを選択してください');
 
   const reader = new FileReader();
   reader.onload = e => {
-    let data = parseCSV(e.target.result); // 古→新順
+    let data = parseCSV(e.target.result); // 古→新
 
-    // 最新日から翌営業日（土日スキップ）を計算して空行を先頭に追加
+    // 最新日から次の営業日を計算して未来行を追加
     const lastDate = new Date(data[data.length - 1].date);
-lastDate.setDate(lastDate.getDate() + 1);
-while (lastDate.getDay() === 0 || lastDate.getDay() === 6) {
-  lastDate.setDate(lastDate.getDate() + 1);
-}
-const yyyy = lastDate.getFullYear();
-const mm = String(lastDate.getMonth() + 1).padStart(2,'0');
-const dd = String(lastDate.getDate()).padStart(2,'0');
-const nextDateStr = `${yyyy}/${mm}/${dd}`;
+    lastDate.setDate(lastDate.getDate() + 1);
+    while (lastDate.getDay() === 0 || lastDate.getDay() === 6) {
+      lastDate.setDate(lastDate.getDate() + 1);
+    }
+    const yyyy = lastDate.getFullYear();
+    const mm = String(lastDate.getMonth() + 1).padStart(2,'0');
+    const dd = String(lastDate.getDate()).padStart(2,'0');
+    const nextDateStr = `${yyyy}/${mm}/${dd}`;
+    data.unshift({ date: nextDateStr, number: '' }); // 先頭に追加
 
-data.unshift({ date: nextDateStr, number: '' }); // 先頭に未来日追加
+    const reversedData = [...data].reverse(); // 新→古順
 
-    // 表示用に「未来日→最新→過去」順に逆転
-    const reversedData = [...data].reverse();
-
-    // 差分テーブル生成
     const resultArea = document.getElementById('details');
     resultArea.innerHTML = '';
+    
+    // ====================
+    // 🌟 予測ロジック
+    // ====================
+    const lastDraw = data[1].number;  // 最新の当選番号（未来行の次）
+    const prevDraw = data[2].number;  // その1つ前
+    const predictionSet = [];
 
+    if (lastDraw && prevDraw) {
+      const lastDigits = lastDraw.split('').map(Number);
+      const prevDigits = prevDraw.split('').map(Number);
+
+      for (let n = 0; n < 3; n++) {
+        let prediction = '';
+        for (let i = 0; i < 4; i++) {
+          const pos = positions[i];
+          const wheel = wheels[pos];
+          const lastIndex = wheel.indexOf(lastDigits[i]);
+          const prevIndex = wheel.indexOf(prevDigits[i]);
+
+          const diff = (lastIndex - prevIndex + 10) % 10;
+          const predictedIndex = (lastIndex + diff + n) % 10;
+          prediction += wheel[predictedIndex];
+        }
+        predictionSet.push(prediction);
+      }
+    }
+
+    // 🌟予測結果表示
+    const predBox = document.createElement('div');
+    predBox.innerHTML = `<h3>予測数字（タカオ式）</h3>
+    <ul>
+      ${predictionSet.map(p => `<li style="font-weight:bold;font-size:1.2em;">${p}</li>`).join('')}
+    </ul>`;
+    resultArea.appendChild(predBox);
+
+    // ====================
+    // 差分テーブル生成
+    // ====================
     const wrapper = document.createElement('div');
     wrapper.style.textAlign = 'center';
 
@@ -156,14 +161,12 @@ data.unshift({ date: nextDateStr, number: '' }); // 先頭に未来日追加
     for (let i = 0; i < reversedData.length; i++) {
       const current = reversedData[i];
       const prev = reversedData[i+1];
-
-      // 差分は下の行(prev)から今の行(current)へ
       const diffs = (prev && prev.number && current.number)
         ? getWheelDiffs(prev.number, current.number)
         : ['', '', '', ''];
 
       const tr = document.createElement('tr');
-      if (!current.number) tr.style.backgroundColor = '#eef'; // 未来日行を薄青
+      if (!current.number) tr.style.backgroundColor = '#eef'; // 未来行
 
       const diffTds = diffs.map(d => {
         const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
@@ -181,5 +184,5 @@ data.unshift({ date: nextDateStr, number: '' }); // 先頭に未来日追加
   reader.readAsText(file);
 }
 </script>
-  </body>
+</body>
 </html>
