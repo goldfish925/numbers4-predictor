@@ -26,20 +26,20 @@
     }
 
     .prediction-section {
-      margin: 20px auto;
+      margin: 30px auto 20px;
     }
 
-    .prediction-section h3 {
+    .prediction-title {
+      font-size: 1.6em;
+      color: #7B3F00;  /* ココア色 */
       margin-bottom: 10px;
-      font-size: 1.5em;
-      color: #333;
     }
 
     #predictionList {
       font-size: 2em;
       list-style: none;
       padding: 0;
-      margin: 0 auto;
+      margin: 0;
     }
 
     #predictionList li {
@@ -66,14 +66,14 @@
     }
   </style>
 </head>
-</body>
 
+<body>
   <img src="neco.png" alt="ねこ" class="neco-image">
 
   <h1>NUMBERS4予想</h1>
 
-  <div class="prediction-box">
-    <h3>🔮予測数字🔮</h3>
+  <div class="prediction-section">
+    <div class="prediction-title">🔮予測数字🔮</div>
     <ul id="predictionList"></ul>
   </div>
 
