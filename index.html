@@ -150,6 +150,9 @@
     const latestEntry = originalData[originalData.length - 1];
     const latestNumber = latestEntry.number;
 
+    const latestEntry = originalData[originalData.length - 1]; // 一番新しい実データ
+　　const latestNumber = latestEntry.number;
+
     // 翌日（予測日）を追加（例：6/27）
     const lastDate = new Date(latestEntry.date);
     lastDate.setDate(lastDate.getDate() + 1);
@@ -161,6 +164,10 @@
     // 新→古に並べて、空の予測行を先頭に追加
     const data = [...originalData].reverse();
     data.unshift({ date: nextDateStr, number: '' });
+
+    // ⭐ 並び順は新しい順にしてから、予測日（空行）を先頭に追加
+　　const data = [...originalData].reverse();
+　　data.unshift({ date: nextDateStr, number: '' });
 
     // 差分パターン頻度集計
     const diffFreq = {};
