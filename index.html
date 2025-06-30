@@ -158,12 +158,12 @@ function predict() {
     table.style.margin = 'auto';
     table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
- for (let i = 0; i < reversedData.length; i++) {
-  const current = reversedData[i];
-  const next = reversedData[i + 1];  // 下の行（より過去）
+ for (let i = 0; i < reversedData.length - 1; i++) {
+  const current = reversedData[i];         // 上の行（新しい日付）
+  const prev = reversedData[i + 1];        // 下の行（前日）
 
-  const diffs = (current.number && next?.number)
-    ? getWheelDiffs(next.number, current.number)  // 下 → 上（過去 → 現在）の差分
+  const diffs = (current.number && prev?.number)
+    ? getWheelDiffs(prev.number, current.number)  // 差分は「前回→今回」
     : ['', '', '', ''];
 
   const tr = document.createElement('tr');
@@ -176,6 +176,8 @@ function predict() {
 
   tr.innerHTML = `<td>${current.date}</td><td>${current.number}</td>${diffTds.join('')}`;
   table.appendChild(tr);
+}
+
 }
     wrapper.appendChild(table);
     resultArea.appendChild(wrapper);
