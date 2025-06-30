@@ -217,8 +217,8 @@ function predict() {
       const prev = data[i + 1];
 
       const diffs = (prev && current.number && prev.number)
-        ? getWheelDiffs(current.number, prev.number)
-        : ['', '', '', ''];
+  ? getWheelDiffs(prev.number, current.number)
+  : ['', '', '', ''];
 
       const row = document.createElement('tr');
       const diffCells = diffs.map(d => {
