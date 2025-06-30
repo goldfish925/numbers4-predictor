@@ -143,29 +143,28 @@
 
   const reader = new FileReader();
   reader.onload = e => {
-    let data = parseCSV(e.target.result); // CSVは古→新順
+    const rawData = parseCSV(e.target.result); // ← 古→新の順でCSV読み込み
+    if (rawData.length < 2) return;
 
-    if (data.length < 2) return;
+    const originalData = [...rawData].reverse(); // 新→古 に変換
 
-    const latestEntry = data[data.length - 1]; // 最新日（新しい）
-    const latestNumber = latestEntry.number;
+    // 最新データ（日付と番号）
+    const latestReal = originalData[0];
+    const latestNumber = latestReal.number;
 
-    // 翌日（予測日）を生成
-    const lastDate = new Date(latestEntry.date);
+    // 最新日の翌日（予測日）を追加（番号は空）
+    const lastDate = new Date(latestReal.date);
     lastDate.setDate(lastDate.getDate() + 1);
     const yyyy = lastDate.getFullYear();
     const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
     const dd = String(lastDate.getDate()).padStart(2, '0');
     const nextDateStr = `${yyyy}/${mm}/${dd}`;
 
-    // 差分解析と表示のため、新→古に並び替え
-    data = data.reverse();
+    const data = [{ date: nextDateStr, number: '' }, ...originalData]; // 予測日を先頭に
 
-    // 先頭（新しい側）に予測日（空）を追加
-    data.unshift({ date: nextDateStr, number: '' });
-
+    // 差分パターン頻度集計（10件）
     const diffFreq = {};
-    for (let i = 1; i < Math.min(21, data.length); i++) {
+    for (let i = 1; i < Math.min(11, data.length); i++) {
       const key = getWheelDiffs(data[i - 1].number, data[i].number).join(',');
       diffFreq[key] = (diffFreq[key] || 0) + 1;
     }
@@ -180,11 +179,9 @@
     const resultArea = document.getElementById('details');
     resultArea.innerHTML = '';
 
-    const pastNumbers = new Set(
-      data.filter(d => d.number).slice(1, 21).map(d => d.number)
-    );
+    const pastNumbers = new Set(data.slice(1, 21).map(d => d.number));
 
-    // 予測は実際の最新番号から行う
+    // 予測出力（空番号ではなく、最新の実データから）
     topPatterns.forEach(pattern => {
       const pred = predictNext(latestNumber, pattern);
       const corrected = applyCorrection(pred, averageError);
@@ -203,19 +200,16 @@
       `;
     });
 
-    // 差分テーブル表示（11件まで）
-    const diffTableWrapper = document.createElement('div');
-    diffTableWrapper.style.textAlign = 'center';
-
+    // 差分テーブル表示（新→古）
+    const diffTableWrapper = document.getElementById('diffTable');
+    diffTableWrapper.innerHTML = '<h3>風車インデックス差分（新→古）</h3>';
     const table = document.createElement('table');
     table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
     for (let i = 0; i < Math.min(11, data.length); i++) {
       const current = data[i];
       const prev = data[i + 1];
-      const diffs = (prev && current.number && prev.number)
-        ? getWheelDiffs(current.number, prev.number)
-        : ['','','',''];
+      const diffs = (prev && current.number && prev.number) ? getWheelDiffs(current.number, prev.number) : ['','','',''];
 
       const row = document.createElement('tr');
       const diffCells = diffs.map(d => {
@@ -228,11 +222,11 @@
     }
 
     diffTableWrapper.appendChild(table);
-    resultArea.appendChild(diffTableWrapper);
   };
 
   reader.readAsText(file);
 }
+
 
 </script>
 </body>
