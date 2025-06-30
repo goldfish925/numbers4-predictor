@@ -161,11 +161,7 @@
     const dd = String(lastDate.getDate()).padStart(2, '0');
     const nextDateStr = `${yyyy}/${mm}/${dd}`;
 
-    // 新→古に並べて、空の予測行を先頭に追加
-    const data = [...originalData].reverse();
-    data.unshift({ date: nextDateStr, number: '' });
-
-    // ⭐ 並び順は新しい順にしてから、予測日（空行）を先頭に追加
+     // ⭐ 並び順は新しい順にしてから、予測日（空行）を先頭に追加
 　　const data = [...originalData].reverse();
 　　data.unshift({ date: nextDateStr, number: '' });
 
