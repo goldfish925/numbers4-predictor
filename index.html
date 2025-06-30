@@ -90,6 +90,34 @@ function getWheelDiffs(prev, curr) {
 }
 
 function predict() {
+  // ----------------------
+// 予測数字を3つ生成
+// ----------------------
+const lastDraw = data[1].number;  // 最新の当選番号（未来行の次）
+const prevDraw = data[2].number;  // その1つ前
+const predictionSet = [];
+
+if (lastDraw && prevDraw) {
+  const lastDigits = lastDraw.split('').map(Number);
+  const prevDigits = prevDraw.split('').map(Number);
+
+  for (let n = 0; n < 3; n++) {
+    let prediction = '';
+    for (let i = 0; i < 4; i++) {
+      const pos = positions[i];
+      const wheel = wheels[pos];
+      const lastIndex = wheel.indexOf(lastDigits[i]);
+      const prevIndex = wheel.indexOf(prevDigits[i]);
+
+      // インデックス差をズレ継承（ランダム微調整つき）
+      const diff = (lastIndex - prevIndex + 10) % 10;
+      const predictedIndex = (lastIndex + diff + n) % 10;
+      prediction += wheel[predictedIndex];
+    }
+    predictionSet.push(prediction);
+  }
+}
+
   const file = document.getElementById('csvFile').files[0];
   if (!file) return alert('CSVファイルを選択してください');
 
