@@ -6,54 +6,82 @@
   <title>NUMBERS4予想</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #ffffff;
       text-align: center;
-      background-color: #fdfaf5;
+      margin: 0;
+      padding: 20px;
     }
 
     .neco-image {
       max-width: 200px;
       display: block;
-      margin: 20px auto 10px;
+      margin: 0 auto 10px;
     }
 
     h1 {
-      margin-top: 0;
-      font-size: 2em;
+      color: #7B3F00; /* ココア色 */
+      font-size: 2.4em;
+      margin: 10px 0 20px;
+    }
+
+    .prediction-section {
+      margin: 20px auto;
+    }
+
+    .prediction-section h3 {
+      margin-bottom: 10px;
+      font-size: 1.5em;
       color: #333;
     }
 
-    .prediction-box {
-      border: 4px solid #8B4513;
-      background-color: #FFF8DC;
-      border-radius: 10px;
-      padding: 20px;
-      margin: 20px auto;
-      max-width: 300px;
-      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .prediction-box h3 {
-      margin-top: 0;
-      color: #5a3a1a;
-      font-size: 1.4em;
-    }
-
     #predictionList {
-      font-size: 1.8em;
+      font-size: 2em;
       list-style: none;
       padding: 0;
-      margin: 10px 0 0 0;
+      margin: 0 auto;
     }
 
-    input, button {
+    #predictionList li {
+      margin: 5px 0;
+    }
+
+    #csvFile,
+    #predictButton {
       margin: 10px;
-      padding: 10px;
+      padding: 10px 20px;
       font-size: 1em;
+    }
+
+    #predictButton {
+      background-color: #7B3F00;  /* ココア色 */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #predictButton:hover {
+      opacity: 0.9;
     }
   </style>
 </head>
+
 <body>
+  <img src="neco.png" alt="ねこ" class="neco-image">
+
+  <h1>NUMBERS4予想</h1>
+
+  <div class="prediction-section">
+    <h3>予測数字</h3>
+    <ul id="predictionList"></ul>
+  </div>
+
+  <input type="file" id="csvFile" accept=".csv" />
+  <button id="predictButton">予測開始</button>
+
+  <div id="details"></div>
+</body>
 
   <img src="neco.png" alt="ねこ" class="neco-image">
 
