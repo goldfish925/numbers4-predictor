@@ -95,7 +95,7 @@ function predict() {
   reader.onload = e => {
     let data = parseCSV(e.target.result); // 古→新
 
-    // 最新日から次の営業日を計算して未来行を追加
+    // 予測日追加（翌営業日）
     const lastDate = new Date(data[data.length - 1].date);
     lastDate.setDate(lastDate.getDate() + 1);
     while (lastDate.getDay() === 0 || lastDate.getDay() === 6) {
@@ -105,90 +105,53 @@ function predict() {
     const mm = String(lastDate.getMonth() + 1).padStart(2,'0');
     const dd = String(lastDate.getDate()).padStart(2,'0');
     const nextDateStr = `${yyyy}/${mm}/${dd}`;
-    data.unshift({ date: nextDateStr, number: '' }); // 先頭に追加
 
-    const reversedData = [...data].reverse(); // 新→古順
+    data.push({ date: nextDateStr, number: '' }); // 未来日を末尾に追加（古→新のまま）
+
+    const reversedData = [...data].reverse(); // 新→古 に並べ替え
 
     const resultArea = document.getElementById('details');
     resultArea.innerHTML = '';
-    
-    // ====================
-    // 🌟 予測ロジック
-    // ====================
-    const lastDraw = data[1].number;  // 最新の当選番号（未来行の次）
-    const prevDraw = data[2].number;  // その1つ前
-    const predictionSet = [];
 
-    if (lastDraw && prevDraw) {
-      const lastDigits = lastDraw.split('').map(Number);
-      const prevDigits = prevDraw.split('').map(Number);
-
-      for (let n = 0; n < 3; n++) {
-        let prediction = '';
-        for (let i = 0; i < 4; i++) {
-          const pos = positions[i];
-          const wheel = wheels[pos];
-          const lastIndex = wheel.indexOf(lastDigits[i]);
-          const prevIndex = wheel.indexOf(prevDigits[i]);
-
-          const diff = (lastIndex - prevIndex + 10) % 10;
-          const predictedIndex = (lastIndex + diff + n) % 10;
-          prediction += wheel[predictedIndex];
-        }
-        predictionSet.push(prediction);
-      }
-    }
-
-    // 🌟予測結果表示
-    const predBox = document.createElement('div');
-    predBox.innerHTML = `<h3>予測数字（タカオ式）</h3>
-    <ul>
-      ${predictionSet.map(p => `<li style="font-weight:bold;font-size:1.2em;">${p}</li>`).join('')}
-    </ul>`;
-    resultArea.appendChild(predBox);
-
-    // ====================
-    // 差分テーブル生成
-    // ====================
     const wrapper = document.createElement('div');
     wrapper.style.textAlign = 'center';
 
     const table = document.createElement('table');
-    table.border = 1;
-    table.style.margin = 'auto';
     table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
-for (let i = 0; i < reversedData.length; i++) {
-  const current = reversedData[i];           // 上の行（新しい日付）
-  const prev = reversedData[i + 1];          // 1つ前（1日前）
+    // 1行目（予測日）だけ追加（差分なし）
+    const future = reversedData[0];
+    const futureTr = document.createElement('tr');
+    futureTr.style.backgroundColor = '#eef';
+    futureTr.innerHTML = `<td>${future.date}</td><td></td><td></td><td></td><td></td><td></td>`;
+    table.appendChild(futureTr);
 
-  // 差分計算：前日 → 今日のズレ
-  const diffs = (current.number && prev?.number)
-    ? getWheelDiffs(prev.number, current.number)
-    : ['', '', '', ''];
+    // 2行目以降（新→古）に差分表示
+    for (let i = 1; i < reversedData.length; i++) {
+      const current = reversedData[i];
+      const prev = reversedData[i - 1]; // 上の行（1日後）
 
-  const tr = document.createElement('tr');
-  if (!current.number) tr.style.backgroundColor = '#eef';
+      const diffs = (current.number && prev?.number)
+        ? getWheelDiffs(current.number, prev.number)
+        : ['', '', '', ''];
 
-  const diffTds = diffs.map(d => {
-    const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
-    return `<td style="color:${color}">${d}</td>`;
-  });
+      const tr = document.createElement('tr');
+      const diffTds = diffs.map(d => {
+        const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
+        return `<td style="color:${color}">${d}</td>`;
+      });
 
-  tr.innerHTML = `<td>${current.date}</td><td>${current.number}</td>${diffTds.join('')}`;
-  table.appendChild(tr);
-}
+      tr.innerHTML = `<td>${current.date}</td><td>${current.number}</td>${diffTds.join('')}`;
+      table.appendChild(tr);
+    }
 
-// ↓もし 2025/6/27 が出てこない場合は、ここで reversedData をチェック
-console.log("最初の行（予測日）", reversedData[0]);
-};
-
-   wrapper.appendChild(table);
+    wrapper.appendChild(table);
     resultArea.appendChild(wrapper);
   };
 
   reader.readAsText(file);
 }
 </script>
+
 </body>
 </html>
