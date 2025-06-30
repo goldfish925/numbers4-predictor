@@ -214,6 +214,32 @@
           predictionList.appendChild(li);
         });
 
+　　　　　// ======= 一致検証と履歴表への追加 =======
+
+// 直近の当選番号（予測日の1つ前）
+const actual = latestNumber.split('').sort().join('');
+
+// 各予測についてボックス一致を確認
+const matches = predictions.map(num => {
+  return actual === num.split('').sort().join('');
+});
+
+// テーブルに行を追加
+const historyTable = document.getElementById('historyTable');
+const row = document.createElement('tr');
+row.innerHTML = `
+  <td>${nextDateStr}</td>
+  <td>${latestNumber}</td>
+  <td>${predictions[0]}</td>
+  <td>${matches[0] ? '◯' : '×'}</td>
+  <td>${predictions[1]}</td>
+  <td>${matches[1] ? '◯' : '×'}</td>
+  <td>${predictions[2]}</td>
+  <td>${matches[2] ? '◯' : '×'}</td>
+`;
+historyTable.appendChild(row);
+
+        
         // 一致判定テーブル作成
         const matchTable = document.createElement('table');
         matchTable.innerHTML = '<tr><th>日付</th><th>予測1</th><th>一致</th><th>予測2</th><th>一致</th><th>予測3</th><th>一致</th></tr>';
