@@ -42,19 +42,43 @@
       border: 1px solid #c1a57b;
       padding: 6px 12px;
     }
+    <style>
+.prediction-box {
+  border: 4px solid #8B4513; /* チョコレートブラウン */
+  background-color: #FFF8DC; /* コーンシルク（柔らかいベージュ） */
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 300px;
+  text-align: center;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+}
+
+#predictionList {
+  font-size: 1.8em;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
   </style>
   
 <head>
 <body>
-    <img src="neco.png" alt="ねこ" class="neco-image">
+  <img src="neco.png" alt="ねこ" class="neco-image">
+
+  <div class="prediction-box">
   <h3>予測数字：</h3>
-<ul id="predictionList" style="font-size: 1.8em; text-align: center; list-style: none; padding: 0;"></ul>
+  <ul id="predictionList"></ul>
+</div>
 
   <h1>NUMBERS4予想</h1>
-    <input type="file" id="csvFile" accept=".csv" />
-<button id="predictButton">予測開始</button>
-<div id="details"></div>
+  <input type="file" id="csvFile" accept=".csv" />
+  <button id="predictButton">予測開始</button>
+  <div id="details"></div>
 </body>
+
 <script>
 const wheels = {
   千: [0,3,6,9,2,5,8,1,4,7],
@@ -208,7 +232,7 @@ function predict() {
     predictionList.innerHTML = '';
     predictions.forEach(num => {
       const li = document.createElement('li');
-      li.textContent = `🎯 ${num}`;
+      li.textContent = `🦉 ${num}`;
       predictionList.appendChild(li);
     });
     // ===== 予測ロジックここまで =====
