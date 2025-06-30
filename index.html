@@ -209,16 +209,16 @@ function predict() {
     const diffTableWrapper = document.createElement('div');
     diffTableWrapper.style.textAlign = 'center';
 
-    const table = document.createElement('table');
+        const table = document.createElement('table');
     table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
-    for (let i = 0; i < Math.min(11, data.length); i++) {
-      const current = data[i];
-      const prev = data[i + 1];
+    for (let i = 0; i < Math.min(11, data.length - 1); i++) {
+      const current = data[i];     // 6/27（空欄）→6/26→6/25...
+      const next = data[i + 1];    // 1つ下の行（6/26→6/25...）
 
-      const diffs = (prev && current.number && prev.number)
-  ? getWheelDiffs(prev.number, current.number)
-  : ['', '', '', ''];
+      const diffs = (current.number && next.number)
+        ? getWheelDiffs(current.number, next.number)  // ← 差分：今→次
+        : ['', '', '', ''];
 
       const row = document.createElement('tr');
       const diffCells = diffs.map(d => {
@@ -229,6 +229,7 @@ function predict() {
       row.innerHTML = `<td>${current.date}</td><td>${current.number}</td>` + diffCells.join('');
       table.appendChild(row);
     }
+
 
     diffTableWrapper.appendChild(table);
     resultArea.appendChild(diffTableWrapper);
