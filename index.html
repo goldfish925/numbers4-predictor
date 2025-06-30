@@ -143,24 +143,27 @@
 
   const reader = new FileReader();
   reader.onload = e => {
-    const originalData = parseCSV(e.target.result); // CSVは古→新
-    if (originalData.length < 2) return;
+    const originalData = parseCSV(e.target.result); // 古い→新しい
+if (originalData.length < 2) return;
 
-    // 最新データ（6/26など）
-    const latestEntry = originalData[originalData.length - 1]; // 一番新しい実データ
-　　const latestNumber = latestEntry.number;
+// 最新データ（直近の実績）
+const latestEntry = originalData[originalData.length - 1];
+const latestNumber = latestEntry.number;
 
-    // 翌日（予測日）を追加（例：6/27）
-    const lastDate = new Date(latestEntry.date);
-    lastDate.setDate(lastDate.getDate() + 1);
-    const yyyy = lastDate.getFullYear();
-    const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
-    const dd = String(lastDate.getDate()).padStart(2, '0');
-    const nextDateStr = `${yyyy}/${mm}/${dd}`;
+// 翌日を生成（CSVの最新日＋1日）
+const lastDate = new Date(latestEntry.date);
+lastDate.setDate(lastDate.getDate() + 1);
+const yyyy = lastDate.getFullYear();
+const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
+const dd = String(lastDate.getDate()).padStart(2, '0');
+const nextDateStr = `${yyyy}/${mm}/${dd}`;
 
-     // ⭐ 並び順は新しい順にしてから、予測日（空行）を先頭に追加
-　　const data = [...originalData].reverse();
-　　data.unshift({ date: nextDateStr, number: '' });
+// 並び順：新→古にしてから、予測日を先頭に
+const data = [...originalData].reverse();
+data.unshift({ date: nextDateStr, number: '' }); // ← ここで予測日が先頭に！
+
+// あとはそのまま差分表示などへ
+
 
     // 差分パターン頻度集計
     const diffFreq = {};
