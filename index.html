@@ -3,84 +3,46 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>NUMBERS4予想</title>
+  <title>NUMBERS4予想ツール</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
       background-color: #ffffff;
+      color: #5a4635;
       text-align: center;
-      margin: 0;
       padding: 20px;
     }
-
-    .neco-image {
-      max-width: 200px;
-      display: block;
-      margin: 0 auto 10px;
-    }
-
     h1 {
-      color: #7B3F00; /* ココア色 */
-      font-size: 2.4em;
-      margin: 10px 0 20px;
+      font-size: 28px;
+      color: #c1a57b;
     }
-
-    .prediction-section {
-      margin: 30px auto 20px;
-    }
-
-    .prediction-title {
-      font-size: 1.6em;
-      color: #7B3F00;  /* ココア色 */
-      margin-bottom: 10px;
-    }
-
-    #predictionList {
-      font-size: 2em;
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    #predictionList li {
-      margin: 5px 0;
-    }
-
-    #csvFile,
-    #predictButton {
-      margin: 10px;
+    button {
+      background-color: #c1a57b;
+      color: #ffffff;
       padding: 10px 20px;
-      font-size: 1em;
-    }
-
-    #predictButton {
-      background-color: #7B3F00;  /* ココア色 */
-      color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
+      font-size: 16px;
       cursor: pointer;
     }
-
-    #predictButton:hover {
-      opacity: 0.9;
+    .prediction-card {
+      background: #fff;
+      border: 2px solid #c1a57b;
+      border-radius: 12px;
+      padding: 15px;
+      margin: 20px auto;
+      max-width: 400px;
+      box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
     }
   </style>
 </head>
-
 <body>
-  <img src="neco.png" alt="ねこ" class="neco-image">
-
-  <h1>NUMBERS4予想</h1>
-
-  <div class="prediction-section">
-    <div class="prediction-title">🔮予測数字🔮</div>
-    <ul id="predictionList"></ul>
-  </div>
-
-  <input type="file" id="csvFile" accept=".csv" />
-  <button id="predictButton">予測開始</button>
-
+  <h1>NUMBERS4予想ツール</h1>
+  <input type="file" id="csvFile" accept=".csv">
+  <button id="predictButton">予測する</button>
   <div id="details"></div>
+  <div id="diffTable"></div>
+
 </body>
 
 
