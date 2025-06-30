@@ -3,7 +3,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>NUMBERS4予想ツール</title>
+  <title>NUMBERS4予想</title>
   <style>
     body {
       font-family: "Hiragino Kaku Gothic ProN", sans-serif;
@@ -34,14 +34,42 @@
       max-width: 400px;
       box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
     }
+    <style>
+.prediction-box {
+  border: 4px solid #8B4513; /* チョコレートブラウン */
+  background-color: #FFF8DC; /* コーンシルク（柔らかいベージュ） */
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 300px;
+  text-align: center;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+}
+
+#predictionList {
+  font-size: 1.8em;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
   </style>
 </head>
 <body>
-  <h1>NUMBERS4予想ツール</h1>
-  <input type="file" id="csvFile" accept=".csv">
-  <button id="predictButton">予測する</button>
+ <body>
+  <img src="neco.png" alt="ねこ" class="neco-image">
+
+  <div class="prediction-box">
+    <h3>🔮予測数字🔮</h3>
+    <ul id="predictionList"></ul>
+  </div>
+
+  <h1>NUMBERS4予想</h1>
+  <input type="file" id="csvFile" accept=".csv" />
+  <button id="predictButton">予測開始</button>
   <div id="details"></div>
-  <div id="diffTable"></div>
+
 
 </body>
 
