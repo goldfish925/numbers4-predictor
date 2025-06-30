@@ -188,6 +188,86 @@ table.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th
     resultArea.appendChild(wrapper);
 
     // ===== 予測ロジックここから =====
+    // ======== 差分最頻1位だけを使った予測ロジック（3件） ========
+
+function getIndexDiffStatsTop1(data) {
+  const diffStats = { 千: {}, 百: {}, 十: {}, 一: {} };
+
+  for (let i = 1; i < data.length; i++) {
+    const prev = data[i - 1].number;
+    const curr = data[i].number;
+    if (!prev || !curr) continue;
+
+    positions.forEach((pos, j) => {
+      const wheel = wheels[pos];
+      const pi = wheel.indexOf(Number(prev[j]));
+      const ci = wheel.indexOf(Number(curr[j]));
+      if (pi === -1 || ci === -1) return;
+
+      const right = (ci - pi + 10) % 10;
+      const left = (pi - ci + 10) % 10;
+      const diff = (left <= right) ? -left : right;
+
+      diffStats[pos][diff] = (diffStats[pos][diff] || 0) + 1;
+    });
+  }
+
+  // 各桁で最多出現ズレ1位だけ抽出
+  const topDiffs = {};
+  for (const pos of positions) {
+    const sorted = Object.entries(diffStats[pos])
+      .sort((a, b) => b[1] - a[1]);
+    topDiffs[pos] = parseInt(sorted[0][0]);
+  }
+
+  return topDiffs;
+}
+
+function generateTop1Prediction(latestNumber, topDiffs) {
+  return positions.map((pos, i) => {
+    const wheel = wheels[pos];
+    const digit = Number(latestNumber[i]);
+    const currentIndex = wheel.indexOf(digit);
+    const diff = topDiffs[pos];
+    const newIndex = (currentIndex + diff + 10) % 10;
+    return wheel[newIndex];
+  }).join('');
+}
+
+// ===== 呼び出し部（既存predict()の中） =====
+const topDiffs = getIndexDiffStatsTop1(data.slice(1)); // 最新行除く
+const latestNum = data[1].number;
+const mainPrediction = generateTop1Prediction(latestNum, topDiffs);
+
+// 逆順も追加
+const reversePrediction = mainPrediction.split('').reverse().join('');
+
+// サブ予測（各桁2位ズレ）用に、1件だけノイズ加え
+function generateNoisePrediction(latestNumber, diffStats) {
+  return positions.map((pos, i) => {
+    const wheel = wheels[pos];
+    const digit = Number(latestNumber[i]);
+    const currentIndex = wheel.indexOf(digit);
+    const sorted = Object.entries(diffStats[pos])
+      .sort((a, b) => b[1] - a[1]);
+    const second = parseInt(sorted[1]?.[0] ?? 0);
+    const newIndex = (currentIndex + second + 10) % 10;
+    return wheel[newIndex];
+  }).join('');
+}
+
+const noisePrediction = generateNoisePrediction(latestNum, getIndexDiffStats(data.slice(1)));
+
+// 結果表示
+const predictionList = document.getElementById('predictionList');
+predictionList.innerHTML = '';
+[mainPrediction, reversePrediction, noisePrediction].forEach(num => {
+  const li = document.createElement('li');
+  li.textContent = `🔮 ${num}`;
+  predictionList.appendChild(li);
+});
+// =============================================
+
     function getIndexDiffStats(data) {
       const diffStats = { 千: {}, 百: {}, 十: {}, 一: {} };
 
