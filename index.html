@@ -1,236 +1,510 @@
 
 <!DOCTYPE html>
+
 <html lang="ja">
+
 <head>
-  <meta charset="UTF-8">
-  <title>NUMBERS4予想</title>
-  <style>
-    body {
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-      background-color: #ffffff;
-      color: #5a4635;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 {
-      font-size: 28px;
-      color: #c1a57b;
-      margin-top: 10px;
-    }
-    button {
-      background-color: #c1a57b;
-      color: #ffffff;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .prediction-box {
-      background-color: #ffffff;
-      border: 2px solid #c1a57b;
-      border-radius: 12px;
-      padding: 15px;
-      margin: 20px auto;
-      max-width: 400px;
-      box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
-    }
-    #predictionList {
-      font-size: 1.6em;
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .tables-flex {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-top: 20px;
-    }
-    table {
-      border-collapse: collapse;
-      font-size: 14px;
-      min-width: 420px;
-    }
-    th, td {
-      border: 1px solid #c1a57b;
-      padding: 6px 8px;
-      text-align: center;
-    }
-    th {
-      background-color: #fdf7ee;
-      color: #5a4635;
-    }
-  </style>
+
+ <meta charset="UTF-8">
+
+ <title>NUMBERS4予想</title>
+
+ <style>
+
+  body {
+
+   font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+
+   background-color: #ffffff;
+
+   color: #5a4635;
+
+   text-align: center;
+
+   padding: 20px;
+
+  }
+
+  h1 {
+
+   font-size: 28px;
+
+   color: #c1a57b;
+
+   margin-bottom: 10px;
+
+  }
+
+  button {
+
+   background-color: #c1a57b;
+
+   color: #ffffff;
+
+   padding: 10px 20px;
+
+   border: none;
+
+   border-radius: 8px;
+
+   font-size: 16px;
+
+   cursor: pointer;
+
+  }
+
+  .prediction-box {
+
+   background: #ffffff;
+
+   border: 2px solid #c1a57b;
+
+   border-radius: 12px;
+
+   padding: 15px;
+
+   margin: 20px auto;
+
+   max-width: 400px;
+
+   box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
+
+  }
+
+  .prediction-box h3 {
+
+   margin-top: 0;
+
+   font-size: 20px;
+
+  }
+
+  #predictionList {
+
+   font-size: 1.6em;
+
+   list-style: none;
+
+   padding: 0;
+
+   margin: 0;
+
+  }
+
+  .tables-wrapper {
+
+   display: flex;
+
+   justify-content: center;
+
+   gap: 40px;
+
+   margin-top: 30px;
+
+   flex-wrap: wrap;
+
+  }
+
+  .tables-wrapper table {
+
+   border-collapse: collapse;
+
+   min-width: 320px;
+
+   font-size: 14px;
+
+   background-color: #fff;
+
+   color: #5a4635;
+
+  }
+
+  .tables-wrapper th,
+
+  .tables-wrapper td {
+
+   border: 1px solid #d8c8aa;
+
+   padding: 6px 10px;
+
+   text-align: center;
+
+  }
+
+ </style>
+
 </head>
+
 <body>
 
-  <img src="neco.png" alt="ねこ" class="neco-image" width="200">
-  <h1>NUMBERS4予想</h1>
+ <img src="neco.png" alt="ねこ" class="neco-image">
 
-  <div class="prediction-box">
-    <h3>🔮予測数字</h3>
-    <ul id="predictionList"></ul>
-  </div>
+ <h1>NUMBERS4予想</h1>
 
-  <input type="file" id="csvFile" accept=".csv" />
-  <button id="predictButton">予測開始</button>
 
-  <div id="tablesWrapper" class="tables-flex">
-    <div id="diffTable"></div>
-    <div id="matchTable"></div>
-  </div>
 
-  <script>
-    const positions = ["千", "百", "十", "一"];
-    const wheels = {
-      "千": [0,3,6,9,2,5,8,1,4,7],
-      "百": [0,1,2,3,4,5,6,7,8,9],
-      "十": [0,7,4,1,8,5,2,9,6,3],
-      "一": [0,9,8,7,6,5,4,3,2,1],
-    };
+ <div class="prediction-box">
 
-    document.getElementById('predictButton').addEventListener('click', predict);
+  <h3>🔮予測数字🔮</h3>
 
-    function parseCSV(csv) {
-      const lines = csv.trim().split('\n').slice(1);
-      return lines.map(line => {
-       const [number, date] = line.split(',');
-        return { date: date.trim(), number: number.trim() };
-      });
-    }
+  <ul id="predictionList"></ul>
 
-    function getWheelDiffs(prevNum, currNum) {
-      return positions.map((pos, i) => {
-        const wheel = wheels[pos];
-        const pi = wheel.indexOf(Number(prevNum[i]));
-        const ci = wheel.indexOf(Number(currNum[i]));
-        if (pi === -1 || ci === -1) return '';
-        const right = (ci - pi + 10) % 10;
-        const left = (pi - ci + 10) % 10;
-        if (left < right) return `左${left}`;
-        else if (right < left) return `右${right}`;
-        else return '同';
-      });
-    }
+ </div>
 
-    function countBoxMatch(pred, actual) {
-      const p = pred.split('').sort();
-      const a = actual.split('').sort();
-      let count = 0, used = Array(4).fill(false);
-      for (let i = 0; i < 4; i++) {
-        const idx = a.indexOf(p[i]);
-        if (idx !== -1 && !used[idx]) {
-          used[idx] = true;
-          count++;
-        }
-      }
-      return `${count}個`;
-    }
 
-    function predict() {
-      const file = document.getElementById('csvFile').files[0];
-      if (!file) return alert('CSVファイルを選択してください');
 
-      const reader = new FileReader();
-      reader.onload = e => {
-        let data = parseCSV(e.target.result);
+ <input type="file" id="csvFile" accept=".csv" />
 
-        const lastDate = new Date(data[data.length - 1].date);
-        lastDate.setDate(lastDate.getDate() + 1);
-        while (lastDate.getDay() === 0 || lastDate.getDay() === 6) {
-          lastDate.setDate(lastDate.getDate() + 1);
-        }
-        const yyyy = lastDate.getFullYear();
-        const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
-        const dd = String(lastDate.getDate()).padStart(2, '0');
-        const nextDateStr = `${yyyy}/${mm}/${dd}`;
-        data.push({ date: nextDateStr, number: '' });
+ <button id="predictButton">予測開始</button>
 
-        const reversedData = [...data].reverse();
 
-        // 差分テーブル
-        const diffTable = document.createElement('table');
-        diffTable.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
-       for (let i = 1; i < reversedData.length; i++) {
-  const curr = reversedData[i];
-  const prev = reversedData[i - 1];
-  const diffs = (curr.number && prev?.number)
-    ? getWheelDiffs(prev.number, curr.number)
-    : ['', '', '', ''];
 
-  const tr = document.createElement('tr');
-  const diffTds = diffs.map(d => {
+ <div class="tables-wrapper">
+
+  <div id="diffTable"></div>
+
+  <div id="matchTable"></div>
+
+ </div>
+
+
+
+ <script>
+
+  const wheels = {
+
+   千: [0,3,6,9,2,5,8,1,4,7],
+
+   百: [0,1,2,3,4,5,6,7,8,9],
+
+   十: [0,7,4,1,8,5,2,9,6,3],
+
+   一: [0,9,8,7,6,5,4,3,2,1],
+
+  };
+
+  const positions = ['千','百','十','一'];
+
+
+
+  document.getElementById('predictButton').addEventListener('click', predict);
+
+
+
+  function parseCSV(text) {
+
+   return text.trim().split('\n').slice(1).map(line => {
+
+    const cols = line.split(',');
+
+    const date = cols[1]?.trim();
+
+    const number = cols[2]?.trim().replace(/[^\d]/g, '').padStart(4,'0');
+
+    return { date, number };
+
+   });
+
+  }
+
+
+
+  function getWheelDiffs(prev, curr) {
+
+   if (!prev || !curr || prev.length < 4 || curr.length < 4) return ['','','',''];
+
+   const p = prev.split('').map(Number);
+
+   const c = curr.split('').map(Number);
+
+   return positions.map((pos, i) => {
+
+    const wheel = wheels[pos];
+
+    const pi = wheel.indexOf(p[i]);
+
+    const ci = wheel.indexOf(c[i]);
+
+    const left = (pi - ci + 10) % 10;
+
+    const right = (ci - pi + 10) % 10;
+
+    return (left <= right ? '左' : '右') + Math.min(left, right);
+
+   });
+
+  }
+
+
+
+  function countBoxMatch(pred, actual) {
+
+   const p = pred.split('').sort().join('');
+
+   const a = actual.split('').sort().join('');
+
+   let count = 0;
+
+   for (let i = 0; i < 4; i++) {
+
+    if (p[i] === a[i]) count++;
+
+   }
+
+   return count;
+
+  }
+
+
+
+  function predict() {
+
+ const file = document.getElementById('csvFile').files[0];
+
+ if (!file) return alert('CSVファイルを選択してください');
+
+
+
+ const reader = new FileReader();
+
+ reader.onload = e => {
+
+  let data = parseCSV(e.target.result);
+
+
+
+  // 未来日追加
+
+  const lastDate = new Date(data[data.length - 1].date);
+
+  lastDate.setDate(lastDate.getDate() + 1);
+
+  while (lastDate.getDay() === 0 || lastDate.getDay() === 6) {
+
+   lastDate.setDate(lastDate.getDate() + 1);
+
+  }
+
+  const yyyy = lastDate.getFullYear();
+
+  const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
+
+  const dd = String(lastDate.getDate()).padStart(2, '0');
+
+  const nextDateStr = `${yyyy}/${mm}/${dd}`;
+
+  data.push({ date: nextDateStr, number: '' });
+
+
+
+  const reversedData = [...data].reverse();
+
+
+
+  // 差分テーブル
+
+  const diffTable = document.createElement('table');
+
+  diffTable.className = 'table-bordered';
+
+  diffTable.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
+
+
+
+  for (let i = 0; i < reversedData.length - 1; i++) {
+
+   const curr = reversedData[i];
+
+   const prev = reversedData[i + 1];
+
+   const diffs = (curr.number && prev?.number) ? getWheelDiffs(prev.number, curr.number) : ['', '', '', ''];
+
+   const tr = document.createElement('tr');
+
+   const diffTds = diffs.map(d => {
+
     const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
+
     return `<td style="color:${color}">${d}</td>`;
+
+   });
+
+   tr.innerHTML = `<td>${curr.date}</td><td>${curr.number}</td>${diffTds.join('')}`;
+
+   diffTable.appendChild(tr);
+
+  }
+
+
+
+  document.getElementById('diffTable').innerHTML = '';
+
+  document.getElementById('diffTable').appendChild(diffTable);
+
+
+
+  // ===== 予測ロジック =====
+
+  function getTopDiffs(data) {
+
+   const stats = { 千: {}, 百: {}, 十: {}, 一: {} };
+
+   for (let i = 1; i < data.length; i++) {
+
+    const p = data[i - 1].number;
+
+    const c = data[i].number;
+
+    if (!p || !c) continue;
+
+    positions.forEach((pos, j) => {
+
+     const wheel = wheels[pos];
+
+     const pi = wheel.indexOf(Number(p[j]));
+
+     const ci = wheel.indexOf(Number(c[j]));
+
+     const right = (ci - pi + 10) % 10;
+
+     const left = (pi - ci + 10) % 10;
+
+     const diff = (left <= right) ? -left : right;
+
+     stats[pos][diff] = (stats[pos][diff] || 0) + 1;
+
+    });
+
+   }
+
+   return stats;
+
+  }
+
+
+
+  function generatePrediction(latest, stats, rank = 0) {
+
+   return positions.map((pos, i) => {
+
+    const wheel = wheels[pos];
+
+    const digit = Number(latest[i]);
+
+    const idx = wheel.indexOf(digit);
+
+    const sorted = Object.entries(stats[pos]).sort((a, b) => b[1] - a[1]).reverse();
+
+    const diff = parseInt(sorted[rank]?.[0] ?? 0);
+
+    return wheel[(idx + diff + 10) % 10];
+
+   }).join('');
+
+  }
+
+
+
+  const stats = getTopDiffs(data.slice(1));
+
+  const latestNumber = data[data.length - 2].number;
+
+  const predictions = [
+
+   generatePrediction(latestNumber, stats, 0),
+
+   generatePrediction(latestNumber, stats, 1),
+
+   generatePrediction(latestNumber, stats, 2),
+
+  ];
+
+
+
+  // 表示
+
+  const predictionList = document.getElementById('predictionList');
+
+  predictionList.innerHTML = '';
+
+  predictions.forEach(num => {
+
+   const li = document.createElement('li');
+
+   li.textContent = `🔮 ${num}`;
+
+   predictionList.appendChild(li);
+
   });
 
-  tr.innerHTML = `<td>${curr.date}</td><td>${curr.number}</td>${diffTds.join('')}`;
-  diffTable.appendChild(tr);
-       }
-        document.getElementById('diffTable').innerHTML = '';
-        document.getElementById('diffTable').appendChild(diffTable);
 
-        // 最頻ズレ幅集計
-        const stats = { 千:{}, 百:{}, 十:{}, 一:{} };
-        for (let i = 1; i < data.length - 1; i++) {
-          const p = data[i - 1].number;
-          const c = data[i].number;
-          if (!p || !c) continue;
-          positions.forEach((pos, j) => {
-            const wheel = wheels[pos];
-            const pi = wheel.indexOf(Number(p[j]));
-            const ci = wheel.indexOf(Number(c[j]));
-            const right = (ci - pi + 10) % 10;
-            const left = (pi - ci + 10) % 10;
-            const diff = left <= right ? -left : right;
-            stats[pos][diff] = (stats[pos][diff] || 0) + 1;
-          });
-        }
 
-        const latest = data[data.length - 2].number;
-        function generatePrediction(rank) {
-          return positions.map((pos, i) => {
-            const wheel = wheels[pos];
-            const digit = Number(latest[i]);
-            const idx = wheel.indexOf(digit);
-            const sorted = Object.entries(stats[pos]).sort((a, b) => b[1] - a[1]);
-            const diff = parseInt(sorted[rank]?.[0] ?? 0);
-            return wheel[(idx + diff + 10) % 10];
-          }).join('');
-        }
+  // ==== 一致履歴テーブル（最新予想との一致数） ====
 
-        const predictions = [
-          generatePrediction(0),
-          generatePrediction(1),
-          generatePrediction(2),
-        ];
+  const matchTable = document.createElement('table');
 
-        const predictionList = document.getElementById('predictionList');
-        predictionList.innerHTML = '';
-        predictions.forEach(num => {
-          const li = document.createElement('li');
-          li.textContent = `🔮 ${num}`;
-          predictionList.appendChild(li);
-        });
+  matchTable.className = 'table-bordered';
 
-        // 一致表（降順に並べる）
-        const matchTable = document.createElement('table');
-        matchTable.innerHTML = '<tr><th>日付</th><th>当選番号</th><th>予測1</th><th>一致</th><th>予測2</th><th>一致</th><th>予測3</th><th>一致</th></tr>';
-        reversedData.forEach(row => {
-          if (!row.number) return;
-          const tr = document.createElement('tr');
-          const results = predictions.map(p => countBoxMatch(p, row.number));
-          tr.innerHTML = `<td>${row.date}</td><td>${row.number}</td>` +
-            predictions.map((p, i) => `<td>${p}</td><td>${results[i]}</td>`).join('');
-          matchTable.appendChild(tr);
-        });
-        document.getElementById('matchTable').innerHTML = '';
-        document.getElementById('matchTable').appendChild(matchTable);
-      };
-      reader.readAsText(file);
-    }
-  </script>
+  matchTable.innerHTML = '<tr><th>日付</th><th>当選番号</th><th>予測1</th><th>一致</th><th>予測2</th><th>一致</th><th>予測3</th><th>一致</th></tr>';
+
+
+
+  function countBoxMatch(pred, actual) {
+
+   const p = pred.split('').sort().join('');
+
+   const a = actual.split('').sort().join('');
+
+   let match = 0;
+
+   for (let i = 0; i < 4; i++) {
+
+    if (a.includes(p[i])) match++;
+
+   }
+
+   return match;
+
+  }
+
+
+
+  for (let i = 1; i < reversedData.length; i++) {
+
+   const current = reversedData[i];
+
+   if (!current.number) continue;
+
+   const tr = document.createElement('tr');
+
+   const matchCounts = predictions.map(p => countBoxMatch(p, current.number));
+
+   tr.innerHTML = `<td>${current.date}</td><td>${current.number}</td>` +
+
+    predictions.map((p, idx) => `<td>${p}</td><td>${matchCounts[idx]}個</td>`).join('');
+
+   matchTable.appendChild(tr);
+
+  }
+
+
+
+  document.getElementById('matchTable').innerHTML = '';
+
+  document.getElementById('matchTable').appendChild(matchTable);
+
+ };
+
+
+
+ reader.readAsText(file);
+
+}
+
+
+
+ </script>
+
 </body>
+
 </html>
