@@ -1,48 +1,88 @@
 
 <!DOCTYPE html>
+
 <html lang="ja">
+
 <head>
+
  <meta charset="UTF-8" />
+
  <title>NUMBERS4予想</title>
+
  <style>
+
   body {
+
    font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+
    background-color: #ffffff;
+
    color: #5a4635;
+
    text-align: center;
+
    padding: 20px;
 
   }
 
+
+
   h1 {
+
    font-size: 28px;
+
    color: #c1a57b; /* ココア色 */
+
    margin-top: 40px;
 
   }
+
+
+
   h3 {
+
    color: #c1a57b;
+
   }
 
+
+
   button {
+
    background-color: #c1a57b;
+
    color: #ffffff;
+
    padding: 10px 20px;
+
    border: none;
+
    border-radius: 8px;
+
    font-size: 16px;
+
    cursor: pointer;
+
    margin-top: 10px;
 
   }
 
+
+
   .prediction-box {
+
    background-color: #ffffff; /* ← 白背景に修正 */
+
    border: 2px solid #c1a57b;
+
    border-radius: 12px;
+
    padding: 15px;
+
    margin: 20px auto;
+
    max-width: 320px;
+
    box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
 
   }
@@ -50,9 +90,13 @@
 
 
   #predictionList {
+
    font-size: 1.6em;
+
    list-style: none;
+
    padding: 0;
+
    margin: 0;
 
   }
@@ -60,15 +104,21 @@
 
 
   table {
+
    border-collapse: collapse;
+
    margin: 0 auto;
+
    margin-top: 20px;
 
   }
 
+
+
   th, td {
 
    border: 1px solid #d8c4a0; /* ミルクティー系の淡い線 */
+
    padding: 6px 10px;
 
   }
@@ -78,6 +128,7 @@
   th {
 
    background-color: #fdf7f0;
+
    color: #5a4635;
 
   }
@@ -93,7 +144,9 @@
 
 
   .neco-image {
+
    width: 120px;
+
    margin-bottom: 10px;
 
   }
@@ -103,6 +156,7 @@
 </head>
 
 <body>
+
  <img src="neco.png" alt="ねこ" class="neco-image" />
 
   
@@ -114,27 +168,16 @@
   <ul id="predictionList"></ul>
 
  </div>
- 
- </style>
-</head>
-<body>
 
-  
 
-    <!-- 📂 入力エリア -->
-  <input type="file" id="csvFile" accept=".csv" />
-  <button id="predictButton">予測開始</button>
 
-  
-  <!-- 🔄 差分＆一致テーブル（←一番下に配置！） -->
-  <div id="details" style="margin-top: 60px;">
-    <div class="tables-wrapper">
-      <div id="diffTable"></div>
-      <div id="matchTable"></div>
-    </div>
-  </div>
+ <h1>NUMBERS4予想</h1>
 
-</body>
+ <input type="file" id="csvFile" accept=".csv" />
+
+ <button id="predictButton">予測開始</button>
+
+ <div id="details"></div>
 
 
 
