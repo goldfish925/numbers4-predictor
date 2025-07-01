@@ -238,6 +238,32 @@ function getIndexDiffStats(data) {
   return diffStats;
 }
 
+   function generateTopPredictions(latestNumber, diffStats, count = 3) {
+  const candidates = [];
+
+  for (let k = 0; k < count; k++) {
+    const predictedDigits = positions.map((pos, i) => {
+      const wheel = wheels[pos];
+      const digit = Number(latestNumber[i]);
+      const currentIndex = wheel.indexOf(digit);
+      if (currentIndex === -1) return digit;
+
+      const diffs = diffStats[pos];
+      const sorted = Object.entries(diffs)
+        .sort((a, b) => b[1] - a[1])
+        .map(([d]) => parseInt(d));
+
+      const diff = sorted[k] ?? 0;
+      const newIndex = (currentIndex + diff + 10) % 10;
+      return wheel[newIndex];
+    });
+
+    candidates.push(predictedDigits.join(''));
+  }
+
+  return [...new Set(candidates)];
+}
+
   
     // ===== 予測数字（3件） =====
     const diffStats = getIndexDiffStats(data.slice(1));
