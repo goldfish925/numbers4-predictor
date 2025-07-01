@@ -217,7 +217,28 @@
       tr.innerHTML = `<td>${curr.date}</td><td>${curr.number}</td>${diffTds.join('')}`;
       diffTable.appendChild(tr);
     }
+   
+function getIndexDiffStats(data) {
+  const diffStats = { 千: {}, 百: {}, 十: {}, 一: {} };
+  for (let i = 1; i < data.length; i++) {
+    const prev = data[i - 1].number;
+    const curr = data[i].number;
+    if (!prev || !curr) continue;
+    positions.forEach((pos, j) => {
+      const wheel = wheels[pos];
+      const pi = wheel.indexOf(Number(prev[j]));
+      const ci = wheel.indexOf(Number(curr[j]));
+      if (pi === -1 || ci === -1) return;
+      const right = (ci - pi + 10) % 10;
+      const left = (pi - ci + 10) % 10;
+      const diff = (left <= right) ? -left : right;
+      diffStats[pos][diff] = (diffStats[pos][diff] || 0) + 1;
+    });
+  }
+  return diffStats;
+}
 
+  
     // ===== 予測数字（3件） =====
     const diffStats = getIndexDiffStats(data.slice(1));
     const latestNumber = data[data.length - 2].number;
