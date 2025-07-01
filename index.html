@@ -351,6 +351,38 @@
 
      });
 
+     // 一致数をカウント（ボックス形式で）
+function countBoxMatch(pred, actual) {
+  const p = pred.split('');
+  const a = actual.split('');
+  let count = 0;
+  const used = Array(4).fill(false);
+  for (let i = 0; i < p.length; i++) {
+    for (let j = 0; j < a.length; j++) {
+      if (!used[j] && p[i] === a[j]) {
+        count++;
+        used[j] = true;
+        break;
+      }
+    }
+  }
+  return count;
+}
+
+// 表を作成・更新
+const history = document.getElementById('boxMatchTable');
+const row = document.createElement('tr');
+const actual = latestNumber; // 予測日の前日が当選番号
+const counts = predictions.map(p => countBoxMatch(p, actual));
+row.innerHTML = `
+  <td>${nextDateStr}</td>
+  <td>${actual}</td>
+  <td>${predictions[0]}</td><td>${counts[0]}個</td>
+  <td>${predictions[1]}</td><td>${counts[1]}個</td>
+  <td>${predictions[2]}</td><td>${counts[2]}個</td>
+`;
+history.appendChild(row);
+
 
 
      tr.innerHTML = `<td>${current.date}</td><td>${current.number}</td>${diffTds.join('')}`;
