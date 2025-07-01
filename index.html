@@ -10,159 +10,77 @@
  <title>NUMBERS4予想</title>
 
  <style>
-
   body {
-
-   font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-
-   background-color: #ffffff;
-
-   color: #5a4635;
-
-   text-align: center;
-
-   padding: 20px;
-
+    font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+    background-color: #ffffff;
+    color: #5a4635;
+    text-align: center;
+    padding: 20px;
   }
-
-
 
   h1 {
-
-   font-size: 28px;
-
-   color: #c1a57b; /* ココア色 */
-
-   margin-top: 40px;
-
+    font-size: 28px;
+    color: #c1a57b;
+    margin-top: 40px;
   }
-
-
 
   h3 {
-
-   color: #c1a57b;
-
+    color: #c1a57b;
   }
-
-
 
   button {
-
-   background-color: #c1a57b;
-
-   color: #ffffff;
-
-   padding: 10px 20px;
-
-   border: none;
-
-   border-radius: 8px;
-
-   font-size: 16px;
-
-   cursor: pointer;
-
-   margin-top: 10px;
-
+    background-color: #c1a57b;
+    color: #ffffff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
   }
-
-
 
   .prediction-box {
-
-   background-color: #ffffff; /* ← 白背景に修正 */
-
-   border: 2px solid #c1a57b;
-
-   border-radius: 12px;
-
-   padding: 15px;
-
-   margin: 20px auto;
-
-   max-width: 320px;
-
-   box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
-
+    background-color: #ffffff;
+    border: 2px solid #c1a57b;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 20px auto;
+    max-width: 320px;
+    box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
   }
-
-
 
   #predictionList {
-
-   font-size: 1.6em;
-
-   list-style: none;
-
-   padding: 0;
-
-   margin: 0;
-
+    font-size: 1.6em;
+    list-style: none;
+    padding: 0;
+    margin: 0;
   }
-
-
 
   table {
-
-   border-collapse: collapse;
-
-   margin: 0 auto;
-
-   margin-top: 20px;
-
+    border-collapse: collapse;
+    margin: 0 auto;
+    margin-top: 20px;
   }
-
-
 
   th, td {
-
-   border: 1px solid #d8c4a0; /* ミルクティー系の淡い線 */
-
-   padding: 6px 10px;
-
+    border: 1px solid #d8c4a0;
+    padding: 6px 10px;
   }
-
-
 
   th {
-
-   background-color: #fdf7f0;
-
-   color: #5a4635;
-
+    background-color: #fdf7f0;
+    color: #5a4635;
   }
-
-
 
   td {
-
-   background-color: #fff;
-
+    background-color: #fff;
   }
-
-
 
   .neco-image {
-
-   width: 120px;
-
-   margin-bottom: 10px;
-
+    width: 120px;
+    margin-bottom: 10px;
   }
-
-  <h3>ボックス一致記録</h3>
-<table id="boxMatchTable" border="1" style="margin: 20px auto; border-collapse: collapse;">
-  <tr>
-    <th>日付</th>
-    <th>当選番号</th>
-    <th>予測①</th><th>一致</th>
-    <th>予測②</th><th>一致</th>
-    <th>予測③</th><th>一致</th>
-  </tr>
-</table>
-
- </style>
+</style>
 
 </head>
 
@@ -189,6 +107,16 @@
  <button id="predictButton">予測開始</button>
 
  <div id="details"></div>
+<h3>ボックス一致記録</h3>
+<table id="boxMatchTable" border="1" style="margin: 20px auto; border-collapse: collapse;">
+  <tr>
+    <th>日付</th>
+    <th>当選番号</th>
+    <th>予測①</th><th>一致</th>
+    <th>予測②</th><th>一致</th>
+    <th>予測③</th><th>一致</th>
+  </tr>
+</table>
 
 
 
