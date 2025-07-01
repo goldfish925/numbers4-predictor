@@ -73,38 +73,41 @@
 </head>
 <body>
 
- <img src="neco.png" alt="ねこ" class="neco-image">
- <h1>NUMBERS4予想</h1>
- 
- <div class="prediction-box">
-  <h3>🔮予測数字🔮</h3>
-  <ul id="predictionList"></ul>
- </div> <!-- ←ここでちゃんと閉じる！ -->
+  <img src="neco.png" alt="ねこ" class="neco-image">
+  <h1>NUMBERS4予想</h1>
 
- <!-- 🔄 差分と一致テーブル -->
- <div id="details">
-   <div class="tables-wrapper">
-     <div id="diffTable"></div>
-     <div id="matchTable"></div>
-   </div>
- </div>
+  <!-- 🔮 予測表示 -->
+  <div class="prediction-box">
+    <h3>🔮予測数字🔮</h3>
+    <ul id="predictionList"></ul>
+  </div>
 
- <!-- 🧾 入力とボタン -->
- <input type="file" id="csvFile" accept=".csv" />
- <button id="predictButton">予測開始</button>
+  <!-- 📂 入力エリア -->
+  <input type="file" id="csvFile" accept=".csv" />
+  <button id="predictButton">予測開始</button>
 
- <!-- 🕊️ 履歴 -->
- <h3>ボックス一致記録（履歴）</h3>
- <table id="boxMatchTable" border="1" style="margin: 20px auto; border-collapse: collapse;">
-   <tr>
-     <th>日付</th>
-     <th>当選番号</th>
-     <th>予測①</th><th>一致</th>
-     <th>予測②</th><th>一致</th>
-     <th>予測③</th><th>一致</th>
-   </tr>
- </table>
+  <!-- 🕊️ 履歴テーブル -->
+  <h3>ボックス一致記録（履歴）</h3>
+  <table id="boxMatchTable" border="1" style="margin: 20px auto; border-collapse: collapse;">
+    <tr>
+      <th>日付</th>
+      <th>当選番号</th>
+      <th>予測①</th><th>一致</th>
+      <th>予測②</th><th>一致</th>
+      <th>予測③</th><th>一致</th>
+    </tr>
+  </table>
+
+  <!-- 🔄 差分＆一致テーブル（←一番下に配置！） -->
+  <div id="details" style="margin-top: 60px;">
+    <div class="tables-wrapper">
+      <div id="diffTable"></div>
+      <div id="matchTable"></div>
+    </div>
+  </div>
+
 </body>
+
 
 
  <script>
