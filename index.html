@@ -156,7 +156,9 @@
         for (let i = 0; i < reversedData.length - 1; i++) {
           const curr = reversedData[i];
           const prev = reversedData[i + 1];
-          const diffs = (curr.number && prev?.number) ? getWheelDiffs(prev.number, curr.number) : ['', '', '', ''];
+         const diffs = (curr.number && prev?.number)
+  ? getWheelDiffs(curr.number, prev.number)
+  : ['', '', '', ''];
           const tr = document.createElement('tr');
           const diffTds = diffs.map(d => {
             const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
