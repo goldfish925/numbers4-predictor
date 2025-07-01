@@ -79,30 +79,32 @@
  <div class="prediction-box">
   <h3>🔮予測数字🔮</h3>
   <ul id="predictionList"></ul>
- 
-<!-- 🔄 差分と一致テーブルを表示する場所（predict()がここに出力） -->
-<div id="details">
-  <div class="tables-wrapper" style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
-    <div id="diffTable"></div>  <!-- ← 差分テーブル -->
-    <div id="matchTable"></div> <!-- ← 一致数テーブル -->
-  </div>
-</div>
+ </div> <!-- ←ここでちゃんと閉じる！ -->
 
-<!-- 🧾 ファイル読み込みと予測ボタン -->
-<input type="file" id="csvFile" accept=".csv" />
-<button id="predictButton">予測開始</button>
+ <!-- 🔄 差分と一致テーブル -->
+ <div id="details">
+   <div class="tables-wrapper">
+     <div id="diffTable"></div>
+     <div id="matchTable"></div>
+   </div>
+ </div>
 
-<!-- 🕊️ ここは履歴（毎日記録用） -->
-<h3>ボックス一致記録（履歴）</h3>
-<table id="boxMatchTable" border="1" style="margin: 20px auto; border-collapse: collapse;">
-  <tr>
-    <th>日付</th>
-    <th>当選番号</th>
-    <th>予測①</th><th>一致</th>
-    <th>予測②</th><th>一致</th>
-    <th>予測③</th><th>一致</th>
-  </tr>
-</table>
+ <!-- 🧾 入力とボタン -->
+ <input type="file" id="csvFile" accept=".csv" />
+ <button id="predictButton">予測開始</button>
+
+ <!-- 🕊️ 履歴 -->
+ <h3>ボックス一致記録（履歴）</h3>
+ <table id="boxMatchTable" border="1" style="margin: 20px auto; border-collapse: collapse;">
+   <tr>
+     <th>日付</th>
+     <th>当選番号</th>
+     <th>予測①</th><th>一致</th>
+     <th>予測②</th><th>一致</th>
+     <th>予測③</th><th>一致</th>
+   </tr>
+ </table>
+</body>
 
 
  <script>
