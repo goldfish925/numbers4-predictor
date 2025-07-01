@@ -48,26 +48,7 @@
    padding: 0;
    margin: 0;
   }
-  .tables-wrapper {
-   display: flex;
-   justify-content: center;
-   gap: 40px;
-   margin-top: 30px;
-   flex-wrap: wrap;
-  }
-  .tables-wrapper table {
-   border-collapse: collapse;
-   min-width: 320px;
-   font-size: 14px;
-   background-color: #fff;
-   color: #5a4635;
-  }
-  .tables-wrapper th,
-  .tables-wrapper td {
-   border: 1px solid #d8c8aa;
-   padding: 6px 10px;
-   text-align: center;
-  }
+  
   #diffTable table {
   border-collapse: collapse;
   width: 100%;
@@ -174,9 +155,10 @@
       lastDate.setDate(lastDate.getDate() + 1);
     }
     const yyyy = lastDate.getFullYear();
-    const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
-    const dd = String(lastDate.getDate()).padStart(2, '0');
-    const nextDateStr = `${yyyy}/${mm}/${dd}`;
+const mm = String(lastDate.getMonth() + 1);  // ← 修正済み
+const dd = String(lastDate.getDate()).padStart(2, '0');  // 日付だけ0埋め
+const nextDateStr = `${yyyy}/${mm}/${dd}`;
+
     data.push({ date: nextDateStr, number: '' });
 
     const reversedData = [...data].reverse();
