@@ -157,9 +157,9 @@
       lastDate.setDate(lastDate.getDate() + 1);
     }
     const yyyy = lastDate.getFullYear();
-const mm = String(lastDate.getMonth() + 1);  // ← 修正済み
-const dd = String(lastDate.getDate()).padStart(2, '0');  // 日付だけ0埋め
-const nextDateStr = `${yyyy}/${mm}/${dd}`;
+const mm = lastDate.getMonth() + 1;  // ← そのまま数値でOK
+const dd = lastDate.getDate();
+const nextDateStr = `${lastDate.getFullYear()}/${mm}/${dd}`;
 
     data.push({ date: nextDateStr, number: '' });
 
