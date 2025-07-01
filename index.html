@@ -86,18 +86,7 @@
   <input type="file" id="csvFile" accept=".csv" />
   <button id="predictButton">予測開始</button>
 
-  <!-- 🕊️ 履歴テーブル -->
-  <h3>ボックス一致記録（履歴）</h3>
-  <table id="boxMatchTable" border="1" style="margin: 20px auto; border-collapse: collapse;">
-    <tr>
-      <th>日付</th>
-      <th>当選番号</th>
-      <th>予測①</th><th>一致</th>
-      <th>予測②</th><th>一致</th>
-      <th>予測③</th><th>一致</th>
-    </tr>
-  </table>
-
+  
   <!-- 🔄 差分＆一致テーブル（←一番下に配置！） -->
   <div id="details" style="margin-top: 60px;">
     <div class="tables-wrapper">
@@ -275,43 +264,21 @@ function getIndexDiffStats(data) {
       li.textContent = `🦉 ${num}`;
       predictionList.appendChild(li);
     });
+   
+    // 表示エリアクリア＆再構築
+const container = document.getElementById('details');
+container.innerHTML = '';
 
-    // ===== 一致テーブル作成 =====
-    const matchTable = document.createElement('table');
-    matchTable.innerHTML = '<tr><th>日付</th><th>当選番号</th><th>予測①</th><th>一致</th><th>予測②</th><th>一致</th><th>予測③</th><th>一致</th></tr>';
-    for (let i = 1; i < reversedData.length; i++) {
-      const current = reversedData[i];
-      if (!current.number) continue;
-      const row = document.createElement('tr');
-      const counts = predictions.map(p => countBoxMatch(p, current.number));
-      row.innerHTML = `
-        <td>${current.date}</td>
-        <td>${current.number}</td>
-        <td>${predictions[0]}</td><td>${counts[0]}個</td>
-        <td>${predictions[1]}</td><td>${counts[1]}個</td>
-        <td>${predictions[2]}</td><td>${counts[2]}個</td>`;
-      matchTable.appendChild(row);
-    }
+const wrapper = document.createElement('div');
+wrapper.style.display = 'flex';
+wrapper.style.justifyContent = 'center';
 
-    // ===== 横並びに表示 =====
-    const container = document.getElementById('details');
-    container.innerHTML = '';
+const diffDiv = document.createElement('div');
+diffDiv.appendChild(diffTable);
+wrapper.appendChild(diffDiv);
 
-    const wrapper = document.createElement('div');
-    wrapper.style.display = 'flex';
-    wrapper.style.justifyContent = 'center';
-    wrapper.style.gap = '40px'; // 間隔
-
-    const diffDiv = document.createElement('div');
-    const matchDiv = document.createElement('div');
-
-    diffDiv.appendChild(diffTable);
-    matchDiv.appendChild(matchTable);
-
-    wrapper.appendChild(diffDiv);
-    wrapper.appendChild(matchDiv);
-    container.appendChild(wrapper);
-  };
+container.appendChild(wrapper);
+};
 
   reader.readAsText(file);
 }
