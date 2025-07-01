@@ -201,6 +201,7 @@
 
     // ===== 差分テーブル作成 =====
     const diffTable = document.createElement('table');
+   diffTable.className = 'diff-table'; 
     diffTable.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
     for (let i = 0; i < reversedData.length - 1; i++) {
