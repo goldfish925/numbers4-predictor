@@ -153,20 +153,22 @@
         // 差分テーブル
         const diffTable = document.createElement('table');
         diffTable.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
-        for (let i = 0; i < reversedData.length - 1; i++) {
-          const curr = reversedData[i];
-          const prev = reversedData[i + 1];
-         const diffs = (curr.number && prev?.number)
-  ? getWheelDiffs(curr.number, prev.number)
-  : ['', '', '', ''];
-          const tr = document.createElement('tr');
-          const diffTds = diffs.map(d => {
-            const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
-            return `<td style="color:${color}">${d}</td>`;
-          });
-          tr.innerHTML = `<td>${curr.date}</td><td>${curr.number}</td>${diffTds.join('')}`;
-          diffTable.appendChild(tr);
-        }
+       for (let i = 1; i < reversedData.length; i++) {
+  const curr = reversedData[i];
+  const prev = reversedData[i - 1];
+  const diffs = (curr.number && prev?.number)
+    ? getWheelDiffs(prev.number, curr.number)
+    : ['', '', '', ''];
+
+  const tr = document.createElement('tr');
+  const diffTds = diffs.map(d => {
+    const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
+    return `<td style="color:${color}">${d}</td>`;
+  });
+
+  tr.innerHTML = `<td>${curr.date}</td><td>${curr.number}</td>${diffTds.join('')}`;
+  diffTable.appendChild(tr);
+       }
         document.getElementById('diffTable').innerHTML = '';
         document.getElementById('diffTable').appendChild(diffTable);
 
