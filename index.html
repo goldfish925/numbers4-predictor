@@ -206,7 +206,7 @@ const nextDateStr = `${lastDate.getFullYear()}/${mm}/${dd}`;
         const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
         return `<td style="color:${color}">${d}</td>`;
       });
-      tr.innerHTML = `<td>${curr.date}</td><td>${curr.number}</td>${diffTds.join('')}`;
+      
      const tr = document.createElement('tr');
 const diffTds = diffs.map(d => {
   const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
