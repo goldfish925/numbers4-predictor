@@ -95,8 +95,13 @@
 <body>
  <img src="neco.png" alt="ねこ" class="neco-image" />
  <div class="prediction-box">
-  <h3>🔮予測数字🔮</h3>
+  <h3>🔮タカオ式予測🔮</h3>
   <ul id="predictionList"></ul>
+</div>
+
+<div class="prediction-box">
+  <h3>🧪ミックス予測🧪</h3>
+  <ul id="mixPredictionList"></ul>
  </div>
 
 
@@ -218,6 +223,27 @@
           li.textContent = `🦉 ${num}`;
           predictionList.appendChild(li);
         });
+
+       // ===== ミックス予測数字（3口） =====
+const mixDigits = predictions.join('').split('');
+
+const mixPredictions = [];
+while (mixPredictions.length < 3) {
+  const shuffled = [...mixDigits].sort(() => Math.random() - 0.5);
+  const newNum = shuffled.slice(0, 4).join('');
+  if (!mixPredictions.includes(newNum)) {
+    mixPredictions.push(newNum);
+  }
+}
+
+const mixPredictionList = document.getElementById('mixPredictionList');
+mixPredictionList.innerHTML = '';
+mixPredictions.forEach(num => {
+  const li = document.createElement('li');
+  li.textContent = `🧪 ${num}`;
+  mixPredictionList.appendChild(li);
+});
+
 
         const diffTable = document.createElement('table');
         diffTable.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th><th>ミックス</th></tr>';
