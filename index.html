@@ -81,6 +81,14 @@
    width: 120px;
    margin-bottom: 10px;
   }
+  .diff-table {
+  border-collapse: collapse;
+  margin: 0 auto;
+}
+.diff-table th, .diff-table td {
+  border: 1px solid #d8c8aa;
+  padding: 6px 10px;
+}
 
  </style>
 </head>
@@ -191,26 +199,27 @@ const nextDateStr = `${lastDate.getFullYear()}/${mm}/${dd}`;
     }
 
     // ===== 差分テーブル作成 =====
-    const diffTable = document.createElement('table');
-   diffTable.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th><th>ミックス</th></tr>';
-   diffTable.className = 'diff-table'; 
-    diffTable.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
+   const diffTable = document.createElement('table');
+diffTable.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th><th>ミックス</th></tr>';
+diffTable.className = 'diff-table'; 
 
-    for (let i = 0; i < reversedData.length - 1; i++) {
-      const curr = reversedData[i];
-      const prev = reversedData[i + 1];
-      const mixResult = checkMixMatch(predictions, current.number);
-      const diffs = (curr.number && prev?.number) ? getWheelDiffs(prev.number, curr.number) : ['', '', '', ''];
-      const tr = document.createElement('tr');
-      const diffTds = diffs.map(d => {
-        const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
-        return `<td style="color:${color}">${d}</td>`;
-      });
-      
-     
-tr.innerHTML = `<td>${curr.date}</td><td>${curr.number}</td>${diffTds.join('')}`;
-tr.innerHTML += `<td style="color: ${mixResult === '〇' ? 'green' : '#999'}">${mixResult}</td>`;
-diffTable.appendChild(tr);
+for (let i = 0; i < reversedData.length - 1; i++) {
+  const curr = reversedData[i];
+  const prev = reversedData[i + 1];
+  
+  const diffs = (curr.number && prev?.number) ? getWheelDiffs(prev.number, curr.number) : ['', '', '', ''];
+  const mixResult = curr.number ? checkMixMatch(predictions, curr.number) : '';  // ← ここでミックスチェック
+  
+  const tr = document.createElement('tr');
+  const diffTds = diffs.map(d => {
+    const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
+    return `<td style="color:${color}">${d}</td>`;
+  });
+  
+  tr.innerHTML = `<td>${curr.date}</td><td>${curr.number}</td>${diffTds.join('')}<td style="color: ${mixResult === '〇' ? 'green' : '#999'}">${mixResult}</td>`;
+  diffTable.appendChild(tr);
+}
+
     
     }
    function checkMixMatch(predictions, actual) {
