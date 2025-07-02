@@ -207,12 +207,7 @@ const nextDateStr = `${lastDate.getFullYear()}/${mm}/${dd}`;
         return `<td style="color:${color}">${d}</td>`;
       });
       
-     const tr = document.createElement('tr');
-const diffTds = diffs.map(d => {
-  const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
-  return `<td style="color:${color}">${d}</td>`;
-});
-
+     
 tr.innerHTML = `<td>${curr.date}</td><td>${curr.number}</td>${diffTds.join('')}`;
 tr.innerHTML += `<td style="color: ${mixResult === '〇' ? 'green' : '#999'}">${mixResult}</td>`;
 diffTable.appendChild(tr);
