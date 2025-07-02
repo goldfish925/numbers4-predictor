@@ -1,182 +1,101 @@
 
 <!DOCTYPE html>
-
 <html lang="ja">
 
 <head>
 
  <meta charset="UTF-8" />
-
  <title>NUMBERS4予想</title>
 
  <style>
 
   body {
-
    font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-
    background-color: #ffffff;
-
    color: #5a4635;
-
    text-align: center;
-
    padding: 20px;
 
   }
 
-
-
   h1 {
 
    font-size: 28px;
-
    color: #c1a57b; /* ココア色 */
-
    margin-top: 40px;
 
   }
-
-
-
   h3 {
-
    color: #c1a57b;
-
   }
-
-
-
   button {
-
    background-color: #c1a57b;
-
    color: #ffffff;
-
    padding: 10px 20px;
-
    border: none;
-
    border-radius: 8px;
-
    font-size: 16px;
-
    cursor: pointer;
-
    margin-top: 10px;
-
   }
-
-
 
   .prediction-box {
-
    background-color: #ffffff; /* ← 白背景に修正 */
-
    border: 2px solid #c1a57b;
-
    border-radius: 12px;
-
    padding: 15px;
-
    margin: 20px auto;
-
    max-width: 320px;
-
    box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
-
   }
 
 
 
   #predictionList {
-
    font-size: 1.6em;
-
    list-style: none;
-
    padding: 0;
-
    margin: 0;
-
   }
-
 
 
   table {
-
    border-collapse: collapse;
-
    margin: 0 auto;
-
    margin-top: 20px;
-
   }
-
-
 
   th, td {
-
    border: 1px solid #d8c4a0; /* ミルクティー系の淡い線 */
-
-   padding: 6px 10px;
-
+  padding: 6px 10px;
   }
-
-
-
   th {
-
    background-color: #fdf7f0;
-
    color: #5a4635;
-
   }
-
-
 
   td {
-
    background-color: #fff;
-
   }
-
-
-
   .neco-image {
-
    width: 120px;
-
    margin-bottom: 10px;
-
   }
 
  </style>
-
 </head>
-
 <body>
-
  <img src="neco.png" alt="ねこ" class="neco-image" />
-
-  
-
  <div class="prediction-box">
-
   <h3>🔮予測数字🔮</h3>
-
   <ul id="predictionList"></ul>
-
  </div>
 
 
 
  <h1>NUMBERS4予想</h1>
-
  <input type="file" id="csvFile" accept=".csv" />
-
  <button id="predictButton">予測開始</button>
-
  <div id="details"></div>
 
 
@@ -273,12 +192,14 @@ const nextDateStr = `${lastDate.getFullYear()}/${mm}/${dd}`;
 
     // ===== 差分テーブル作成 =====
     const diffTable = document.createElement('table');
+   diffTable.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th><th>ミックス</th></tr>';
    diffTable.className = 'diff-table'; 
     diffTable.innerHTML = '<tr><th>日付</th><th>番号</th><th>千</th><th>百</th><th>十</th><th>一</th></tr>';
 
     for (let i = 0; i < reversedData.length - 1; i++) {
       const curr = reversedData[i];
       const prev = reversedData[i + 1];
+      const mixResult = checkMixMatch(predictions, current.number);
       const diffs = (curr.number && prev?.number) ? getWheelDiffs(prev.number, curr.number) : ['', '', '', ''];
       const tr = document.createElement('tr');
       const diffTds = diffs.map(d => {
@@ -286,8 +207,21 @@ const nextDateStr = `${lastDate.getFullYear()}/${mm}/${dd}`;
         return `<td style="color:${color}">${d}</td>`;
       });
       tr.innerHTML = `<td>${curr.date}</td><td>${curr.number}</td>${diffTds.join('')}`;
-      diffTable.appendChild(tr);
+     const tr = document.createElement('tr');
+const diffTds = diffs.map(d => {
+  const color = d.startsWith('右') ? 'red' : d.startsWith('左') ? 'green' : 'black';
+  return `<td style="color:${color}">${d}</td>`;
+});
+
+tr.innerHTML = `<td>${curr.date}</td><td>${curr.number}</td>${diffTds.join('')}`;
+tr.innerHTML += `<td style="color: ${mixResult === '〇' ? 'green' : '#999'}">${mixResult}</td>`;
+diffTable.appendChild(tr);
+    
     }
+   function checkMixMatch(predictions, actual) {
+  const mixDigits = predictions.join('').split('');
+  return actual.split('').every(d => mixDigits.includes(d)) ? '〇' : '✖';
+}
    
 function getIndexDiffStats(data) {
   const diffStats = { 千: {}, 百: {}, 十: {}, 一: {} };
