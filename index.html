@@ -89,26 +89,53 @@
   border: 1px solid #d8c8aa;
   padding: 6px 10px;
 }
-  .prediction-box ul {
+ .prediction-box ul {
   list-style: none;
   padding: 0;
-  font-size: 1.4em; /* 控えめにしつつ見やすく */
   margin: 0;
+  font-size: 1.6em;
+}
+  .prediction-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.prediction-box {
+  flex: 1 1 300px; /* 幅自動で最低300px */
+  max-width: 350px;
+  background: #ffffff;
+  border: 2px solid #c1a57b;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(193, 165, 123, 0.2);
+}
+
+.prediction-box h3 {
+  margin-top: 0;
+  font-size: 20px;
+  color: #c1a57b;
 }
 
  </style>
 </head>
 <body>
  <img src="neco.png" alt="ねこ" class="neco-image" />
- <div class="prediction-box">
-  <h3>🔮タカオ式予測🔮</h3>
-  <ul id="predictionList"></ul>
+
+ <div class="prediction-wrapper">
+  <div class="prediction-box">
+    <h3>🔮タカオ式予測🔮</h3>
+    <ul id="predictionList"></ul>
+  </div>
+
+  <div class="prediction-box">
+    <h3>🧪ミックス予測🧪</h3>
+    <ul id="mixPredictionList"></ul>
+ 
 </div>
 
-<div class="prediction-box">
-  <h3>🧪ミックス予測🧪</h3>
-  <ul id="mixPredictionList"></ul>
- </div>
 
 
 
